@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.15 — Fish Behavior + Scuds</title>
+  <title>EcoSphere Lab 3.15.1 — Fish Behavior + Scuds</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -436,13 +436,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   .app:not(.focus-tank) .left{height:740px}
   .app:not(.focus-tank) .center{grid-template-rows:auto auto 400px auto}
 }
+.canvas-wrap{position:relative}
+.performance-monitor{position:absolute;bottom:12px;left:12px;z-index:15;max-width:calc(100% - 24px);pointer-events:none;border:1px solid #3c6373;border-radius:8px;padding:7px 9px;background:rgba(4,15,24,.91);color:#d6f6ff;font-size:10px;line-height:1.45;font-variant-numeric:tabular-nums;white-space:normal}
+.performance-monitor[hidden]{display:none}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.15</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.15.1</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -456,6 +459,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         <summary class="btn">View & data</summary>
         <div class="top-menu-panel">
           <button id="exportBtn" class="btn">Export CSV</button>
+          <button id="performanceBtn" class="btn" aria-pressed="false" title="Compare animation, model updates and falling habitat on this device">Performance monitor</button>
           <button id="oxygenBudgetBtn" class="btn" title="See oxygen gains and losses from the last simulated step">Oxygen budget</button>
           <button id="assumptionsBtn" class="btn" title="See what the model represents and simplifies">Model Assumptions</button>
           <button id="activityBtn" class="btn focus-on" title="Show floating event bubbles inside the aquarium">Event Bubbles: On</button>
@@ -556,6 +560,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           <div id="focusQuoteText" class="focus-quote-text"></div>
           <div id="focusQuoteAuthor" class="focus-quote-author"></div>
         </div>
+        <output id="performanceMonitor" class="performance-monitor" hidden aria-label="Live performance monitor"></output>
         <div id="focusExitHint" class="focus-exit-hint" aria-hidden="true">Esc to exit full screen</div>
       </div>
 
@@ -2851,6 +2856,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   const habitatCanvas = document.createElement('canvas');
   habitatCanvas.width=tank.width;habitatCanvas.height=tank.height;
   const habitatCtx = habitatCanvas.getContext('2d');
+  const waterDetailsCanvas=document.createElement('canvas');
+  waterDetailsCanvas.width=tank.width;waterDetailsCanvas.height=tank.height;
+  const waterDetailsCtx=waterDetailsCanvas.getContext('2d');
+  let waterDetailsDirty=true;
+  let waterDetailsState=null,waterDetailsTerrainVersion=-1;
   const graph = $('graph');
 
   function resizeTankToWrapper() {
@@ -2867,6 +2877,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     tank.height = targetH;
     habitatCanvas.width = targetW;
     habitatCanvas.height = targetH;
+    waterDetailsCanvas.width=targetW;waterDetailsCanvas.height=targetH;
+    waterDetailsDirty=true;
     habitatCacheDirty = true;
 
     // Redraw into the new backing store. Model coordinates continue to use
@@ -2959,6 +2971,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   let timeTransition = { from: state.timeHours, to: state.timeHours, start: performance.now(), duration: 1 };
   let oxygenBubbles = [];
   let lastBubbleTime = performance.now();
+  let lastBubbleSpawnTime=lastBubbleTime;
   let lastProbe = null;
   let liveContextMode = 'probe';
   let activityOverlayEnabled = true;
@@ -2980,6 +2993,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   let habitatCacheDirty = true;
   let lastTerrainVersion = -1;
   let lastGranularStep = 0;
+  let performanceEnabled=false;
+  const performanceStats={start:0,frames:0,drawTotal:0,modelMs:null,habitatMs:0};
+  function resetPerformanceStats(){
+    Object.assign(performanceStats,{start:performance.now(),frames:0,drawTotal:0,modelMs:null,habitatMs:0});
+    if(performanceEnabled)$('performanceMonitor').textContent='Measuring animation on this device…';
+  }
+  function updatePerformanceMonitor(now,drawMs){
+    if(!performanceEnabled)return;
+    performanceStats.frames++;performanceStats.drawTotal+=drawMs;
+    const elapsed=now-performanceStats.start;
+    if(elapsed<1000)return;
+    const fps=performanceStats.frames*1000/elapsed;
+    const draw=performanceStats.drawTotal/performanceStats.frames;
+    $('performanceMonitor').textContent=`Animation ${fps.toFixed(0)} fps (target ${targetFPS}) · Draw ${draw.toFixed(1)} ms/frame · Model ${performanceStats.modelMs===null?'not stepped':performanceStats.modelMs.toFixed(1)+' ms/hour update'} · Falling habitat ${terrainSettling?performanceStats.habitatMs.toFixed(1)+' ms/pass':'idle'}`;
+    performanceStats.start=now;performanceStats.frames=0;performanceStats.drawTotal=0;
+  }
   const MAX_HABITAT_OBJECTS = 1600;
 
 
@@ -3099,6 +3128,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function resetHistory() {
+    if(performanceEnabled)resetPerformanceStats();
     history = [snapshot()];
   }
 
@@ -3689,6 +3719,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function updateAll() {
+    waterDetailsDirty=true;
     E.syncPlantRoots(state);
     if (lastProbe && Number.isFinite(lastProbe.x) && Number.isFinite(lastProbe.y)) {
       lastProbe = E.probe(state, lastProbe.x, lastProbe.y);
@@ -3729,6 +3760,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function clearOxygenBubbles() {
     oxygenBubbles = [];
     lastBubbleTime = performance.now();
+    lastBubbleSpawnTime=lastBubbleTime;
   }
 
   function updateOxygenBubbles(now) {
@@ -3750,7 +3782,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       b.canvasY = cp.y;
     });
 
-    if (!running) return;
+    if (!running) {lastBubbleSpawnTime=now;return;}
+    // Bubble motion remains continuous; qualitative emission only needs 15 Hz.
+    const spawnElapsed=now-lastBubbleSpawnTime;
+    if(spawnElapsed<1000/15)return;
+    const spawnDt=Math.min(.12,spawnElapsed/1000);
+    lastBubbleSpawnTime=now;
 
     const daylight = E.sunFraction(state.timeHours);
     if (daylight < 0.12 || state.settings.lightPercent < 18 || !state.plants.length) return;
@@ -3758,7 +3795,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     state.plants.forEach(p => {
       const height = p.heightCells || E.PLANT_TYPES?.[p.type]?.height || 2;
       const leafY = Math.max(0.25, p.y - height * (0.25 + Math.random() * 0.55));
-      const light = E.localLightAt(state,p.x,leafY,false).value;
+      const light = E.localLightAt(state,p.x,leafY,true).value;
       const production = daylight * light * p.biomass * ((E.PLANT_TYPES[p.type] || E.PLANT_TYPES.grass).photo || 1);
       if (production < 0.06) return;
 
@@ -3767,7 +3804,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         p.type === 'stem' ? 1.0 :
         0.55;
 
-      const spawnChance = Math.min(0.7, baseRate * production * dt * 2.2);
+      const spawnChance = Math.min(0.7, baseRate * production * spawnDt * 2.2);
       if (Math.random() > spawnChance) return;
 
       const burst = Math.random() < Math.min(0.45, production * 0.22) ? 2 : 1;
@@ -4020,6 +4057,55 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     ctx.drawImage(habitatCanvas,0,0);
   }
 
+  function drawWaterDetails() {
+    const terrainVersion=state.terrain?.version ?? -1;
+    if(waterDetailsDirty || waterDetailsState!==state || waterDetailsTerrainVersion!==terrainVersion){
+      waterDetailsCtx.clearRect(0,0,waterDetailsCanvas.width,waterDetailsCanvas.height);
+      const wr=waterRect();
+    const cellW = wr.w / E.COLS, cellH = wr.h / E.ROWS;
+    for (let y = 0; y < E.ROWS; y++) {
+      for (let x = 0; x < E.COLS; x++) {
+        const i = E.idx(x, y);
+        const lightInfo = E.localLightAt(state,x+.5,y+.5,true);
+        const light = lightInfo.value;
+        const oxygen = state.fields.o2[i];
+        if (oxygen < 4) { waterDetailsCtx.fillStyle = `rgba(251,113,133,${(4 - oxygen) * 0.035})`; waterDetailsCtx.fillRect(wr.x + x * cellW, wr.y + y * cellH, cellW + 1, cellH + 1); }
+        if(lightInfo.factor<.92){
+          const shadeAlpha=Math.min(.42,(1-lightInfo.factor)*.36);
+          waterDetailsCtx.fillStyle=`rgba(2,12,22,${shadeAlpha})`;
+          waterDetailsCtx.fillRect(wr.x+x*cellW,wr.y+y*cellH,cellW+1,cellH+1);
+        }
+        const algae = state.fields.algae[i];
+        const dots = Math.min(7, Math.floor(algae * 6));
+        waterDetailsCtx.fillStyle = `rgba(93,230,105,${0.22 + algae * 0.25})`;
+        for (let d = 0; d < dots; d++) {
+          const ox = ((x * 17 + y * 11 + d * 7) % 10) / 10;
+          const oy = ((x * 7 + y * 19 + d * 3) % 10) / 10;
+          waterDetailsCtx.beginPath(); waterDetailsCtx.arc(wr.x + (x + ox) * cellW, wr.y + (y + oy) * cellH, 1.2 + algae, 0, Math.PI * 2); waterDetailsCtx.fill();
+        }
+        if (light > 0.03 && y < E.ROWS - 1) { waterDetailsCtx.fillStyle = `rgba(255,244,190,${Math.min(0.035, light * 0.025)})`; waterDetailsCtx.fillRect(wr.x + x * cellW, wr.y + y * cellH, cellW, cellH); }
+      }
+    }
+
+    waterDetailsCtx.fillStyle = '#a97c45'; waterDetailsCtx.fillRect(wr.x, wr.y + wr.h - 24, wr.w, 24);
+    // Draw suspended and settled detritus as small organic particles.
+    for (let y = 0; y < E.ROWS; y++) {
+      for (let x = 0; x < E.COLS; x++) {
+        const amount = state.fields.detritus[E.idx(x,y)];
+        if (amount < 0.045) continue;
+        const n = Math.min(4, Math.floor(amount * 8));
+        for (let k = 0; k < n; k++) {
+          const pp = modelToCanvas(x + .18 + ((k*37+x*11)%70)/100, y + .22 + ((k*53+y*7)%60)/100);
+          waterDetailsCtx.fillStyle = y > E.ROWS-3 ? 'rgba(126,78,43,.72)' : 'rgba(139,91,52,.48)';
+          waterDetailsCtx.beginPath(); waterDetailsCtx.ellipse(pp.x, pp.y, 2.3, 1.1, (x+y+k)*.45, 0, Math.PI*2); waterDetailsCtx.fill();
+        }
+      }
+    }
+      waterDetailsDirty=false;waterDetailsState=state;waterDetailsTerrainVersion=terrainVersion;
+    }
+    ctx.drawImage(waterDetailsCanvas,0,0);
+  }
+
   function drawTank() {
     const now = performance.now();
     updateOxygenBubbles(now);
@@ -4047,45 +4133,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     ctx.fillText('surface exchange zone', wr.x + 8, wr.y + 13);
     ctx.fillText('benthic / decomposition zone', wr.x + 8, wr.y + wr.h - 30);
 
-    const cellW = wr.w / E.COLS, cellH = wr.h / E.ROWS;
-    for (let y = 0; y < E.ROWS; y++) {
-      for (let x = 0; x < E.COLS; x++) {
-        const i = E.idx(x, y);
-        const lightInfo = E.localLightAt(state,x+.5,y+.5,true);
-        const light = lightInfo.value;
-        const oxygen = state.fields.o2[i];
-        if (oxygen < 4) { ctx.fillStyle = `rgba(251,113,133,${(4 - oxygen) * 0.035})`; ctx.fillRect(wr.x + x * cellW, wr.y + y * cellH, cellW + 1, cellH + 1); }
-        if(lightInfo.factor<.92){
-          const shadeAlpha=Math.min(.42,(1-lightInfo.factor)*.36);
-          ctx.fillStyle=`rgba(2,12,22,${shadeAlpha})`;
-          ctx.fillRect(wr.x+x*cellW,wr.y+y*cellH,cellW+1,cellH+1);
-        }
-        const algae = state.fields.algae[i];
-        const dots = Math.min(7, Math.floor(algae * 6));
-        ctx.fillStyle = `rgba(93,230,105,${0.22 + algae * 0.25})`;
-        for (let d = 0; d < dots; d++) {
-          const ox = ((x * 17 + y * 11 + d * 7) % 10) / 10;
-          const oy = ((x * 7 + y * 19 + d * 3) % 10) / 10;
-          ctx.beginPath(); ctx.arc(wr.x + (x + ox) * cellW, wr.y + (y + oy) * cellH, 1.2 + algae, 0, Math.PI * 2); ctx.fill();
-        }
-        if (light > 0.03 && y < E.ROWS - 1) { ctx.fillStyle = `rgba(255,244,190,${Math.min(0.035, light * 0.025)})`; ctx.fillRect(wr.x + x * cellW, wr.y + y * cellH, cellW, cellH); }
-      }
-    }
-
-    ctx.fillStyle = '#a97c45'; ctx.fillRect(wr.x, wr.y + wr.h - 24, wr.w, 24);
-    // Draw suspended and settled detritus as small organic particles.
-    for (let y = 0; y < E.ROWS; y++) {
-      for (let x = 0; x < E.COLS; x++) {
-        const amount = state.fields.detritus[E.idx(x,y)];
-        if (amount < 0.045) continue;
-        const n = Math.min(4, Math.floor(amount * 8));
-        for (let k = 0; k < n; k++) {
-          const pp = modelToCanvas(x + .18 + ((k*37+x*11)%70)/100, y + .22 + ((k*53+y*7)%60)/100);
-          ctx.fillStyle = y > E.ROWS-3 ? 'rgba(126,78,43,.72)' : 'rgba(139,91,52,.48)';
-          ctx.beginPath(); ctx.ellipse(pp.x, pp.y, 2.3, 1.1, (x+y+k)*.45, 0, Math.PI*2); ctx.fill();
-        }
-      }
-    }
+    drawWaterDetails();
     drawHabitatLayer();
     state.plants.forEach(p => drawPlant(p));
     drawOxygenBubbles();
@@ -4107,8 +4155,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       if(c){const v=visualCarcassState(c),p=modelToCanvas(v.x,v.y);ctx.save();ctx.strokeStyle='#fda4af';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(p.x,p.y,23,0,Math.PI*2);ctx.stroke();ctx.restore();}
     }
 
-    drawActionPopups(performance.now());
-    updateActivityStrip();
+    drawActionPopups(now);
 
     ctx.strokeStyle = 'rgba(215,244,255,.65)'; ctx.lineWidth = 2; ctx.beginPath();
     const wavePhase = targetFPS >= 25 ? now * 0.018 : displayTime * 5;
@@ -4381,6 +4428,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const beforeAnimals = captureAnimalPositions();
     const beforeCarcasses = captureCarcassPositions();
     const beforeTime = state.timeHours;
+    const modelStart=performanceEnabled?performance.now():0;
     let remaining = hours;
     while (remaining > 1e-9) {
       const dt = Math.min(0.25, remaining);
@@ -4388,6 +4436,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       history.push(snapshot());
       remaining -= dt;
     }
+    if(performanceEnabled)performanceStats.modelMs=performance.now()-modelStart;
     while (history.length > 1400) history.shift();
     if (activeTrial) activeTrial.elapsed = state.timeHours - activeTrial.startTime;
     beginVisualTransition(beforeAnimals, beforeCarcasses, beforeTime);
@@ -4581,6 +4630,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   $('resetBtn').addEventListener('click', () => { cancelActiveTrial(); clearOxygenBubbles(); animalTransitions.clear(); carcassTransitions.clear(); selectedAnimalId=null; selectedCarcassId=null; habitatUndoStack=[]; habitatDraw=null; $('presetSelect').value='starter'; setWorkspace('ecosphere'); state = E.createState(84); timeTransition={from:state.timeHours,to:state.timeHours,start:performance.now(),duration:1}; running = false; missionComplete = false; lastProbe = null; liveContextMode='probe'; activityOverlayEnabled = true; activityPanelEnabled = true; actionPopups=[]; seenPopupEvents.clear(); $('activityBtn').textContent='Event Bubbles: On'; $('activityBtn').classList.add('focus-on'); $('activityPanelBtn').textContent='Activity Strip: On'; $('activityPanelBtn').classList.add('focus-on'); resetHistory(); updateAll(); });
   $('clearBtn').addEventListener('click', () => { cancelActiveTrial(); clearOxygenBubbles(); animalTransitions.clear(); carcassTransitions.clear(); selectedAnimalId=null; selectedCarcassId=null; habitatUndoStack=[]; habitatDraw=null; state = E.createState(84); timeTransition={from:state.timeHours,to:state.timeHours,start:performance.now(),duration:1}; state.animals = []; state.carcasses = []; state.plants = []; state.rocks = []; state.fields.algae.fill(0.02); state.fields.detritus.fill(0.02); running = false; missionComplete = false; lastProbe = null; liveContextMode='probe'; activityOverlayEnabled = true; activityPanelEnabled = true; actionPopups=[]; seenPopupEvents.clear(); $('activityBtn').textContent='Event Bubbles: On'; $('activityBtn').classList.add('focus-on'); $('activityPanelBtn').textContent='Activity Strip: On'; $('activityPanelBtn').classList.add('focus-on'); resetHistory(); updateAll(); });
   $('exportBtn').addEventListener('click', exportCSV);
+  $('performanceBtn').addEventListener('click',()=>{
+    performanceEnabled=!performanceEnabled;resetPerformanceStats();
+    $('performanceBtn').setAttribute('aria-pressed',String(performanceEnabled));
+    $('performanceMonitor').hidden=!performanceEnabled;
+    $('performanceMonitor').textContent='Measuring animation on this device…';
+    document.querySelector('.top-menu').open=false;
+  });
+  document.addEventListener('visibilitychange',()=>{if(performanceEnabled)resetPerformanceStats();});
   $('oxygenBudgetBtn').addEventListener('click', () => {
     document.querySelector('.top-menu').open=false;
     activateRailTab('analysis');activateAnalysisTab('coach');
@@ -4604,7 +4661,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     activityPanelEnabled = !activityPanelEnabled;
     $('activityPanelBtn').textContent = activityPanelEnabled ? 'Activity Strip: On' : 'Activity Strip: Off';
     $('activityPanelBtn').classList.toggle('focus-on', activityPanelEnabled);
-    drawTank();
+    updateActivityStrip();drawTank();
   });
 
 
@@ -4900,7 +4957,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function animationLoop(now) {
     if(terrainSettling && state.terrain && now-lastGranularStep>=32){
       lastGranularStep=now;
+      const granularStart=performanceEnabled?performance.now():0;
       const moved=E.stepGranular(state,1);
+      if(performanceEnabled)performanceStats.habitatMs=performance.now()-granularStart;
       if(moved)habitatCacheDirty=true;
       else terrainSettling=false;
     }
@@ -4912,9 +4971,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
 
     const frameInterval = 1000 / Math.max(10, targetFPS);
-    if (now - lastFrame >= frameInterval) {
-      lastFrame = now;
+    if (now - lastFrame >= frameInterval-.5) {
+      // Keep a stable phase instead of losing a whole frame to RAF jitter.
+      lastFrame += frameInterval*Math.max(1,Math.floor((now-lastFrame+.5)/frameInterval));
+      const drawStart=performanceEnabled?performance.now():0;
       drawTank();
+      if(performanceEnabled)updatePerformanceMonitor(performance.now(),performance.now()-drawStart);
     }
     requestAnimationFrame(animationLoop);
   }

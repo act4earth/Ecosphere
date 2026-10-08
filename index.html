@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.18.1 — Nutrient Cycles</title>
+  <title>EcoSphere Lab 3.19 — Nutrient Cycles</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -439,13 +439,34 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .canvas-wrap{position:relative}
 .performance-monitor{position:absolute;bottom:12px;left:12px;z-index:15;max-width:calc(100% - 24px);pointer-events:none;border:1px solid #3c6373;border-radius:8px;padding:7px 9px;background:rgba(4,15,24,.91);color:#d6f6ff;font-size:10px;line-height:1.45;font-variant-numeric:tabular-nums;white-space:normal}
 .performance-monitor[hidden]{display:none}
+/* 3.19 live matter-cycle view */
+.cycle-view{position:absolute;inset:8px;z-index:5;display:none;flex-direction:column;background:#07111d;border:1px solid #1f3550;border-radius:12px;overflow:hidden}
+.cycle-view.open{display:flex}
+.cycle-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #18293e}
+.cycle-head h2{font-size:13px;margin:0 6px 0 0;color:#e6eef8}
+.cycle-seg{display:flex;border:1px solid #26364d;border-radius:9px;overflow:hidden}
+.cycle-seg button{background:#0a1524;color:#a9bbcf;border:0;padding:5px 10px;font-size:11px;cursor:pointer}
+.cycle-seg button+button{border-left:1px solid #26364d}
+.cycle-seg button.on{color:#06202a;font-weight:800}
+.cycle-svg{flex:1;min-height:0;width:100%;display:block}
+.cycle-foot{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;padding:8px 12px;border-top:1px solid #18293e;font-size:11px;line-height:1.4;color:#c9d6e4;min-height:64px}
+.cycle-foot b{color:#fff}
+.cycle-top{font-variant-numeric:tabular-nums}
+.cycle-top div{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden}
+.cycle-edge{fill:none;stroke-linecap:round;cursor:pointer}
+.cycle-edge-hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
+.cycle-dash{fill:none;stroke-linecap:round;stroke-dasharray:3 13;pointer-events:none;animation:cycleflow linear infinite}
+@keyframes cycleflow{to{stroke-dashoffset:-32}}
+@media (prefers-reduced-motion: reduce){.cycle-dash{animation:none}}
+.cycle-node text{pointer-events:none;paint-order:stroke;stroke:#07111d;stroke-width:3.5px;stroke-linejoin:round}
+.cycle-edge-label{font-size:11px;font-weight:700;paint-order:stroke;stroke:#07111d;stroke-width:4px;pointer-events:none}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.18.1</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.19</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -466,6 +487,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           <button id="performanceBtn" class="btn" aria-pressed="false" title="Compare animation, model updates and falling habitat on this device">Performance monitor</button>
           <button id="oxygenBudgetBtn" class="btn" title="See oxygen gains and losses from the last simulated step">Oxygen budget</button>
           <button id="massBalanceBtn" class="btn" title="Check that carbon, nitrogen and phosphorus are conserved">Mass balance</button>
+          <button id="cycleMenuBtn" class="btn" title="Watch carbon, nitrogen and phosphorus move between living and non-living pools">Cycle view</button>
           <button id="assumptionsBtn" class="btn" title="See what the model represents and simplifies">Model Assumptions</button>
           <button id="activityBtn" class="btn focus-on" title="Show floating event bubbles inside the aquarium">Event Bubbles: On</button>
           <button id="activityPanelBtn" class="btn focus-on" title="Show the live activity strip above the aquarium">Activity Strip: On</button>
@@ -775,6 +797,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       <div class="assumption-box"><b>Ammonia toxicity</b><br>Total ammonia (NH₃ + NH₄⁺) is shown as Ammonia-N. Only the un-ionized NH₃ fraction is toxic; it is computed from pH and temperature (Emerson et al. 1975). At pH 7.2 and 22 °C about 0.7% is NH₃; at pH 8.6 and 28 °C it is about 22%. Animal stress begins near 0.02 mg/L NH₃-N.</div>
       <div class="assumption-box"><b>Food webs & reproduction</b><br>Minnows capture prey following a Holling type II functional response (intake = aN / (1 + ahN)), so feeding saturates when prey are plentiful. A few prey per compartment are protected in refuges. Minnows also graze algae and detritus. Grazers feed at a rate that saturates with food concentration. Eaten food is egested (30%), stored as body reserves, or respired. Offspring are built from stored reserves, so births depend on food; juveniles grow from reserves before they reach adult size. Hungry prey accept more predation risk to keep feeding. Starvation is a rising risk in poor condition rather than a sudden threshold, and minnows have a small background mortality.</div>
       <div class="assumption-box"><b>Plant dynamics</b><br>Macrophytes photosynthesize by day, respire continuously, and shed about 1% of their tissue per day as detritus. They take N and P from the root zone. Shade, turbidity or heat above 30 °C can push a plant below its die-back threshold; after 4 days there it dies and all its tissue becomes detritus that bacteria must decompose. Healthy plants spread by runners (grass, ribbon) or rooting fragments (stem plants), with the daughter’s tissue coming from the parent.</div>
+      <div class="assumption-box"><b>Cycle view (3.19)</b><br>The 🔄 Cycle view draws every recorded transfer of carbon, nitrogen or phosphorus between pools while the model runs. Arrow width follows the flow rate and circle size the amount stored (log scale, because the dissolved pools are much larger). “Right now” averages roughly the last hour, so it shows day/night changes; “24-hour average” smooths them. The flows add up exactly to each pool’s change, so the picture is a complete account of where matter went.</div>
       <div class="assumption-box" style="grid-column:1/-1"><b>Parameter table</b><br>Every tuned rate in the model, with units and the kind of evidence behind it. Values marked instructional are tuned for a stable classroom model rather than taken from one study. Run <code>node tests/sensitivity.js</code> to see how each parameter affects persistence.<div id="paramTable" style="margin-top:8px;max-height:340px;overflow:auto"></div></div>
       <div class="assumption-box"><b>What the * preset means</b><br>The hidden * configuration is a reference ecosystem that has been stability-tested within this model. It is not a claim that those exact organism numbers form an optimal real ecosystem. Scuds remain intentionally absent from that preset.</div>
       <div class="assumption-box"><b>Interpretation</b><br>Use the model to investigate mechanisms, patterns, feedbacks, and evidence. Treat exact numerical outcomes as outputs of this educational model rather than measured ecological forecasts.</div>
@@ -977,11 +1000,46 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     if (!state.sediment) state.sediment = { p: Array(COLS).fill(PARAMS.sedPInit) };
   }
   // Release CO2, ammonium and phosphate from `om` units of organic matter.
+  // ---- Flow recording for the live cycle diagram ----------------------
+  // Every transfer of matter between pools is recorded as an edge
+  // "from>to" carrying mg of C, N and P. stepInterval turns these into
+  // smoothed rates (state.flowRates) for the diagram.
+  function recordFlowEl(state, from, to, C, N, P) {
+    if (!(Math.abs(C) + Math.abs(N) + Math.abs(P) > 0)) return;
+    const acc = state._flowStep || (state._flowStep = {});
+    const e = acc[from + '>' + to] || (acc[from + '>' + to] = { C: 0, N: 0, P: 0 });
+    e.C += C; e.N += N; e.P += P;
+  }
+  function recordFlow(state, from, to, om) {
+    if (!(om > 0)) return;
+    recordFlowEl(state, from, to, om * PARAMS.omCO2 * 12 / 44, om * PARAMS.omN, om * PARAMS.omN / PARAMS.omNP);
+  }
+  function animalNode(animal) { return animal.kind === 'fish' ? 'fish' : 'invertebrates'; }
+  const FLOW_TAU_NOW = 1, FLOW_TAU_DAY = 24;
+  function updateFlowRates(state, dt) {
+    const step = state._flowStep || {};
+    const rates = state.flowRates || (state.flowRates = {});
+    const keys = new Set([...Object.keys(rates), ...Object.keys(step)]);
+    const aNow = Math.min(1, dt / FLOW_TAU_NOW), aDay = Math.min(1, dt / FLOW_TAU_DAY);
+    for (const k of keys) {
+      const r = rates[k] || (rates[k] = { now: { C: 0, N: 0, P: 0 }, day: { C: 0, N: 0, P: 0 } });
+      const s = step[k] || { C: 0, N: 0, P: 0 };
+      for (const e of ['C', 'N', 'P']) {
+        const perHour = s[e] / dt;
+        r.now[e] += (perHour - r.now[e]) * aNow;
+        r.day[e] += (perHour - r.day[e]) * aDay;
+      }
+    }
+    state.flowRatesHours = (state.flowRatesHours || 0) + dt;
+    state._flowStep = {};
+  }
+
   // Aerobic respiration uses 1 mol O2 per mol CO2 released (32/44 by mass).
   // When oxygen runs out, the remainder is treated as anaerobic breakdown.
   const O2_PER_CO2 = 32 / 44;
-  function mineralize(state, i, om, proc = 'decomposition') {
+  function mineralize(state, i, om, proc = 'decomposition', from = 'detritus') {
     if (!(om > 0)) return;
+    recordFlow(state, from, 'dissolved', om);
     const f = state.fields;
     const demand = om * PARAMS.omCO2 * O2_PER_CO2;
     const used = Math.min(Math.max(0, f.o2[i]), demand);
@@ -995,7 +1053,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   // first) and phosphate in zone i (CO2 may come from a different zone ci).
   // Returns the amount actually built, which may be smaller if a resource
   // runs out, so mass is never created.
-  function assimilate(state, i, om, ci = i, photosynthetic = false) {
+  function assimilate(state, i, om, ci = i, photosynthetic = false, to = 'bacteria') {
     if (!(om > 0)) return 0;
     const f = state.fields;
     const din = Math.max(0, f.nh3[i]) + Math.max(0, f.no3[i]);
@@ -1010,6 +1068,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     f.nh3[i] -= fromNH; n -= fromNH;
     f.no3[i] -= n;
     f.po4[i] -= actual * omP();
+    recordFlow(state, 'dissolved', to, actual);
     if (photosynthetic) {
       const o2 = actual * PARAMS.omCO2 * O2_PER_CO2;
       f.o2[ci] += o2;
@@ -1295,6 +1354,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   function createMinnowCarcass(state, animal, reason = 'mortality', announce = true) {
     if (!state.carcasses) state.carcasses = [];
+    recordFlow(state, 'fish', 'carcasses', (animal.bodyOM ?? BODY_OM.fish) + (animal.store || 0));
     const carcass = {
       id: `carcass-${Math.floor(state.rng() * 1e9)}`,
       x: animal.x,
@@ -1367,7 +1427,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         0.00042 * c.mass * tempFactor * settlingFactor * dt + decay * 0.055);
       f.detritus[i] += toDetritus;
       f.bacteria[i] += toBacteria;
-      mineralize(state, i, decay - toDetritus - toBacteria, 'decomposition');
+      recordFlow(state, 'carcasses', 'detritus', toDetritus);
+      recordFlow(state, 'carcasses', 'bacteria', toBacteria);
+      mineralize(state, i, decay - toDetritus - toBacteria, 'decomposition', 'carcasses');
 
       // Carcasses are local sources. Several carcasses in the same region can
       // create a decomposition hotspot rather than only changing tank averages.
@@ -1384,6 +1446,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         survivors.push(c);
       } else {
         f.detritus[i] += c.mass;
+        recordFlow(state, 'carcasses', 'detritus', c.mass);
         addEvent(state, 'A minnow carcass was largely decomposed into detrital material.', 'info', {
           x: c.x, y: c.y, popup: 'Carcass decomposed'
         });
@@ -1565,7 +1628,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         // process as new biomass (growth yield), so they bloom after die-offs.
         const decomposerGrowth = omDecomposed * P.bacterialYield;
         f.detritus[i] -= omDecomposed;
-        mineralize(state, i, omDecomposed - decomposerGrowth, 'decomposition');
+        mineralize(state, i, omDecomposed - decomposerGrowth, 'decomposition', 'detritus');
+        recordFlow(state, 'detritus', 'bacteria', decomposerGrowth);
 
         // Nitrification conserves nitrogen: NH4+ -> NO2- -> NO3-.
         f.nh3[i] -= nitrify1;
@@ -1576,6 +1640,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         const bacterialLoss = f.bacteria[i] * P.bacterialLoss * metabolic * dt;
         f.bacteria[i] += decomposerGrowth + nitrifierGrowth - bacterialLoss;
         f.detritus[i] += bacterialLoss;
+        recordFlow(state, 'bacteria', 'detritus', bacterialLoss);
 
         // Algae: gross growth draws CO2, DIN and PO4; losses return as
         // detritus (a fraction) or are mineralized. Existing algae can grow;
@@ -1583,12 +1648,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         const room = Math.max(0, LIMITS.algae[1] - producer);
         const gross = Math.min(room, producer * P.algaeMaxGrowth * growthTemp * lightEff * nutrientFactor * carbonFactor * dt);
         // Photosynthesis: O2 released in proportion to carbon fixed (quotient 1).
-        const grown = assimilate(state, i, gross * P.algaeOM, i, true) / P.algaeOM;
+        const grown = assimilate(state, i, gross * P.algaeOM, i, true, 'algae') / P.algaeOM;
         const loss = Math.min(producer + grown, producer * P.algaeLoss * metabolic * dt);
         const lossToDetritus = loss * P.algaeLossToDetritus;
         f.algae[i] = producer + grown - loss;
         f.detritus[i] += lossToDetritus;
-        mineralize(state, i, loss * P.algaeOM - lossToDetritus, 'producerRespiration');
+        recordFlow(state, 'algae', 'detritus', lossToDetritus);
+        mineralize(state, i, loss * P.algaeOM - lossToDetritus, 'producerRespiration', 'algae');
 
         if (y === 0) {
           const exchange = (saturation - f.o2[i]) * state.settings.gasExchange * dt;
@@ -1597,6 +1663,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           const co2Exchange = (2.5 - f.co2[i]) * state.settings.gasExchange * 0.35 * dt;
           f.co2[i] += co2Exchange;
           if (flux) flux.C.atmosphere += co2Exchange * 12 / 44;
+          recordFlowEl(state, 'atmosphere', 'dissolved', co2Exchange * 12 / 44, 0, 0);
         }
 
         // Sediment phosphorus (Mortimer redox model): oxic sediment binds
@@ -1609,6 +1676,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
             state.sediment.p[x] * P.pRelease * (1 + (P.anoxicReleaseFactor - 1) * anoxic) * metabolic * dt);
           f.po4[i] += released - sorbed;
           state.sediment.p[x] += sorbed - released;
+          recordFlowEl(state, 'dissolved', 'sediment', 0, 0, sorbed);
+          recordFlowEl(state, 'sediment', 'dissolved', 0, 0, released);
         }
 
         const unboundedO2 = f.o2[i];
@@ -1701,6 +1770,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     L.cumulative.C[key] += dC; L.cumulative.N[key] += dN; L.cumulative.P[key] += dP;
     L.last.C += dC; L.last.N += dN; L.last.P += dP;
   }
+  // Pools for the cycle diagram: like massPools, with animals split into
+  // invertebrates and minnows.
+  function flowPools(state) {
+    const m = massPools(state);
+    const C = 12 / 44;
+    const pools = { ...m.pools };
+    delete pools.animals;
+    for (const [node, test] of [['invertebrates', a => a.kind !== 'fish'], ['fish', a => a.kind === 'fish']]) {
+      const om = state.animals.filter(test).reduce((s, a) => s + (a.bodyOM ?? BODY_OM[a.kind] ?? 0) + (a.store || 0), 0);
+      pools[node] = { C: om * PARAMS.omCO2 * C, N: om * PARAMS.omN, P: om * PARAMS.omN / PARAMS.omNP };
+    }
+    return pools;
+  }
+
   function massBalanceSummary(state) {
     if (!state.ledger) resetLedger(state);
     const L = state.ledger, now = massPools(state);
@@ -2414,15 +2497,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   // Ingested organic matter: a fraction is egested as feces (detritus), a
   // fraction is stored for growth and reproduction, and the rest is
   // respired / excreted as CO2, ammonium and phosphate.
-  function ingest(state, animal, i, om) {
+  function ingest(state, animal, i, om, from = 'detritus') {
     if (!(om > 0)) return;
+    const node = animalNode(animal);
+    recordFlow(state, from, node, om);
     const feces = om * PARAMS.egestion;
     state.fields.detritus[i] += feces;
+    recordFlow(state, node, 'detritus', feces);
     const assimilated = om - feces;
     const room = Math.max(0, BODY_OM[animal.kind] * 2 - (animal.store || 0));
     const stored = Math.min(room, assimilated * GROWTH_EFFICIENCY[animal.kind]);
     animal.store = (animal.store || 0) + stored;
-    mineralize(state, i, assimilated - stored, 'animalRespiration');
+    mineralize(state, i, assimilated - stored, 'animalRespiration', node);
   }
 
   function growJuvenile(animal, dt) {
@@ -2450,7 +2536,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const om = da * PARAMS.algaeOM + dd;
     if (!(om > 0)) return false;
     animal.energy = clamp(animal.energy + om * PARAMS.fishGrazeEnergy, 0, 1.25);
-    ingest(state, animal, i, om);
+    ingest(state, animal, i, da * PARAMS.algaeOM, 'algae');
+    ingest(state, animal, i, dd, 'detritus');
     if (om > 0.0004 * dt) animal.lastAte = 0;
     return true;
   }
@@ -2488,7 +2575,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       // Maintenance metabolism burns stored organic matter, releasing CO2,
       // ammonium and phosphate; juveniles grow from the same store.
       const burn = Math.min(animal.store, baseUse * 0.06 * dt);
-      if (burn > 0) { animal.store -= burn; mineralize(state, i, burn, 'animalRespiration'); }
+      if (burn > 0) { animal.store -= burn; mineralize(state, i, burn, 'animalRespiration', animalNode(animal)); }
       growJuvenile(animal, dt);
 
       if (animal.kind === 'fish') {
@@ -2547,7 +2634,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
               crowd.consumed[prey.animal.kind]++;
               animal.energy = clamp(animal.energy + (prey.animal.kind === 'scud' ? 0.14 : 0.11), 0, 1.25);
               animal.lastAte = 0;
-              ingest(state, animal, i, (prey.animal.bodyOM ?? BODY_OM[prey.animal.kind]) + (prey.animal.store || 0));
+              ingest(state, animal, i, (prey.animal.bodyOM ?? BODY_OM[prey.animal.kind]) + (prey.animal.store || 0), animalNode(prey.animal));
               const preyName = prey.animal.kind === 'scud' ? 'scud' : 'Daphnia';
               addEvent(state, `A minnow ate a ${preyName}.`, 'action', {
                 x: prey.animal.x, y: prey.animal.y, popup: `${preyName} eaten by minnow`
@@ -2592,7 +2679,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
                 tissue.plant.biomass = clamp(tissue.plant.biomass - bite, 0, 1.35);
                 tissue.plant.grazingDamage = clamp((tissue.plant.grazingDamage || 0) + bite * 5.0, 0, 1);
                 const zi = zoneAt(tissue.plant.x, tissue.plant.y);
-                ingest(state, animal, zi, bite * PARAMS.plantOM);
+                ingest(state, animal, zi, bite * PARAMS.plantOM, 'plants');
                 animal.energy = clamp(animal.energy + bite * 22, 0, 1.2);
                 animal.lastAte = 0;
                 fed = true;
@@ -2627,7 +2714,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
             state.fields.detritus[food.i] -= dd;
             const share = (da + dd) / Math.max(1e-9, (rates[0] + rates[1]) * dt);
             animal.energy = clamp(animal.energy + rates[2] * share * dt, 0, 1.2);
-            ingest(state, animal, food.i, da * PARAMS.algaeOM + dd);
+            ingest(state, animal, food.i, da * PARAMS.algaeOM, 'algae');
+            ingest(state, animal, food.i, dd, 'detritus');
             animal.lastAte = 0;
           }
         }
@@ -2746,6 +2834,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         } else {
           const zi = zoneAt(animal.x, animal.y);
           state.fields.detritus[zi] += animal.bodyOM + (animal.store || 0);
+          recordFlow(state, animalNode(animal), 'detritus', animal.bodyOM + (animal.store || 0));
           const deathName = animal.kind === 'daphnia' ? 'Daphnia' : animal.kind === 'scud' ? 'Scud' : 'Snail';
           addEvent(state, `${deathName} died: ${deathReason}.`, 'warning', {
             x: animal.x, y: animal.y, popup: `${deathName} died`
@@ -2864,7 +2953,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
     state.animals.push(...births);
     if (state.animals.length > 260) {
-      for (const a of state.animals.slice(260)) state.fields.detritus[zoneAt(a.x,a.y)] += a.bodyOM + (a.store || 0);
+      for (const a of state.animals.slice(260)) { state.fields.detritus[zoneAt(a.x,a.y)] += a.bodyOM + (a.store || 0); recordFlow(state, animalNode(a), 'detritus', a.bodyOM + (a.store || 0)); }
       state.animals.length = 260;
     }
   }
@@ -3001,6 +3090,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
     ledger.last = { ...after };
     state._ledgerFlux = null;
+    updateFlowRates(state, dt);
 
     const s = summariesCore(state);
     const prev = state._lastSummary || s;
@@ -3131,11 +3221,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       // respiration continues day and night. Space/self-shading slows growth
       // in large plants.
       const gross=PARAMS.plantMaxGrowth*resource*room*dt;
-      const grown=assimilate(state,rootI,gross*PARAMS.plantOM,midI,true)/PARAMS.plantOM;
+      const grown=assimilate(state,rootI,gross*PARAMS.plantOM,midI,true,'plants')/PARAMS.plantOM;
       const respired=Math.min(Math.max(0,p.biomass+grown-sloughed),PARAMS.plantResp*p.biomass*Math.pow(2,(temp-20)/10)*dt);
       p.biomass=p.biomass+grown-sloughed-respired;
       f.detritus[midI]+=sloughed*PARAMS.plantOM;
-      mineralize(state,midI,respired*PARAMS.plantOM,'producerRespiration');
+      recordFlow(state,'plants','detritus',sloughed*PARAMS.plantOM);
+      mineralize(state,midI,respired*PARAMS.plantOM,'producerRespiration','plants');
       p.growthRate=dt>0?(p.biomass-oldBiomass)/dt:0;
       p.heatStressed=heat>0;
 
@@ -3211,6 +3302,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         for(let yy=Math.floor(Math.max(0,p.y-h));yy<=Math.floor(Math.min(ROWS-1,p.y));yy++)cells.push(zoneAt(p.x,yy));
         const share=p.biomass*PARAMS.plantOM/Math.max(1,cells.length);
         for(const ci of cells)state.fields.detritus[ci]+=share;
+        recordFlow(state,'plants','detritus',p.biomass*PARAMS.plantOM);
         const name=plantProfile(p.type).label;
         const cause=p.heatStressed?'heat stress':p.shadeClass!=='open'?'low light (shade)':state.settings.turbidityPercent>45?'low light (turbidity)':'insufficient light or nutrients';
         addEvent(state,`A ${name.toLowerCase()} died back (${cause}). Its tissue became detritus, adding oxygen demand.`,'warning',{x:p.x,y:p.y-h*.5,popup:'Plant died back'});
@@ -3219,7 +3311,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
     if(daughters.length)state.plants.push(...daughters);
     if(state.plants.length>maxPlants){
-      for(const p of state.plants.slice(maxPlants))state.fields.detritus[zoneAt(p.x,p.y)]+=p.biomass*PARAMS.plantOM;
+      for(const p of state.plants.slice(maxPlants)){state.fields.detritus[zoneAt(p.x,p.y)]+=p.biomass*PARAMS.plantOM;recordFlow(state,'plants','detritus',p.biomass*PARAMS.plantOM);}
       state.plants.length=maxPlants;
     }
   }
@@ -3256,6 +3348,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         addedP += state.fields.po4[i] - p0;
       }
       ledgerExternal(state, 'runoff', 0, addedN, addedP);
+      recordFlowEl(state, 'runoff', 'dissolved', 0, addedN, addedP);
       state.flags.runoffUsed = true; state.flags.runoffTime = state.timeHours;
       if (!hidden) addEvent(state, 'Nutrient runoff entered the surface water.', 'disturbance');
     }
@@ -3272,13 +3365,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         const lost = state.fields.algae[i] * (0.35 + rng() * 0.25);
         state.fields.algae[i] -= lost;
         state.fields.detritus[i] = clamp(state.fields.detritus[i] + lost * 0.7, ...LIMITS.detritus);
+        recordFlow(state, 'algae', 'detritus', lost * 0.7);
       }
       if (!hidden) addEvent(state, 'A large algal die-off increased detrital material.', 'disturbance');
     }
     if (type === 'pesticide') {
       state.animals = state.animals.filter(a => {
         const survives = a.kind === 'daphnia' ? rng() > 0.55 : a.kind === 'snail' ? rng() > 0.25 : true;
-        if (!survives) state.fields.detritus[zoneAt(a.x, a.y)] += (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0);
+        if (!survives) { state.fields.detritus[zoneAt(a.x, a.y)] += (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0); recordFlow(state, animalNode(a), 'detritus', (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0)); }
         return survives;
       });
       if (!hidden) addEvent(state, 'Pesticide pulse reduced sensitive invertebrates.', 'disturbance');
@@ -3432,7 +3526,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   global.EcoEngine = {
     COLS, ROWS, LIMITS, PLANT_TYPES, PARAMS, PARAM_INFO, BODY_OM, LIFE_HISTORY,
-    deriveParams, serializeState, deserializeState, lightResponse, nutrientLimitation, limitingNutrient, unionizedFraction, massPools, massBalanceSummary, resetLedger,
+    deriveParams, serializeState, deserializeState, flowPools, lightResponse, nutrientLimitation, limitingNutrient, unionizedFraction, massPools, massBalanceSummary, resetLedger,
     createState, step, summaries, oxygenBudgetSummary, waterChemistryScore, sunFraction, effectiveSurfaceLight, lightAtDepth, localLightAt, computeHabitatLightFactor, ensureHabitatLightGrid, oxygenSaturation,
     addOrganism, addPlant, addPatch, applyDisturbance, triggerMystery, revealMystery, probe,
     coachPrompt, scenarioPrompt, mulberry32, diffuse, mean, idx, clamp, shelterScoreAt, nearestShelter, habitatStructureAt, paintTerrain, eraseTerrain, stepSand, stepGranular, terrainSolidAt, markHabitatChanged, findPlantSupportY, findOpenCavityTop, syncPlantRoots, stepPlants, stepAnimals, nearestFoodZone, nearestPlantTissue, bestOxygenZone, bestSurfaceOxygenZone, stepCarcasses, carcassSupportBelow, particulateBarrierBelow, fishPositionOpen, shelteredFishTarget, chemistryBarrierBetween, chemistryCompartments, chemistryCompartmentAt, compartmentSummaries, createMinnowCarcass,
@@ -4409,6 +4503,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     drawTank();
     drawGraph();
     updateActivityStrip();
+    updateCycleView();
   }
 
   function waterRect() {
@@ -4809,6 +4904,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
   (function(){const wrap=tank.closest('.canvas-wrap');if(!wrap)return;wrap.style.position='relative';const b=document.createElement('button');b.className='btn';b.id='lensBtn';b.textContent='🔬 Lens: off';b.title='Cycle a smoothed heatmap of one variable (shortcut: L)';b.style.cssText='position:absolute;top:14px;right:14px;z-index:3;font-size:11px;padding:5px 9px;opacity:.92';
     const cycle=()=>{lensMode=(lensMode+1)%LENS.length;b.textContent=lensMode?`🔬 Lens: ${LENS[lensMode].l.split(' ')[0]}`:'🔬 Lens: off';};b.addEventListener('click',cycle);
+    const cb=document.createElement('button');cb.className='btn';cb.id='cycleBtn';cb.textContent='🔄 Cycle view';cb.title='Show carbon, nitrogen and phosphorus flowing between pools (shortcut: C)';cb.style.cssText='position:absolute;top:52px;right:14px;z-index:3;font-size:11px;padding:5px 9px;opacity:.92';
+    cb.addEventListener('click',()=>toggleCycleView());wrap.appendChild(cb);
+    window.addEventListener('keydown',e=>{if((e.key==='c'||e.key==='C')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))toggleCycleView();});
     window.addEventListener('keydown',e=>{if((e.key==='l'||e.key==='L')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))cycle();});wrap.appendChild(b);})();
 
   function drawTank() {
@@ -5250,7 +5348,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   const AUTOSAVE_KEY='ecosphere-lab-autosave-v1';
   let lastAutosaveAt=0,lastAutosaveTime=null,autosaveBlocked=false;
   function buildSave(){
-    return {app:'EcoSphere Lab',appVersion:'3.18.1',savedAt:new Date().toISOString(),
+    return {app:'EcoSphere Lab',appVersion:'3.19',savedAt:new Date().toISOString(),
       state:E.serializeState(state),history:history.slice(-1400),
       missionIndex,missionComplete,level:$('levelSelect').value,speed};
   }
@@ -5318,6 +5416,191 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     wrap.appendChild(card);
     $('resumeYes').addEventListener('click',()=>{try{applySave(save);setPresetMessage(`Resumed your saved tank at ${day}. Press Run to continue.`);}catch(err){setPresetMessage('The saved tank could not be restored, so a new tank was started.');}card.remove();});
     $('resumeNo').addEventListener('click',()=>{card.remove();autosave(true);});
+  }
+
+  // ---- Live matter-cycle view ------------------------------------------
+  // A food-web / nutrient-cycle diagram drawn from the engine's recorded
+  // flows. Arrow width follows the flow rate; node size follows how much of
+  // the element each pool holds. The model keeps running underneath.
+  const CYCLE_COLORS={C:'#fb923c',N:'#86efac',P:'#7dd3fc'};
+  const CYCLE_NAMES={C:'Carbon',N:'Nitrogen',P:'Phosphorus'};
+  const CYCLE_NOTES={
+    C:'Carbon moves from CO₂ into algae and plants by photosynthesis, along the food web, into dead matter, and back to CO₂ through respiration and decomposition. It is the only element here that is exchanged with the air.',
+    N:'Nitrogen cycles as ammonium, nitrite and nitrate (all counted as dissolved). Bacteria release ammonium from dead matter; nitrifiers turn it into nitrate, which producers take up again.',
+    P:'Phosphorus has no gas phase, so it never leaves the tank. It cycles between phosphate, organisms and dead matter, and the sediment binds it when bottom water has oxygen and releases it when oxygen runs out.'
+  };
+  const CYCLE_NODES={
+    atmosphere:{label:'Air',sub:'CO₂ exchange',x:90,y:62,color:'#94a3b8',only:'C'},
+    runoff:{label:'Runoff',sub:'fertilizer',x:250,y:48,color:'#fde68a',optional:true},
+    dissolved:{label:'Dissolved',sub:'CO₂ · NH₄⁺/NO₃⁻ · PO₄³⁻',x:125,y:215,color:'#38bdf8'},
+    sediment:{label:'Sediment',sub:'bound phosphate',x:125,y:368,color:'#a8835a',only:'P'},
+    algae:{label:'Algae',sub:'producers',x:370,y:92,color:'#4ade80'},
+    plants:{label:'Plants',sub:'producers',x:370,y:340,color:'#22c55e'},
+    invertebrates:{label:'Invertebrates',sub:'Daphnia · snails · scuds',x:690,y:92,color:'#f0abfc'},
+    fish:{label:'Minnows',sub:'omnivores',x:910,y:92,color:'#cbd5e1'},
+    carcasses:{label:'Carcasses',sub:'dead minnows',x:910,y:310,color:'#d88772'},
+    detritus:{label:'Detritus',sub:'dead matter',x:720,y:340,color:'#c08457'},
+    bacteria:{label:'Bacteria',sub:'decomposers',x:545,y:215,color:'#fbbf24'},
+  };
+  const CYCLE_EDGES=[
+    ['atmosphere','dissolved','CO₂ dissolving from air','CO₂ moves between air and water toward equilibrium. When the water holds more CO₂ than the air, the arrow reverses and the tank loses carbon.'],
+    ['runoff','dissolved','Runoff','Fertilizer runoff adds nitrate, ammonium and phosphate from outside the tank.'],
+    ['dissolved','algae','Uptake by algae','Photosynthesis builds new algal cells from CO₂, nitrogen and phosphate.'],
+    ['dissolved','plants','Uptake by plants','Plants build tissue from CO₂ in the water and N and P from the root zone.'],
+    ['dissolved','bacteria','Nitrifier growth','Nitrifying bacteria fix a little CO₂ as they oxidize ammonium.'],
+    ['algae','dissolved','Algal respiration','Algae respire part of their biomass, releasing CO₂, ammonium and phosphate.'],
+    ['plants','dissolved','Plant respiration','Plants respire day and night, returning CO₂ and nutrients to the water.'],
+    ['algae','invertebrates','Grazing on algae','Daphnia filter algae; snails and scuds scrape it from surfaces.'],
+    ['plants','invertebrates','Scuds eating plants','Scuds nibble soft plant tissue.'],
+    ['detritus','invertebrates','Eating detritus','Snails and scuds eat settled dead matter.'],
+    ['algae','fish','Minnows grazing algae','Minnows are omnivores and pick at algae.'],
+    ['detritus','fish','Minnows eating detritus','Minnows also take detritus while foraging.'],
+    ['invertebrates','fish','Predation','Minnows catch Daphnia and scuds (Holling type II).'],
+    ['invertebrates','dissolved','Invertebrate respiration & excretion','Animals respire food to CO₂ and excrete ammonium and phosphate.'],
+    ['fish','dissolved','Minnow respiration & excretion','Minnows respire food to CO₂ and excrete ammonium and phosphate.'],
+    ['invertebrates','detritus','Feces & dead invertebrates','Undigested food and bodies of dead invertebrates become detritus.'],
+    ['fish','detritus','Minnow feces','About 30% of what minnows eat is egested as feces.'],
+    ['fish','carcasses','Minnow deaths','Dead minnows sink and become carcasses.'],
+    ['algae','detritus','Dead algae','Dying algal cells become detritus.'],
+    ['plants','detritus','Shed & dead plant tissue','Plants shed about 1% of their tissue a day; dying plants add all of it.'],
+    ['carcasses','detritus','Carcass breakdown','Carcasses fragment into detritus.'],
+    ['carcasses','bacteria','Bacteria on carcasses','Bacteria grow on decaying carcasses.'],
+    ['carcasses','dissolved','Carcass decomposition','Decomposition releases CO₂, ammonium and phosphate (and uses oxygen).'],
+    ['detritus','bacteria','Decomposer growth','Bacteria keep about a third of the dead matter they process as new cells.'],
+    ['detritus','dissolved','Decomposition','Bacteria break dead matter down to CO₂, ammonium and phosphate (mineralization), using oxygen.'],
+    ['bacteria','detritus','Dead bacteria','Bacterial cells die and join the detritus.'],
+    ['dissolved','sediment','Phosphate binding','Iron in oxygenated sediment binds phosphate.'],
+    ['sediment','dissolved','Phosphate release','When bottom water loses oxygen, the sediment releases phosphate (internal loading).'],
+  ];
+  let cycleElement='N',cycleWindow='day',cycleBuilt=false,cycleHover=null;
+  const cycleEls={};
+  const SVGNS='http://www.w3.org/2000/svg';
+  function svgEl(tag,attrs,parent){const el=document.createElementNS(SVGNS,tag);for(const k in attrs)el.setAttribute(k,attrs[k]);if(parent)parent.appendChild(el);return el;}
+  function fmtMg(v){const a=Math.abs(v);return a>=100?v.toFixed(0):a>=10?v.toFixed(1):a>=1?v.toFixed(2):a>=.01?v.toFixed(3):a>0?v.toExponential(1):'0';}
+  function buildCycleView(){
+    const wrap=tank.closest('.canvas-wrap');
+    const view=document.createElement('div');view.className='cycle-view';view.id='cycleView';
+    view.innerHTML=`<div class="cycle-head"><h2>Matter cycle · live</h2>
+      <div class="cycle-seg" id="cycleElSeg">${['C','N','P'].map(e=>`<button data-el="${e}">${CYCLE_NAMES[e]}</button>`).join('')}</div>
+      <div class="cycle-seg" id="cycleWinSeg"><button data-win="now">Right now</button><button data-win="day">24-hour average</button></div>
+      <span class="small" id="cycleClock" style="margin-left:auto"></span>
+      <button class="btn" id="cycleCloseBtn" style="font-size:11px;padding:5px 9px">Back to tank</button></div>
+      <svg class="cycle-svg" id="cycleSvg" viewBox="0 0 1000 430" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Live diagram of matter flowing between pools"></svg>
+      <div class="cycle-foot"><div id="cycleInfo"></div><div class="cycle-top" id="cycleTop"></div></div>`;
+    wrap.appendChild(view);
+    const svg=$('cycleSvg');
+    const defs=svgEl('defs',{},svg);
+    for(const e of ['C','N','P']){
+      const m=svgEl('marker',{id:'cycleArrow'+e,viewBox:'0 0 10 10',refX:'6',refY:'5',markerWidth:'13',markerHeight:'13',orient:'auto-start-reverse',markerUnits:'userSpaceOnUse'},defs);
+      svgEl('path',{d:'M0,0 L10,5 L0,10 z',fill:CYCLE_COLORS[e]},m);
+    }
+    const edgeLayer=svgEl('g',{},svg),labelLayer=svgEl('g',{},svg),nodeLayer=svgEl('g',{},svg);
+    cycleEls.edges={};
+    for(const [from,to,label,desc] of CYCLE_EDGES){
+      const g=svgEl('g',{},edgeLayer);
+      const base=svgEl('path',{class:'cycle-edge'},g);
+      const dash=svgEl('path',{class:'cycle-dash'},g);
+      const hit=svgEl('path',{class:'cycle-edge-hit'},g);
+      const title=svgEl('title',{},hit);
+      const text=svgEl('text',{class:'cycle-edge-label','text-anchor':'middle'},labelLayer);
+      const key=from+'>'+to;
+      hit.addEventListener('mouseenter',()=>{cycleHover=key;updateCycleView();});
+      hit.addEventListener('mouseleave',()=>{cycleHover=null;updateCycleView();});
+      hit.addEventListener('click',()=>{cycleHover=cycleHover===key?null:key;updateCycleView();});
+      cycleEls.edges[key]={g,base,dash,hit,title,text,from,to,label,desc};
+    }
+    cycleEls.nodes={};
+    for(const [id,n] of Object.entries(CYCLE_NODES)){
+      const g=svgEl('g',{class:'cycle-node',transform:`translate(${n.x},${n.y})`},nodeLayer);
+      const halo=svgEl('circle',{r:30,fill:n.color,opacity:.12},g);
+      const c=svgEl('circle',{r:24,fill:'#0b1828',stroke:n.color,'stroke-width':2.5},g);
+      const name=svgEl('text',{'text-anchor':'middle',y:-2,fill:'#f1f5f9','font-size':11.5,'font-weight':700},g);name.textContent=n.label;
+      const amt=svgEl('text',{'text-anchor':'middle',y:11,fill:'#cbd5e1','font-size':10},g);
+      const sub=svgEl('text',{'text-anchor':'middle',fill:'#8ea1b7','font-size':9.5},g);sub.textContent=n.sub;
+      cycleEls.nodes[id]={g,halo,c,name,amt,sub,n};
+    }
+    view.querySelectorAll('#cycleElSeg button').forEach(b=>b.addEventListener('click',()=>{cycleElement=b.dataset.el;updateCycleView();}));
+    view.querySelectorAll('#cycleWinSeg button').forEach(b=>b.addEventListener('click',()=>{cycleWindow=b.dataset.win;updateCycleView();}));
+    $('cycleCloseBtn').addEventListener('click',()=>toggleCycleView(false));
+    cycleBuilt=true;
+  }
+  function toggleCycleView(force){
+    if(!cycleBuilt)buildCycleView();
+    const open=force==null?!$('cycleView').classList.contains('open'):force;
+    $('cycleView').classList.toggle('open',open);
+    const b=$('cycleBtn');if(b)b.classList.toggle('focus-on',open);
+    if(open)updateCycleView();
+  }
+  function updateCycleView(){
+    if(!cycleBuilt||!$('cycleView').classList.contains('open'))return;
+    const el=cycleElement,color=CYCLE_COLORS[el];
+    document.querySelectorAll('#cycleElSeg button').forEach(b=>{const on=b.dataset.el===el;b.classList.toggle('on',on);b.style.background=on?CYCLE_COLORS[b.dataset.el]:'';});
+    document.querySelectorAll('#cycleWinSeg button').forEach(b=>{const on=b.dataset.win===cycleWindow;b.classList.toggle('on',on);b.style.background=on?'#67e8f9':'';});
+    const rates=state.flowRates||{};
+    const pools=E.flowPools(state);
+    // Node sizes: area grows with the amount held (log scale, since dissolved pools are far larger).
+    const radius={};
+    for(const [id,ne] of Object.entries(cycleEls.nodes)){
+      const n=ne.n;let amount=null;
+      if(id==='atmosphere'||id==='runoff')amount=null;else amount=pools[id]?pools[id][el]:0;
+      const hidden=(n.only&&n.only!==el)||(id==='runoff'&&!((rates['runoff>dissolved']?.day?.N||0)+(rates['runoff>dissolved']?.day?.P||0)>1e-6&&el!=='C'));
+      ne.g.style.display=hidden?'none':'';
+      const r=amount==null?20:E.clamp(17+6*Math.log10(1+amount/0.05),17,38);
+      radius[id]=hidden?0:r;
+      ne.c.setAttribute('r',r);ne.halo.setAttribute('r',r+6);
+      ne.amt.textContent=amount==null?'':`${fmtMg(amount)} mg`;
+      ne.sub.setAttribute('y',r+13);
+    }
+    // Edges
+    const list=[];
+    for(const ed of Object.values(cycleEls.edges)){
+      let v=(rates[ed.from+'>'+ed.to]?.[cycleWindow]?.[el]||0)*24;
+      let from=ed.from,to=ed.to,label=ed.label;
+      if(ed.from==='atmosphere'&&v<0){from='dissolved';to='atmosphere';v=-v;label='CO₂ escaping to air';}
+      ed.cur={from,to,v,label};
+      if(radius[ed.from]===0||radius[ed.to]===0)v=0;
+      list.push(ed);
+    }
+    const max=Math.max(1e-9,...list.map(e=>e.cur.v));
+    // Numbers are printed on the four largest arrows to keep the picture readable.
+    const labelled=new Set(list.filter(e=>e.cur.v>max*0.002).sort((a,b)=>b.cur.v-a.cur.v).slice(0,4));
+    for(const ed of list){
+      const {from,to,v}=ed.cur;
+      if(!(v>max*0.002)){ed.g.style.display='none';ed.text.textContent='';continue;}
+      ed.g.style.display='';
+      const A=CYCLE_NODES[from],B=CYCLE_NODES[to];
+      const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+      const px=-uy,py=ux,bend=Math.min(60,len*0.18);
+      const sx=A.x+ux*(radius[from]+4),sy=A.y+uy*(radius[from]+4);
+      const ex=B.x-ux*(radius[to]+12),ey=B.y-uy*(radius[to]+12);
+      const cx=(sx+ex)/2+px*bend,cy=(sy+ey)/2+py*bend;
+      const d=`M${sx.toFixed(1)},${sy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`;
+      const rel=v/max,w=1.2+11*Math.sqrt(rel);
+      const hovered=cycleHover===ed.from+'>'+ed.to;
+      for(const p of [ed.base,ed.dash,ed.hit])p.setAttribute('d',d);
+      ed.base.setAttribute('stroke',color);ed.base.setAttribute('stroke-width',w.toFixed(2));
+      ed.base.setAttribute('stroke-opacity',hovered?1:cycleHover?0.25:0.55+0.35*Math.sqrt(rel));
+      ed.base.setAttribute('marker-end',`url(#cycleArrow${el})`);
+      ed.dash.setAttribute('stroke','#ffffff');ed.dash.setAttribute('stroke-opacity',cycleHover&&!hovered?0.08:0.55);
+      ed.dash.setAttribute('stroke-width',Math.max(1.2,w*0.35).toFixed(2));
+      ed.dash.style.animationDuration=(1.2/(0.15+Math.sqrt(rel))).toFixed(2)+'s';
+      ed.title.textContent=`${ed.cur.label}: ${fmtMg(v)} mg ${el}/day`;
+      const showLabel=hovered||labelled.has(ed);
+      ed.text.textContent=showLabel?`${fmtMg(v)}`:'';
+      ed.text.setAttribute('x',(0.25*sx+0.5*cx+0.25*ex+px*(w/2+9)).toFixed(1));
+      ed.text.setAttribute('y',(0.25*sy+0.5*cy+0.25*ey+py*(w/2+9)+4).toFixed(1));
+      ed.text.setAttribute('fill',color);
+    }
+    // Footer: hovered flow or the element note, plus the largest flows.
+    const unit=`mg ${el} per day`;
+    const h=cycleHover&&cycleEls.edges[cycleHover];
+    $('cycleInfo').innerHTML=h&&h.cur&&h.cur.v>0
+      ? `<b style="color:${color}">${h.cur.label}</b> · ${CYCLE_NODES[h.cur.from].label} → ${CYCLE_NODES[h.cur.to].label}<br><b>${fmtMg(h.cur.v)}</b> ${unit}. ${h.desc}`
+      : `<b style="color:${color}">${CYCLE_NAMES[el]}</b> · arrow width = flow rate, circle size = amount stored, numbers in ${unit}.<br>${CYCLE_NOTES[el]}`;
+    const top=list.filter(e=>e.cur.v>0&&e.g.style.display!=='none').sort((a,b)=>b.cur.v-a.cur.v).slice(0,5);
+    $('cycleTop').innerHTML=`<b>Largest flows ${cycleWindow==='now'?'right now':'(24-h average)'}</b>`+top.map(e=>`<div><span>${e.cur.label}</span><span style="color:${color}">${fmtMg(e.cur.v)}</span></div>`).join('');
+    const warm=(state.flowRatesHours||0)<(cycleWindow==='day'?24:1);
+    $('cycleClock').textContent=`${formatTime(state.timeHours)} · ${E.sunFraction(state.timeHours)>0?'daylight':'night'}${warm?' · averaging, run longer for steady values':''}`;
   }
 
   function exportCSV() {
@@ -5425,6 +5708,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   $('oxygenBudgetScope').addEventListener('change',updateOxygenBudget);
   $('massBalancePanel').addEventListener('toggle',updateMassBalance);
   $('massBalanceResetBtn').addEventListener('click',()=>{E.resetLedger(state);updateMassBalance();});
+  $('cycleMenuBtn').addEventListener('click',()=>{document.querySelector('.top-menu').open=false;toggleCycleView(true);});
   $('massBalanceBtn').addEventListener('click',()=>{
     document.querySelector('.top-menu').open=false;
     activateRailTab('analysis');activateAnalysisTab('coach');

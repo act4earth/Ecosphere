@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.15.1 — Fish Behavior + Scuds</title>
+  <title>EcoSphere Lab 3.15.2 — Fish Behavior + Scuds</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -48,12 +48,12 @@ body{overflow:hidden}button,input,select,textarea{font:inherit}.app{height:100dv
   pointer-events:none;
   opacity:0;
   visibility:hidden;
-  transition:opacity 1.8s ease,transform 1.8s ease,visibility 0s linear 1.8s;
+  transition:opacity .7s ease,transform .7s ease,visibility 0s linear .7s;
   z-index:8;
 }
 .app.focus-tank .focus-quote{
   visibility:visible;
-  transition:opacity 1.8s ease,transform 1.8s ease;
+  transition:opacity .7s ease,transform .7s ease;
 }
 .app.focus-tank .focus-quote.visible{
   opacity:1;
@@ -445,7 +445,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.15.1</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.15.2</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -740,7 +740,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     <div class="modal-head"><div><h2>EcoSphere Lab · Model Assumptions</h2><div class="small">Use this page to distinguish represented mechanisms from classroom simplifications.</div></div><button id="closeAssumptionsBtn" class="btn">Close</button></div>
     <div class="assumption-grid" style="margin-top:12px">
       <div class="assumption-box"><b>Spatial water chemistry</b><br>O₂, CO₂, nitrogen compounds, algae, bacteria, and detritus are represented on an 18 × 10 chemistry grid. Continuous sandbox glass can block diffusion between neighboring chemistry zones, allowing separate water compartments to develop different chemistry. Very small enclosures inside one chemistry cell will not be chemically independent. Surface gas exchange and depth-dependent light remain simplified processes.</div>
-      <div class="assumption-box"><b>Plants, growth & bubbles</b><br>Plant biomass affects photosynthesis and respiration. Plants now change biomass gradually with modeled light and nutrient availability. Grass and ribbon forms can spread clonally when resources and space permit. Growth and spread rates are instructional parameters rather than calibrated species-specific rates. Visible bubbles remain qualitative indicators of active photosynthesis.</div>
+      <div class="assumption-box"><b>Tank Focus quotations</b><br>Quotations appear for about 8 seconds with a 20-second gap. Additional selections and author attributions follow <a href="https://bucketlistjourney.net/nature-quotes/" target="_blank" rel="noopener noreferrer">Bucket List Journey’s nature quote collection</a>.<br><br><b>Plants, growth & bubbles</b><br>The Plant removal tool harvests whole plants without adding detritus. Undo restores harvested plants while preserving current chemistry and growth of remaining plants. Plant biomass affects photosynthesis and respiration. Plants now change biomass gradually with modeled light and nutrient availability. Grass and ribbon forms can spread clonally when resources and space permit. Growth and spread rates are instructional parameters rather than calibrated species-specific rates. Visible bubbles remain qualitative indicators of active photosynthesis.</div>
       <div class="assumption-box"><b>Plant rooting, cavities & substrate</b><br>Plant roots remain associated with the open-water cavity in which they were placed. A plant clicked beneath an overhang therefore roots on the lower substrate instead of relocating to the upper landscape. Sand, gravel, rock crevices, and the tank floor can support roots; bare glass cannot. Cave height can physically limit plant height.</div>
       <div class="assumption-box"><b>Habitat shade & local light</b><br>Local photosynthetic light combines day/night cycle, the Light control, turbidity, water depth, and simplified habitat occlusion. Rock, sand, and gravel block direct light; glass transmits most light. Side openings provide partial indirect illumination, so shallow overhangs are shaded rather than automatically black. Deep enclosed caves can become very dim. This is a teaching approximation of light geometry, not optical ray tracing.</div>
       <div class="assumption-box"><b>Substrate & oxygen</b><br>Sand, gravel, rock, and glass are not oxygen consumers by themselves. Their oxygen effect is indirect: they can shade producers, support rooted plants, create refuge, and trap sinking detritus. Organic matter trapped at substrate surfaces supports bacterial decomposition and nitrification, which can create localized oxygen demand. Anaerobic porewater inside deep sediment is not modeled.</div>
@@ -2929,6 +2929,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       { id: 'inspect', label: 'Inspect', icon: '◎', tip: 'Click an animal to view its condition, behavior, and local habitat.' },
     ],
     Producers: [
+      { id: 'plantRemove', label: 'Plant removal', icon: '✂', tip: 'Click or drag across foliage to harvest whole plants. Placement Amount controls brush width. Harvested biomass leaves the tank; Undo restores it.' },
       { id: 'algae', label: 'Algae', icon: '✣', tip: 'Add suspended algal biomass.' },
       { id: 'plantGrass', label: 'Low grass', icon: '≋', tip: 'Short rooted grass. Click inside an overhang to root it on the lower substrate there; local shade affects growth.' },
       { id: 'plantRibbon', label: 'Ribbon plant', icon: '〽', tip: 'Rooted ribbon plant. It can be placed inside an overhang, but cave height and local light can limit it.' },
@@ -3169,6 +3170,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     else if (activeTool === 'sand') $('brushHelp').textContent = `Sand brush ${placementLevel}/5. Larger settings release a broader stream of falling sand.`;
     else if (activeTool === 'glass') $('brushHelp').textContent = `Glass brush ${placementLevel}/5. Draw solid transparent walls and compartments.`;
     else if (['algae','bacteria','detritus'].includes(activeTool)) $('brushHelp').textContent = `Patch amount = ${p.patch.toFixed(2)} relative biomass per click.`;
+    else if (activeTool === 'plantRemove') $('brushHelp').textContent = `Harvest brush ${placementLevel}/5. Click or drag across foliage to remove whole plants; use Undo to restore them.`;
     else if (activeTool.startsWith('plant')) $('brushHelp').textContent = `New plants begin at approximately ${Math.round(p.plant*100)}% relative biomass.`;
     else $('brushHelp').textContent = 'Placement amount changes organism number, patch mass, plant biomass, and habitat cluster size.';
   }
@@ -3247,11 +3249,32 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     E.markHabitatChanged(state);habitatCacheDirty=true;terrainSettling=true;
   }
 
+  function harvestPlantsAt(point) {
+    const radius=.15+placementLevel*.10;
+    const removed=state.plants.filter(plant=>{
+      const height=plant.heightCells || E.PLANT_TYPES[plant.type]?.height || 2;
+      const closestY=E.clamp(point.y,Math.max(0,plant.y-height),plant.y);
+      return Math.hypot(point.x-plant.x,point.y-closestY)<=radius;
+    });
+    if(!removed.length)return;
+    if(!habitatDraw.undo){
+      habitatDraw.undo={kind:'plantRemoval',originalPlants:state.plants.slice(),removed:[]};
+      habitatUndoStack.push(habitatDraw.undo);
+      if(habitatUndoStack.length>14)habitatUndoStack.shift();
+    }
+    habitatDraw.undo.removed.push(...removed);
+    const harvested=new Set(removed);
+    state.plants=state.plants.filter(plant=>!harvested.has(plant));
+    state.oxygenBudget=null;
+    clearOxygenBubbles();
+  }
+
   function startHabitatStroke(kind, p, pointerId) {
-    pushHabitatUndo();
-    habitatDraw = {kind, pointerId, lastX:p.x, lastY:p.y};
+    if(kind!=='plantRemoval')pushHabitatUndo();
+    habitatDraw = {kind, pointerId, lastX:p.x, lastY:p.y,undo:null};
     if (tank.setPointerCapture) { try { tank.setPointerCapture(pointerId); } catch {} }
-    if (kind === 'erase') eraseHabitatAt(p);
+    if (kind === 'plantRemoval') harvestPlantsAt(p);
+    else if (kind === 'erase') eraseHabitatAt(p);
     else if(kind==='sand'){
       E.paintTerrain(state,1,p.x,p.y,0.075+placementLevel*.055);terrainSettling=true;habitatCacheDirty=true;
     } else if(kind==='fallingGravel'){
@@ -3270,13 +3293,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       : 0.18 + placementLevel * 0.045;
     const d = Math.hypot(p.x - habitatDraw.lastX, p.y - habitatDraw.lastY);
     if (d < spacing) return;
-    const steps = Math.min(8, Math.ceil(d / spacing));
+    const steps = Math.min(habitatDraw.kind==='plantRemoval'?120:8, Math.ceil(d / spacing));
     for (let s=1;s<=steps;s++) {
       const q={
         x:habitatDraw.lastX + (p.x-habitatDraw.lastX)*(s/steps),
         y:habitatDraw.lastY + (p.y-habitatDraw.lastY)*(s/steps)
       };
-      if (habitatDraw.kind === 'erase') eraseHabitatAt(q);
+      if (habitatDraw.kind === 'plantRemoval') harvestPlantsAt(q);
+      else if (habitatDraw.kind === 'erase') eraseHabitatAt(q);
       else if(habitatDraw.kind==='sand'){
         E.paintTerrain(state,1,q.x,q.y,0.075+placementLevel*.055);terrainSettling=true;habitatCacheDirty=true;
       } else if(habitatDraw.kind==='fallingGravel'){
@@ -3286,6 +3310,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       } else habitatStamp(habitatDraw.kind,q);
     }
     habitatDraw.lastX=p.x;habitatDraw.lastY=p.y;
+    updateHabitatActions();
     drawTank();
   }
 
@@ -3300,6 +3325,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function undoHabitat() {
     const previous=habitatUndoStack.pop();
     if (!previous) return;
+    if(previous.kind==='plantRemoval'){
+      const current=new Set(state.plants),removed=new Set(previous.removed);
+      const original=new Set(previous.originalPlants);
+      state.plants=[...previous.originalPlants.filter(plant=>current.has(plant)||removed.has(plant)),
+        ...state.plants.filter(plant=>!original.has(plant))];
+      state.oxygenBudget=null;
+      clearOxygenBubbles();
+      updateHabitatActions();history.push(snapshot());updateAll();return;
+    }
     state.rocks=previous.rocks.map(r=>({...r}));
     if(state.terrain && previous.terrain){
       state.terrain.cells=previous.terrain.slice();
@@ -3328,18 +3362,24 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function updateHabitatActions() {
-    const habitatMode=['rock','substrate','habitatErase','sand','glass'].includes(activeTool);
+    const habitatMode=['rock','substrate','habitatErase','sand','glass','plantRemove'].includes(activeTool);
     const box=$('habitatActions');
     if(box) box.classList.toggle('visible',habitatMode);
     document.querySelector('.builder-head')?.classList.toggle('habitat-active',habitatMode);
     document.querySelector('.canvas-wrap')?.classList.toggle('habitat-drawing',habitatMode);
-    if($('undoHabitatBtn')) $('undoHabitatBtn').disabled=habitatUndoStack.length===0;
+    if($('undoHabitatBtn')) {
+      $('undoHabitatBtn').disabled=habitatUndoStack.length===0;
+      $('undoHabitatBtn').title=habitatUndoStack.at(-1)?.kind==='plantRemoval'?'Undo the most recent plant harvest':'Undo the most recent habitat drawing stroke';
+    }
+    if($('clearHabitatBtn')) $('clearHabitatBtn').hidden=activeTool==='plantRemove';
+    document.querySelector('.habitat-actions-title').textContent=activeTool==='plantRemove'?'Plant removal':'Habitat drawing';
     if($('clearHabitatBtn')) $('clearHabitatBtn').disabled=!hasHabitat();
     if(!$('habitatHint')) return;
     if(activeTool==='rock') $('habitatHint').textContent=`Rock brush: drag through the lower tank to build piles, walls, ledges, or caves. ${state.rocks.length} rock/gravel objects (safety limit ${MAX_HABITAT_OBJECTS}).`;
     else if(activeTool==='substrate') $('habitatHint').textContent=sandboxWorkspace
       ? 'Falling gravel: drag anywhere in the water. Gravel drops and forms coarser, steeper piles than sand.'
       : `Gravel brush: drag along the tank to paint benthic refuge. ${state.rocks.length} rock/gravel objects.`;
+    else if(activeTool==='plantRemove') $('habitatHint').textContent='Harvest whole plants by clicking or dragging across foliage. Removed biomass leaves the tank. Brush width follows Placement Amount; Undo restores the harvest.';
     else if(activeTool==='habitatErase') $('habitatHint').textContent=`Eraser: drag across rock, gravel, sand, or glass. Brush width follows Placement Amount.`;
     else if(activeTool==='sand') $('habitatHint').textContent='Falling sand: drag anywhere in the water. Sand falls and piles on the bottom, rocks, and glass.';
     else if(activeTool==='glass') $('habitatHint').textContent='Glass wall: draw transparent barriers. Closed shapes can physically separate organisms.';
@@ -4674,13 +4714,46 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     {text:'In Wildness is the preservation of the World.',author:'Henry David Thoreau'},
     {text:'Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts.',author:'Rachel Carson'},
     {text:'Wilderness is not a luxury but a necessity of the human spirit.',author:'Edward Abbey'},
-    {text:'Instructions for living a life: Pay attention. Be astonished. Tell about it.',author:'Mary Oliver'}
+    {text:'Instructions for living a life: Pay attention. Be astonished. Tell about it.',author:'Mary Oliver'},
+    {"text": "An early-morning walk is a blessing for the whole day.", "author": "Henry David Thoreau", "attributed": true},
+    {"text": "Choose only one master—nature.", "author": "Rembrandt", "attributed": true},
+    {"text": "Colors are the smiles of nature.", "author": "Leigh Hunt", "attributed": true},
+    {"text": "Every flower is a soul blossoming in nature.", "author": "Gérard de Nerval", "attributed": true},
+    {"text": "I go to nature to be soothed and healed, and to have my senses put in order.", "author": "John Burroughs", "attributed": true},
+    {"text": "If one way be better than another, that you may be sure is nature’s way.", "author": "Aristotle", "attributed": true},
+    {"text": "Let us permit nature to have her way. She understands her business better than we do.", "author": "Michel de Montaigne", "attributed": true},
+    {"text": "Man’s heart away from nature becomes hard.", "author": "Standing Bear", "attributed": true},
+    {"text": "Many eyes go through the meadow, but few see the flowers in it.", "author": "Ralph Waldo Emerson", "attributed": true},
+    {"text": "Men argue. Nature acts.", "author": "Voltaire", "attributed": true},
+    {"text": "Nature does not hurry, yet everything is accomplished.", "author": "Lao Tzu", "attributed": true},
+    {"text": "Nature is pleased with simplicity. And nature is no dummy.", "author": "Isaac Newton", "attributed": true},
+    {"text": "Nature, time, and patience are the three great physicians.", "author": "Chinese proverb", "attributed": true},
+    {"text": "Never, no, never did nature say one thing and wisdom another.", "author": "Edmund Burke", "attributed": true},
+    {"text": "One touch of nature makes the whole world kin.", "author": "William Shakespeare", "attributed": true},
+    {"text": "The Amen of nature is always a flower.", "author": "Oliver Wendell Holmes, Sr.", "attributed": true},
+    {"text": "The clearest way into the Universe is through a forest wilderness.", "author": "John Muir", "attributed": true},
+    {"text": "The fairest thing in nature, a flower, still has its roots in earth and manure.", "author": "D. H. Lawrence", "attributed": true},
+    {"text": "The goal of life is living in agreement with nature.", "author": "Zeno", "attributed": true},
+    {"text": "The least movement is of importance to all nature. The entire ocean is affected by a pebble.", "author": "Blaise Pascal", "attributed": true},
+    {"text": "The mountains are calling and I must go.", "author": "John Muir", "attributed": true},
+    {"text": "The poetry of the earth is never dead.", "author": "John Keats", "attributed": true},
+    {"text": "The richness I achieve comes from Nature, the source of my inspiration.", "author": "Claude Monet", "attributed": true},
+    {"text": "The sun, with all those planets revolving around it and dependent on it, can still ripen a bunch of grapes as if it had nothing else in the universe to do.", "author": "Galileo Galilei", "attributed": true},
+    {"text": "Every sunset brings the promise of a new dawn.", "author": "Ralph Waldo Emerson", "attributed": true},
+    {"text": "How glorious a greeting the sun gives the mountains!", "author": "John Muir", "attributed": true},
+    {"text": "The Earth laughs in flowers.", "author": "Ralph Waldo Emerson", "attributed": true},
+    {"text": "Love the world as your own self; then you can truly care for all things.", "author": "Lao Tzu", "attributed": true},
+    {"text": "Land really is the best art.", "author": "Andy Warhol", "attributed": true},
+    {"text": "Nature is not a place to visit. It is home.", "author": "Gary Snyder", "attributed": true}
   ];
 
   let focusQuoteOrder = [];
   let focusQuoteIndex = 0;
   let focusQuoteTimer = null;
   let focusQuoteFadeTimer = null;
+  let focusQuoteHideTimer = null;
+  const FOCUS_QUOTE_VISIBLE_MS=8000;
+  const FOCUS_QUOTE_GAP_MS=20000;
 
   function shuffledFocusQuoteOrder(){
     const order = FOCUS_QUOTES.map((_,i)=>i);
@@ -4706,9 +4779,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     focusQuoteFadeTimer=setTimeout(()=>{
       const q=FOCUS_QUOTES[focusQuoteOrder[focusQuoteIndex++]];
       $('focusQuoteText').textContent=`“${q.text}”`;
-      $('focusQuoteAuthor').textContent=`— ${q.author}`;
+      $('focusQuoteAuthor').textContent=q.attributed?`Attributed to ${q.author}`:`— ${q.author}`;
       box.classList.add('visible');
-    },900);
+      focusQuoteHideTimer=setTimeout(()=>{
+        box.classList.remove('visible');
+        focusQuoteTimer=setTimeout(showNextFocusQuote,FOCUS_QUOTE_GAP_MS);
+      },FOCUS_QUOTE_VISIBLE_MS);
+    },700);
   }
 
   function startFocusQuotes(){
@@ -4716,17 +4793,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     focusQuoteOrder=shuffledFocusQuoteOrder();
     focusQuoteIndex=0;
     showNextFocusQuote();
-    // Quotes remain fully available for most of a 40-second interval.
-    focusQuoteTimer=setInterval(()=>{
-      const box=$('focusQuote');
-      if(box) box.classList.remove('visible');
-      clearTimeout(focusQuoteFadeTimer);
-      focusQuoteFadeTimer=setTimeout(showNextFocusQuote,2200);
-    },40000);
+    // Each quote is shown briefly, followed by an unobstructed tank view.
   }
 
   function stopFocusQuotes(){
-    if(focusQuoteTimer){clearInterval(focusQuoteTimer);focusQuoteTimer=null}
+    if(focusQuoteTimer){clearTimeout(focusQuoteTimer);focusQuoteTimer=null}
+    if(focusQuoteHideTimer){clearTimeout(focusQuoteHideTimer);focusQuoteHideTimer=null}
     if(focusQuoteFadeTimer){clearTimeout(focusQuoteFadeTimer);focusQuoteFadeTimer=null}
     const box=$('focusQuote');
     if(box) box.classList.remove('visible');
@@ -4835,6 +4907,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
     if(activeTool==='rock'){startHabitatStroke('rock',p,e.pointerId);return;}
     if(activeTool==='substrate'){startHabitatStroke(sandboxWorkspace?'fallingGravel':'gravel',p,e.pointerId);return;}
+    if(activeTool==='plantRemove'){startHabitatStroke('plantRemoval',p,e.pointerId);return;}
     if(activeTool==='habitatErase'){startHabitatStroke('erase',p,e.pointerId);return;}
     if(activeTool==='sand'){startHabitatStroke('sand',p,e.pointerId);return;}
     if(activeTool==='glass'){startHabitatStroke('glass',p,e.pointerId);return;}

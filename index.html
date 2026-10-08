@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.17.0 — Fish Behavior + Scuds</title>
+  <title>EcoSphere Lab 3.18.1 — Nutrient Cycles</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -445,7 +445,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.15.2</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.18.1</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -458,9 +458,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       <details class="top-menu">
         <summary class="btn">View & data</summary>
         <div class="top-menu-panel">
+          <button id="saveFileBtn" class="btn" title="Download this tank, its graph history and mission as a file">Save tank to file</button>
+          <button id="openFileBtn" class="btn" title="Continue a tank from a saved file">Open saved tank</button>
+          <input id="openFileInput" type="file" accept=".json,application/json" hidden>
+          <div id="saveStatus" class="small" style="grid-column:1/-1;font-size:9px">Autosave: waiting for first change</div>
           <button id="exportBtn" class="btn">Export CSV</button>
           <button id="performanceBtn" class="btn" aria-pressed="false" title="Compare animation, model updates and falling habitat on this device">Performance monitor</button>
           <button id="oxygenBudgetBtn" class="btn" title="See oxygen gains and losses from the last simulated step">Oxygen budget</button>
+          <button id="massBalanceBtn" class="btn" title="Check that carbon, nitrogen and phosphorus are conserved">Mass balance</button>
           <button id="assumptionsBtn" class="btn" title="See what the model represents and simplifies">Model Assumptions</button>
           <button id="activityBtn" class="btn focus-on" title="Show floating event bubbles inside the aquarium">Event Bubbles: On</button>
           <button id="activityPanelBtn" class="btn focus-on" title="Show the live activity strip above the aquarium">Activity Strip: On</button>
@@ -541,7 +546,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     <section class="center">
       <div class="panel mission">
         <div><div id="missionTitle" class="mission-title"></div><div id="missionGoal" class="mission-goal"></div></div>
-        <select id="missionSelect" class="select"><option value="0">Mission 1</option><option value="1">Mission 2</option><option value="2">Mission 3</option><option value="3">Mission 4</option></select>
+        <select id="missionSelect" class="select"><option value="0">Mission 1</option><option value="1">Mission 2</option><option value="2">Mission 3</option><option value="3">Mission 4</option><option value="4">Mission 5</option><option value="5">Mission 6</option></select>
         <div class="timebox small">Time <b id="timeLabel" style="color:white"></b></div>
       </div>
 
@@ -622,6 +627,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
                 <option value="nh3">Ammonia-N</option>
                 <option value="no2">Nitrite-N</option>
                 <option value="no3">Nitrate-N</option>
+                <option value="po4">Phosphate-P</option>
+                <option value="nh3u">Toxic (un-ionized) NH₃-N</option>
               </optgroup>
               <optgroup label="Populations / biomass">
                 <option value="algae">Algae biomass</option>
@@ -641,6 +648,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
               <option value="nh3">NH₃-N</option>
               <option value="no2">NO₂-N</option>
               <option value="no3">NO₃-N</option>
+              <option value="po4">PO₄-P</option>
+              <option value="nh3u">NH₃ toxic</option>
               <option value="algae">Algae</option>
               <option value="detritus">Detritus</option>
               <option value="daphnia">Daphnia</option>
@@ -702,6 +711,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
                 </label>
                 <div id="oxygenBudgetContent" aria-live="polite">Advance time to measure oxygen gains and losses.</div>
               </details>
+              <details id="massBalancePanel" class="oxygen-budget">
+                <summary>Mass balance · carbon, nitrogen, phosphorus</summary>
+                <div id="massBalanceContent" aria-live="polite">Advance time to track element totals.</div>
+                <button id="massBalanceResetBtn" class="btn" style="margin-top:6px;font-size:10px;padding:5px 8px">Restart ledger from now</button>
+              </details>
               <div id="probeCard" class="probe-card">Probe a location in the tank to inspect spatial chemistry.</div>
               <div id="organismCard" class="organism-card"><b>Organism inspection</b><br>Choose <b>Inspect</b>, then click a living animal or minnow carcass.</div>
               <h3>Census</h3><div id="census" class="census"></div>
@@ -749,12 +763,19 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       <div class="assumption-box"><b>Predator-prey refuge</b><br>Vegetation, rock piles, and gravel create a modeled refuge score. Daphnia and scuds may move toward cover when fish are nearby, and prey in stronger cover are harder for minnows to capture.</div>
       <div class="assumption-box"><b>Population dynamics</b><br>Energy, age, food, crowding, maturity, and stochastic reproduction influence populations. Lifespans and rate constants are tuned for instructional stability and are not experimentally calibrated predictions of exact real-world timing.</div>
       <div class="assumption-box"><b>Scuds</b><br>Scuds are modeled as lower-water-column amphipod grazers/shredders that use detritus, algae/periphyton, and small amounts of soft plant tissue. Minnows can prey on them.</div>
-      <div class="assumption-box"><b>Modeled food & energy pathways</b><br>Every animal has an explicit food/energy pathway in the model. Daphnia graze suspended algae; snails graze algae/periphyton and detritus; scuds use detritus, algae, and limited soft plant tissue; minnows consume Daphnia and scuds. Bacteria process detritus and carcasses. Producers require light, inorganic nitrogen, and CO₂. These pathways are intentionally visible enough for students to infer a food web from observations rather than being presented as a complete real-community web.</div>
+      <div class="assumption-box"><b>Modeled food & energy pathways</b><br>Every animal has an explicit food/energy pathway in the model. Daphnia graze suspended algae; snails graze algae/periphyton and detritus; scuds use detritus, algae, and limited soft plant tissue; minnows consume Daphnia and scuds and also graze algae and detritus. Bacteria process detritus and carcasses. Producers require light, inorganic nitrogen, and CO₂. These pathways are intentionally visible enough for students to infer a food web from observations rather than being presented as a complete real-community web.</div>
       <div class="assumption-box"><b>Bacterial persistence</b><br>Existing bacteria grow through modeled decomposition and nitrification. Maintenance loss is proportional to biomass, so small populations can persist and respond when resources return. No minimum bacterial population is imposed. The single bacterial pool combines multiple microbial functions and uses instructional rate constants.</div>
       <div class="assumption-box"><b>Oxygen budget & water chemistry condition</b><br>The optional oxygen budget accounts for the last simulated step, including photosynthesis, respiration, decomposition, nitrification, surface exchange, mixing, and numerical bounds. Water chemistry condition is an instructional 0–100 score based on selected chemistry, pH, and temperature. It does not measure population persistence, biodiversity, or future ecosystem stability.</div>
       <div class="assumption-box"><b>Systems check 3.14.1</b><br>Chemical diffusion conserves dissolved material between equal-volume zones. Plant chemistry, added food patches, consumer resources, and spawning use the connected glass compartment. Fish cannot consume the same prey twice. Photosynthesis requires available CO₂; algae require an existing population. These are consistency checks of an educational model, not calibration against field data.</div>
       <div class="assumption-box"><b>Glass compartments</b><br>Continuous glass blocks animal movement and chemistry diffusion. Only water compartments connected to the modeled surface receive direct atmospheric gas exchange. A fully submerged sealed compartment can therefore develop its own O₂, CO₂, and nitrogen chemistry. Animals search for food, predators, and higher-O₂ water only within their connected compartment.</div>
       <div class="assumption-box"><b>Carcasses & decomposition</b><br>A dead minnow sinks until it contacts the actual modeled floor, sand, gravel, rock, or glass structure beneath it. Decomposition promotes local bacterial biomass, contributes detritus and ammonia, consumes dissolved oxygen, and releases carbon dioxide. Multiple carcasses have additive local effects. The model now includes a simplified high-CO₂ stress response, but its threshold is instructional rather than species-specific.</div>
+      <div class="assumption-box"><b>Conservation of matter (3.18)</b><br>Carbon, nitrogen and phosphorus are tracked through dissolved pools, algae, plants, animals, carcasses, detritus, bacteria and sediment. Every process moves atoms between pools; only CO₂ exchange with the air, runoff and your own actions add or remove them. Open <b>Mass balance</b> to see the totals. Oxygen is linked to carbon: photosynthesis releases, and respiration and decomposition use, one O₂ for each CO₂ (quotient 1). Nitrification uses 3.43 mg O₂ per mg N oxidized to nitrite and 1.14 to nitrate.</div>
+      <div class="assumption-box"><b>Light, nutrients & producers</b><br>Photosynthesis follows a Steele light curve: it rises with light, peaks near the optimum, and declines in very bright light (photoinhibition). Algae shade the water below them (Lambert–Beer), so blooms darken deeper water. Growth is limited by the scarcer of nitrogen and phosphorus (Monod kinetics with Liebig’s law of the minimum); the default tank is phosphorus-limited, as many fresh waters are. Growth rises about twofold per 10 °C (Q10).</div>
+      <div class="assumption-box"><b>Sediment phosphorus</b><br>Oxic sediment binds phosphate (iron-bound P); when bottom water loses oxygen, the sediment releases it. This internal loading can amplify eutrophication: a bloom decomposes, bottom water becomes hypoxic, phosphate is released, and the next bloom is fed. The model does not include denitrification, burial or a bicarbonate buffer; the pH slider sets pH directly.</div>
+      <div class="assumption-box"><b>Ammonia toxicity</b><br>Total ammonia (NH₃ + NH₄⁺) is shown as Ammonia-N. Only the un-ionized NH₃ fraction is toxic; it is computed from pH and temperature (Emerson et al. 1975). At pH 7.2 and 22 °C about 0.7% is NH₃; at pH 8.6 and 28 °C it is about 22%. Animal stress begins near 0.02 mg/L NH₃-N.</div>
+      <div class="assumption-box"><b>Food webs & reproduction</b><br>Minnows capture prey following a Holling type II functional response (intake = aN / (1 + ahN)), so feeding saturates when prey are plentiful. A few prey per compartment are protected in refuges. Minnows also graze algae and detritus. Grazers feed at a rate that saturates with food concentration. Eaten food is egested (30%), stored as body reserves, or respired. Offspring are built from stored reserves, so births depend on food; juveniles grow from reserves before they reach adult size. Hungry prey accept more predation risk to keep feeding. Starvation is a rising risk in poor condition rather than a sudden threshold, and minnows have a small background mortality.</div>
+      <div class="assumption-box"><b>Plant dynamics</b><br>Macrophytes photosynthesize by day, respire continuously, and shed about 1% of their tissue per day as detritus. They take N and P from the root zone. Shade, turbidity or heat above 30 °C can push a plant below its die-back threshold; after 4 days there it dies and all its tissue becomes detritus that bacteria must decompose. Healthy plants spread by runners (grass, ribbon) or rooting fragments (stem plants), with the daughter’s tissue coming from the parent.</div>
+      <div class="assumption-box" style="grid-column:1/-1"><b>Parameter table</b><br>Every tuned rate in the model, with units and the kind of evidence behind it. Values marked instructional are tuned for a stable classroom model rather than taken from one study. Run <code>node tests/sensitivity.js</code> to see how each parameter affects persistence.<div id="paramTable" style="margin-top:8px;max-height:340px;overflow:auto"></div></div>
       <div class="assumption-box"><b>What the * preset means</b><br>The hidden * configuration is a reference ecosystem that has been stability-tested within this model. It is not a claim that those exact organism numbers form an optimal real ecosystem. Scuds remain intentionally absent from that preset.</div>
       <div class="assumption-box"><b>Interpretation</b><br>Use the model to investigate mechanisms, patterns, feedbacks, and evidence. Treat exact numerical outcomes as outputs of this educational model rather than measured ecological forecasts.</div>
     </div>
@@ -794,7 +815,208 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     algae: [0, 1.5],
     bacteria: [0, 1.5],
     detritus: [0, 1.5],
+    po4: [0, 2],
   };
+
+  // ------------------------------------------------------------------
+  // Model parameters. Every tuned rate used by the chemistry, producer,
+  // consumer and nutrient-cycling code lives here so it can be documented,
+  // inspected in the Model Assumptions panel, and varied by the sensitivity
+  // test (tests/sensitivity.js). Units: time in simulated hours; dissolved
+  // pools in mg/L per chemistry zone; organic matter (OM) in
+  // detritus-equivalent units (one unit holds PARAMS.omCO2 mg CO2-equivalent
+  // carbon, PARAMS.omN mg N and PARAMS.omN/PARAMS.omNP mg P).
+  // ------------------------------------------------------------------
+  const PARAMS = {
+    refTempC: 22,
+    q10: 2.0,
+    algaeMaxGrowth: 0.07,
+    algaeLoss: 0.0035,
+    algaeLossToDetritus: 0.10,
+    lightOpt: 0.40,
+    kAlgae: 0.12,
+    piScale: 0.303,
+    kN: 0.5,
+    kP: 0.010,
+    kC: 0.5,
+    decompRate: 0.045,
+    nitrifyRate1: 0.020,
+    nitrifyRate2: 0.016,
+    bacterialLoss: 0.0005,
+    bacterialYield: 0.33,
+    omCO2: 2.5,
+    omN: 0.40,
+    omNP: 7.2,
+    algaeOM: 0.70,
+    plantOM: 4.0,
+    plantTurnover: 0.0004,
+    plantMaxGrowth: 0.004,
+    plantResp: 0.00025,
+    plantDeathBiomass: 0.14,
+    plantDeathHours: 96,
+    plantHeatStressC: 30,
+    pSorption: 0.002,
+    pRelease: 0.00005,
+    anoxicReleaseFactor: 5,
+    po4Init: 0.018,
+    nh3uChronic: 0.02,
+    nh3uAcute: 0.10,
+    egestion: 0.30,
+    grazerK: 0.10,
+    attackRate: 2.0,
+    handlingTime: 0.5,
+    daphniaRefuge: 6,
+    scudRefuge: 3,
+    fishMax: 6,
+    spawnEnergy: 0.42,
+    snailCapacity: 18,
+    scudCapacity: 28,
+    riskForagingEnergy: 0.6,
+    fishGraze: 0.0025,
+    fishGrazeEnergy: 1.5,
+  };
+  // Sediment P starts near equilibrium with bottom water, which carries
+  // about 1.4x the mean phosphate because decomposition is concentrated there.
+  function tempFactorAt(t) { return Math.pow(2, (t - 20) / 10); }
+  // Recompute derived parameters after editing PARAMS (used by tests).
+  function deriveParams() {
+    PARAMS.sedPInit = PARAMS.pSorption * PARAMS.po4Init * 1.4 / (PARAMS.pRelease * tempFactorAt(22));
+  }
+  deriveParams();
+
+  const BODY_OM = { fish: 1.0, daphnia: 0.06, snail: 0.06, scud: 0.06 };
+  const BIRTH_FRACTION = { fish: 0.15, daphnia: 1.0, snail: 0.5, scud: 0.5 };
+  const GROWTH_EFFICIENCY = { fish: 0.15, daphnia: 0.35, snail: 0.15, scud: 0.20 };
+
+  // Documentation for the parameter table. "Source" names the kind of
+  // evidence a student could check; values marked "instructional" are tuned
+  // for a stable classroom model rather than taken from a single study.
+  const PARAM_INFO = {
+    q10: { label: 'Q10 temperature coefficient', unit: '–', group: 'Producers', desc: 'Rate multiplier per 10 °C for algal growth.', source: 'Biological rates typically have Q10 ≈ 2–3; Eppley (1972) gives ≈1.9 for phytoplankton maximum growth.' },
+    refTempC: { label: 'Reference temperature', unit: '°C', group: 'Producers', desc: 'Temperature at which algaeMaxGrowth applies.', source: 'Instructional.' },
+    algaeMaxGrowth: { label: 'Algal maximum growth', unit: 'h⁻¹', group: 'Producers', desc: 'Specific growth at optimal light and unlimited nutrients.', source: 'Order of magnitude of phytoplankton µmax (≈1 d⁻¹); scaled for model light units.' },
+    algaeLoss: { label: 'Algal respiration + mortality', unit: 'h⁻¹', group: 'Producers', desc: 'Biomass loss rate at 20 °C.', source: 'Instructional (≈8% d⁻¹).' },
+    algaeLossToDetritus: { label: 'Algal loss to detritus', unit: 'fraction', group: 'Producers', desc: 'Share of algal loss that becomes particulate detritus; the rest is mineralized.', source: 'Instructional.' },
+    lightOpt: { label: 'Optimal light (Steele I_opt)', unit: 'fraction of full sun', group: 'Light', desc: 'Light at which photosynthesis peaks; brighter light causes photoinhibition.', source: 'Steele (1962) photosynthesis–irradiance curve.' },
+    kAlgae: { label: 'Algal light attenuation', unit: 'per algae unit per zone', group: 'Light', desc: 'Self-shading: each unit of algae above a point absorbs light (Lambert–Beer).', source: 'Chlorophyll-specific attenuation ≈0.015–0.02 m² mg⁻¹ Chl (Kirk 2011); scaled to model units.' },
+    piScale: { label: 'P–I curve scale', unit: '–', group: 'Light', desc: 'Calibrates the Steele curve so daily production at default settings matches the earlier linear model.', source: 'Calibrated.' },
+    kN: { label: 'Half-saturation, nitrogen', unit: 'mg N/L', group: 'Nutrients', desc: 'DIN concentration giving half-maximal uptake (Monod).', source: 'Freshwater phytoplankton K_N range ≈0.01–0.5 mg N/L.' },
+    kP: { label: 'Half-saturation, phosphorus', unit: 'mg P/L', group: 'Nutrients', desc: 'Phosphate concentration giving half-maximal uptake (Monod).', source: 'Freshwater phytoplankton K_P range ≈0.001–0.03 mg P/L.' },
+    kC: { label: 'Half-saturation, CO₂', unit: 'mg CO₂/L', group: 'Nutrients', desc: 'Dissolved CO₂ giving half-maximal carbon uptake (Monod).', source: 'Instructional; many algae concentrate inorganic carbon, so K is low.' },
+    po4Init: { label: 'Initial phosphate', unit: 'mg P/L', group: 'Nutrients', desc: 'Starting dissolved phosphate (mesotrophic).', source: 'OECD trophic classes: 10–35 µg P/L is mesotrophic.' },
+    omNP: { label: 'Organic N:P ratio', unit: 'mass ratio', group: 'Stoichiometry', desc: 'N:P of all organic pools.', source: 'Redfield ratio 16:1 molar ≈ 7.2:1 by mass.' },
+    omN: { label: 'N per organic unit', unit: 'mg N', group: 'Stoichiometry', desc: 'Nitrogen in one detritus-equivalent unit.', source: 'Instructional (matches earlier ammonification rate).' },
+    omCO2: { label: 'Carbon per organic unit', unit: 'mg CO₂-eq', group: 'Stoichiometry', desc: 'Carbon (as CO₂) released when one unit is fully mineralized.', source: 'Instructional (matches earlier decomposition CO₂ yield).' },
+    algaeOM: { label: 'Organic matter per algae unit', unit: 'OM units', group: 'Stoichiometry', desc: 'Converts relative algal biomass to organic matter.', source: 'Instructional (matches algal die-off → detritus conversion).' },
+    plantOM: { label: 'Organic matter per plant biomass unit', unit: 'OM units', group: 'Stoichiometry', desc: 'Converts relative macrophyte biomass to organic matter.', source: 'Instructional.' },
+    decompRate: { label: 'Decomposition rate', unit: 'h⁻¹ per bacteria unit', group: 'Decomposers', desc: 'Detritus processing by bacteria at 20 °C.', source: 'Instructional.' },
+    nitrifyRate1: { label: 'Ammonia oxidation', unit: 'mg N/L/h per bacteria unit', group: 'Decomposers', desc: 'NH₄⁺ → NO₂⁻, oxygen-limited below 5 mg/L.', source: 'Instructional.' },
+    nitrifyRate2: { label: 'Nitrite oxidation', unit: 'mg N/L/h per bacteria unit', group: 'Decomposers', desc: 'NO₂⁻ → NO₃⁻, oxygen-limited below 5 mg/L.', source: 'Instructional.' },
+    bacterialYield: { label: 'Bacterial growth yield', unit: 'fraction', group: 'Decomposers', desc: 'Share of decomposed organic matter converted to bacterial biomass; the rest is respired.', source: 'Bacterial growth efficiency in fresh waters ≈0.1–0.5 (del Giorgio & Cole 1998).' },
+    bacterialLoss: { label: 'Bacterial maintenance loss', unit: 'h⁻¹', group: 'Decomposers', desc: 'Dead bacterial biomass returns to detritus.', source: 'Instructional.' },
+    plantTurnover: { label: 'Macrophyte tissue turnover', unit: 'h⁻¹', group: 'Plants', desc: 'Leaf/stem sloughing to detritus (≈1% per day).', source: 'Submersed macrophyte turnover ≈0.5–3% d⁻¹.' },
+    plantMaxGrowth: { label: 'Macrophyte maximum gross growth', unit: 'biomass h⁻¹', group: 'Plants', desc: 'Gross photosynthetic tissue production at full light and nutrients.', source: 'Instructional.' },
+    plantResp: { label: 'Macrophyte maintenance respiration', unit: 'h⁻¹ at 20 °C', group: 'Plants', desc: 'Continuous respiration (≈0.6% of biomass per day).', source: 'Instructional; dark respiration of submersed plants is typically 0.5–2% d⁻¹.' },
+    plantDeathBiomass: { label: 'Plant die-back threshold', unit: 'relative biomass', group: 'Plants', desc: 'Below this biomass a plant is considered failing.', source: 'Instructional.' },
+    plantDeathHours: { label: 'Hours below threshold before death', unit: 'h', group: 'Plants', desc: 'A failing plant dies and its tissue becomes detritus.', source: 'Instructional.' },
+    plantHeatStressC: { label: 'Plant heat-stress temperature', unit: '°C', group: 'Plants', desc: 'Above this, tissue loss accelerates.', source: 'Many temperate submersed macrophytes decline above ≈30 °C.' },
+    pSorption: { label: 'Phosphate sorption to sediment', unit: 'h⁻¹', group: 'Sediment', desc: 'Iron-bound P uptake by oxic sediment.', source: 'Mortimer (1941–42) redox control of sediment P.' },
+    pRelease: { label: 'Sediment P release (oxic)', unit: 'h⁻¹', group: 'Sediment', desc: 'Baseline release from the sediment P pool.', source: 'Instructional.' },
+    anoxicReleaseFactor: { label: 'Anoxic release multiplier', unit: '×', group: 'Sediment', desc: 'Release increase when bottom water is anoxic (internal loading).', source: 'Internal P loading increases several-fold under anoxia (Søndergaard et al. 2003).' },
+    nh3uChronic: { label: 'Un-ionized NH₃ stress threshold', unit: 'mg N/L', group: 'Toxicity', desc: 'Sublethal stress begins.', source: 'US EPA (1976) criterion of 0.02 mg/L un-ionized NH₃ for freshwater aquatic life.' },
+    nh3uAcute: { label: 'Un-ionized NH₃ severe threshold', unit: 'mg N/L', group: 'Toxicity', desc: 'Severe stress begins.', source: 'Acute LC50s for fathead minnows and Daphnia are roughly 0.5–2 mg/L NH₃; 0.1 marks severe sublethal stress in this model.' },
+    egestion: { label: 'Egestion fraction', unit: 'fraction', group: 'Consumers', desc: 'Ingested organic matter returned as feces (detritus).', source: 'Typical assimilation efficiency 60–80%.' },
+    grazerK: { label: 'Grazer half-saturation food level', unit: 'algae or detritus units', group: 'Consumers', desc: 'Food concentration at which Daphnia, snails and scuds feed at half their maximum rate (Holling type II).', source: 'Holling (1959); value instructional.' },
+    attackRate: { label: 'Minnow attack rate (a)', unit: 'cells h⁻¹', group: 'Consumers', desc: 'Holling type II search efficiency.', source: 'Holling (1959) disc equation; value instructional.' },
+    handlingTime: { label: 'Minnow handling time (h)', unit: 'h per prey', group: 'Consumers', desc: 'Time to pursue and swallow one prey; sets the saturation level.', source: 'Holling (1959); value instructional.' },
+    daphniaRefuge: { label: 'Daphnia refuge', unit: 'individuals', group: 'Consumers', desc: 'Prey effectively invulnerable in refuges per compartment.', source: 'Prey refuges stabilize predator–prey dynamics (Murdoch & Oaten 1975).' },
+    scudRefuge: { label: 'Scud refuge', unit: 'individuals', group: 'Consumers', desc: 'Scuds effectively invulnerable in refuges per compartment.', source: 'Instructional.' },
+    fishMax: { label: 'Minnow spawning ceiling', unit: 'individuals per compartment', group: 'Consumers', desc: 'Spawning stops above this density (territory / space limitation).', source: 'Instructional.' },
+    riskForagingEnergy: { label: 'Risk-taking energy threshold', unit: 'energy', group: 'Consumers', desc: 'Below this body condition, prey keep foraging instead of hiding from fish.', source: 'Foraging–predation risk trade-off (Lima & Dill 1990).' },
+    snailCapacity: { label: 'Snail crowding capacity', unit: 'individuals per compartment', group: 'Consumers', desc: 'Births decline linearly to zero as snails approach this density.', source: 'Logistic density dependence; value instructional.' },
+    scudCapacity: { label: 'Scud crowding capacity', unit: 'individuals per compartment', group: 'Consumers', desc: 'Births decline linearly to zero as scuds approach this density.', source: 'Logistic density dependence; value instructional.' },
+    spawnEnergy: { label: 'Minnow spawning condition', unit: 'energy', group: 'Consumers', desc: 'Both members of the best-conditioned pair need at least this energy to spawn.', source: 'Instructional; reproduction depends on body condition.' },
+    fishGraze: { label: 'Minnow omnivory rate', unit: 'h⁻¹', group: 'Consumers', desc: 'Algae/detritus grazing by hungry minnows.', source: 'Many minnows (e.g., fathead minnow) are omnivores feeding on algae and detritus.' },
+    fishGrazeEnergy: { label: 'Energy per OM grazed', unit: 'energy per OM unit', group: 'Consumers', desc: 'Low digestibility of algae/detritus relative to prey.', source: 'Instructional.' },
+  };
+
+  function tempFactor(temp) { return Math.pow(PARAMS.q10, (temp - PARAMS.refTempC) / 10); }
+
+  // Steele (1962): P = Pmax (I/Iopt) exp(1 - I/Iopt). Rises with light,
+  // peaks at Iopt, declines (photoinhibition) in very bright light.
+  function lightResponse(I) {
+    if (!(I > 0)) return 0;
+    const r = I / PARAMS.lightOpt;
+    return PARAMS.piScale * r * Math.exp(1 - r);
+  }
+
+  // Monod uptake for nitrogen and phosphorus combined with Liebig's law of
+  // the minimum: growth follows whichever nutrient is scarcer.
+  function nutrientLimitation(din, po4) {
+    const fN = Math.max(0, din) / (PARAMS.kN + Math.max(0, din));
+    const fP = Math.max(0, po4) / (PARAMS.kP + Math.max(0, po4));
+    return Math.min(fN, fP);
+  }
+  function limitingNutrient(din, po4) {
+    const fN = Math.max(0, din) / (PARAMS.kN + Math.max(0, din));
+    const fP = Math.max(0, po4) / (PARAMS.kP + Math.max(0, po4));
+    return fN < fP ? 'nitrogen' : 'phosphorus';
+  }
+
+  // Emerson et al. (1975): fraction of total ammonia present as toxic NH3.
+  function unionizedFraction(tempC, pH) {
+    const pKa = 0.09018 + 2729.92 / (tempC + 273.15);
+    return 1 / (1 + Math.pow(10, pKa - pH));
+  }
+
+  // ---- Conservative organic-matter transformations ------------------
+  function omP() { return PARAMS.omN / PARAMS.omNP; }
+  function ensureNutrientState(state) {
+    const f = state.fields;
+    if (!f.po4) f.po4 = blankField(PARAMS.po4Init);
+    if (!state.sediment) state.sediment = { p: Array(COLS).fill(PARAMS.sedPInit) };
+  }
+  // Release CO2, ammonium and phosphate from `om` units of organic matter.
+  // Aerobic respiration uses 1 mol O2 per mol CO2 released (32/44 by mass).
+  // When oxygen runs out, the remainder is treated as anaerobic breakdown.
+  const O2_PER_CO2 = 32 / 44;
+  function mineralize(state, i, om, proc = 'decomposition') {
+    if (!(om > 0)) return;
+    const f = state.fields;
+    const demand = om * PARAMS.omCO2 * O2_PER_CO2;
+    const used = Math.min(Math.max(0, f.o2[i]), demand);
+    f.o2[i] -= used;
+    recordOxygen(state, i, proc, -used);
+    f.co2[i] += om * PARAMS.omCO2;
+    f.nh3[i] += om * PARAMS.omN;
+    f.po4[i] += om * omP();
+  }
+  // Build `om` units of organic matter from dissolved CO2, DIN (ammonium
+  // first) and phosphate in zone i (CO2 may come from a different zone ci).
+  // Returns the amount actually built, which may be smaller if a resource
+  // runs out, so mass is never created.
+  function assimilate(state, i, om, ci = i, photosynthetic = false) {
+    if (!(om > 0)) return 0;
+    const f = state.fields;
+    const din = Math.max(0, f.nh3[i]) + Math.max(0, f.no3[i]);
+    const maxByC = Math.max(0, f.co2[ci]) / PARAMS.omCO2;
+    const maxByN = din / PARAMS.omN;
+    const maxByP = Math.max(0, f.po4[i]) / omP();
+    const actual = Math.min(om, maxByC, maxByN, maxByP);
+    if (!(actual > 0)) return 0;
+    f.co2[ci] -= actual * PARAMS.omCO2;
+    let n = actual * PARAMS.omN;
+    const fromNH = Math.min(Math.max(0, f.nh3[i]), n);
+    f.nh3[i] -= fromNH; n -= fromNH;
+    f.no3[i] -= n;
+    f.po4[i] -= actual * omP();
+    if (photosynthetic) {
+      const o2 = actual * PARAMS.omCO2 * O2_PER_CO2;
+      f.o2[ci] += o2;
+      recordOxygen(state, ci, 'photosynthesis', o2);
+    }
+    return actual;
+  }
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
   function idx(x, y) { return y * COLS + x; }
@@ -804,13 +1026,49 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   function mulberry32(seed) {
     let a = seed >>> 0;
-    return function () {
+    const rng = function () {
       a |= 0;
       a = (a + 0x6D2B79F5) | 0;
       let t = Math.imul(a ^ (a >>> 15), 1 | a);
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+    // Exposed so a saved tank resumes with the same random sequence.
+    rng.getState = () => a;
+    rng.setState = v => { a = v | 0; };
+    return rng;
+  }
+
+  // ---- Saving and resuming a tank -------------------------------------
+  // Keys starting with "_" are caches rebuilt on demand, except these,
+  // which carry real model history.
+  const PERSISTENT_PRIVATE_KEYS = new Set(['_fishSpawning', '_spawningGlassVersion', '_eventSeq',
+    '_lastFishBirth', '_lastSummary', '_lastCarcassWarning', '_habitatVersion']);
+  function serializeState(state) {
+    const out = { format: 'ecosphere-save', saveVersion: 1 };
+    for (const [k, v] of Object.entries(state)) {
+      if (k === 'rng' || k === 'oxygenBudget') continue;
+      if (k.startsWith('_') && !PERSISTENT_PRIVATE_KEYS.has(k)) continue;
+      out[k] = v;
+    }
+    out.rngState = state.rng.getState();
+    return JSON.parse(JSON.stringify(out));
+  }
+  function deserializeState(data) {
+    if (!data || data.format !== 'ecosphere-save') throw new Error('This file is not an EcoSphere Lab save.');
+    const state = JSON.parse(JSON.stringify(data));
+    delete state.format; delete state.saveVersion; delete state.rngState;
+    state.rng = mulberry32(state.seed || 1);
+    state.rng.setState(data.rngState | 0);
+    state.oxygenBudget = null;
+    for (const a of state.animals || []) {
+      if (!Number.isFinite(a.lastAte)) a.lastAte = 0;
+      if (!Number.isFinite(a.lastReproduced)) a.lastReproduced = 1e9;
+    }
+    ensureNutrientState(state);
+    if (!state.ledger) resetLedger(state);
+    state._habitatVersion = (state._habitatVersion || 0) + 1;
+    return state;
   }
 
   function oxygenSaturation(tempC) {
@@ -900,8 +1158,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     return values;
   }
 
+  // Lambert–Beer self-shading: algae in the water above a point absorb light,
+  // so dense blooms darken deeper water (a key negative feedback on growth).
+  function algalShade(state,x,y){
+    const a=state.fields?.algae;
+    if(!a||!(PARAMS.kAlgae>0))return 1;
+    const cx=clamp(Math.floor(x),0,COLS-1),cy=clamp(Math.floor(y),0,ROWS-1);
+    let sum=0;
+    for(let r=0;r<cy;r++)sum+=a[idx(cx,r)];
+    sum+=a[idx(cx,cy)]*clamp(y-cy,0,1);
+    return Math.exp(-PARAMS.kAlgae*sum);
+  }
+
   function localLightAt(state,x,y,useGrid=false){
-    const base=lightAtDepth(state,y);
+    const base=lightAtDepth(state,y)*algalShade(state,x,y);
     let info;
     if(useGrid){
       const cx=clamp(Math.floor(x),0,COLS-1),cy=clamp(Math.floor(y),0,ROWS-1);
@@ -967,27 +1237,28 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       lifespanMin: 4800, lifespanMax: 7000,
       maturity: 300, reproduceEnergy: 0.78,
       reproductionChance: 0, reproductionCost: 0.22,
+      backgroundMortality: 0.00006,
       newbornEnergy: 0.62
     },
     daphnia: {
       energy: 0.78, speed: 0.25,
       lifespanMin: 1000, lifespanMax: 1600,
       maturity: 42, reproduceEnergy: 0.74,
-      reproductionChance: 0.0035, reproductionCost: 0.09,
+      reproductionChance: 0.010, reproductionCost: 0.09,
       newbornEnergy: 0.62
     },
     snail: {
       energy: 0.86, speed: 0.12,
       lifespanMin: 3500, lifespanMax: 5200,
       maturity: 240, reproduceEnergy: 0.74,
-      reproductionChance: 0.0010, reproductionCost: 0.16,
+      reproductionChance: 0.0030, reproductionCost: 0.16,
       newbornEnergy: 0.68
     },
     scud: {
       energy: 0.80, speed: 0.18,
       lifespanMin: 2000, lifespanMax: 3200,
       maturity: 120, reproduceEnergy: 0.72,
-      reproductionChance: 0.0016, reproductionCost: 0.10,
+      reproductionChance: 0.0030, reproductionCost: 0.10,
       newbornEnergy: 0.62
     },
   };
@@ -1004,7 +1275,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       vy: (rng() - 0.5) * spec.speed,
       energy: newborn ? spec.newbornEnergy : spec.energy,
       size: newborn ? 0.62 + rng() * 0.18 : 0.84 + rng() * 0.32,
-      age: 0,
+      adultSize: 0.84 + rng() * 0.32,
+      bodyOM: BODY_OM[kind] * (newborn ? BIRTH_FRACTION[kind] : 1),
+      store: newborn ? 0 : BODY_OM[kind] * 0.25,
+      // Stocked animals are adults of mixed ages, so a starting cohort does
+      // not all reach old age at once. Newborns start at age 0.
+      age: newborn ? 0 : spec.maturity + rng() * Math.max(0, 0.45 * lifespan - spec.maturity),
       lifespan,
       lastAte: 0,
       lastReproduced: 1e9,
@@ -1026,7 +1302,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       vx: (state.rng() - 0.5) * 0.035,
       vy: 0.10 + state.rng() * 0.06,
       age: 0,
-      mass: 1.0,
+      mass: (animal.bodyOM ?? BODY_OM.fish) + (animal.store || 0),
       settled: false,
       phase: state.rng() * Math.PI * 2,
       reason
@@ -1083,18 +1359,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       );
       c.mass = Math.max(0, c.mass - decay);
 
-      const microbeResp = 0.0026 * c.mass * tempFactor * bacteriaActivity * oxygenFactor * settlingFactor * dt;
-      const beforeCarcassO2 = f.o2[i];
-      f.o2[i] = clamp(beforeCarcassO2 - microbeResp, ...LIMITS.o2);
-      recordOxygen(state,i,'decomposition',-microbeResp);
-      recordOxygen(state,i,'bounds',f.o2[i]-(beforeCarcassO2-microbeResp));
-      f.co2[i] = clamp(f.co2[i] + microbeResp * 0.88, ...LIMITS.co2);
-      f.nh3[i] = clamp(f.nh3[i] + decay * 0.20, ...LIMITS.nh3);
-      f.detritus[i] = clamp(f.detritus[i] + decay * 0.48, ...LIMITS.detritus);
-      f.bacteria[i] = clamp(
-        f.bacteria[i] + 0.00042 * c.mass * tempFactor * settlingFactor * dt + decay * 0.055,
-        ...LIMITS.bacteria
-      );
+      // Carcass tissue is split conservatively: about half fragments into
+      // detritus, part supports local bacterial growth, and the rest is
+      // mineralized to CO2, ammonium and phosphate.
+      const toDetritus = decay * 0.48;
+      const toBacteria = Math.min(decay - toDetritus,
+        0.00042 * c.mass * tempFactor * settlingFactor * dt + decay * 0.055);
+      f.detritus[i] += toDetritus;
+      f.bacteria[i] += toBacteria;
+      mineralize(state, i, decay - toDetritus - toBacteria, 'decomposition');
 
       // Carcasses are local sources. Several carcasses in the same region can
       // create a decomposition hotspot rather than only changing tank averages.
@@ -1110,7 +1383,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       if (c.mass > 0.035) {
         survivors.push(c);
       } else {
-        f.detritus[i] = clamp(f.detritus[i] + c.mass * 0.5, ...LIMITS.detritus);
+        f.detritus[i] += c.mass;
         addEvent(state, 'A minnow carcass was largely decomposed into detrital material.', 'info', {
           x: c.x, y: c.y, popup: 'Carcass decomposed'
         });
@@ -1129,7 +1402,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function createState(seed = 42) {
     const rng = mulberry32(seed);
     const state = {
-      version: '3.15',
+      version: '3.18',
       seed,
       rng,
       timeHours: 8,
@@ -1143,7 +1416,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         algae: blankField(0),
         bacteria: blankField(0.18),
         detritus: blankField(0.06),
+        po4: blankField(PARAMS.po4Init),
       },
+      sediment: { p: Array(COLS).fill(PARAMS.sedPInit) },
       plants: [],
       rocks: [],
       animals: [],
@@ -1153,6 +1428,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       flags: { runoffUsed: false, mystery: null, revealed: false },
       trial: null,
       oxygenBudget: null,
+      ledger: null,
     };
 
     for (let y = 0; y < ROWS; y++) {
@@ -1183,6 +1459,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     for (let i = 0; i < 4; i++) state.animals.push(createAnimal('scud', 1 + rng() * (COLS - 2), ROWS - 1.8 - rng() * 1.3, rng));
     for (let i = 0; i < 4; i++) state.animals.push(createAnimal('fish', 2 + rng() * (COLS - 4), 1.5 + rng() * (ROWS - 4), rng));
 
+    resetLedger(state);
     return state;
   }
 
@@ -1230,96 +1507,117 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     // Mineral substrate does not consume oxygen by itself. Instead it changes
     // where sinking organic particles stop. Detritus trapped at that surface
     // then fuels local bacterial decomposition and oxygen demand.
+    // Cached per zone; rebuilt only when terrain or rocks change.
+    const key=`${state.terrain?.version}|${state._habitatVersion||0}|${state.rocks.length}`;
+    let cache=state._barrierBelowCache;
+    if(!cache||cache.key!==key||cache.rocks!==state.rocks){
+      cache=state._barrierBelowCache={key,rocks:state.rocks,values:new Int8Array(ZONE_COUNT).fill(-1)};
+    }
+    const i=idx(xCell,yCell);
+    if(cache.values[i]>=0)return cache.values[i]===1;
     const x=clamp(xCell+.5,.05,COLS-.05);
     const y0=clamp(yCell+.55,.05,ROWS-.05);
     const y1=clamp(yCell+1.45,.05,ROWS-.05);
+    let blocked=false;
     for(let y=y0;y<=y1;y+=.07){
-      if(terrainSolidAt(state,x,y))return true;
+      if(terrainSolidAt(state,x,y)){blocked=true;break;}
     }
-    return false;
+    cache.values[i]=blocked?1:0;
+    return blocked;
   }
 
   function stepChemistry(state, dt = 1) {
+    ensureNutrientState(state);
     const f = state.fields;
+    const P = PARAMS;
     const temp = state.settings.temperatureC;
-    const pH = state.settings.pH;
     const metabolic = Math.pow(2, (temp - 20) / 10);
+    const growthTemp = tempFactor(temp);
     const saturation = oxygenSaturation(temp);
     const labels = chemistryCompartments(state).labels;
-    const plantCompartments = new Map(state.plants.map(p => [p, chemistryCompartmentAt(state,p.x,p.y).id]));
+    const flux = state._ledgerFlux;
 
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const i = idx(x, y);
         const light = localLightAt(state,x+.5,y+.5,true).value;
+        const lightEff = lightResponse(light);
         const producer = f.algae[i];
-        const plantInfluence = state.plants.reduce((sum, p) => {
-          if (plantCompartments.get(p) !== labels[i]) return sum;
-          const influence = plantLeafInfluence(p, x, y);
-          sum.photo += influence.photo;
-          sum.resp += influence.resp;
-          return sum;
-        }, { photo: 0, resp: 0 });
 
-        const nutrientFactor = clamp((f.no3[i] + f.nh3[i] * 4) / 8, 0, 1.3);
-        const carbonFactor = clamp(f.co2[i] / 4.0, 0, 1.25);
-        // Producer coefficients are tuned so a well-lit, heavily planted tank
-        // can recover from oxygen depletion once decomposer demand declines.
-        // Carbon limitation prevents unlimited O2 accumulation when CO2 becomes scarce.
-        const potentialPhoto = (producer * 0.108 + plantInfluence.photo * 0.102) * light * nutrientFactor * carbonFactor * dt;
-        const photo = Math.min(potentialPhoto, Math.max(0, f.co2[i]) / 0.80);
-        const producerResp = (producer * 0.012 + plantInfluence.resp * 0.010) * metabolic * dt;
+        const nutrientFactor = nutrientLimitation(f.no3[i] + f.nh3[i], f.po4[i]);
+        // Carbon limitation is Monod-type; 1.25 keeps the earlier calibration at CO2 ≥ 5 mg/L.
+        const carbonFactor = 1.25 * Math.max(0, f.co2[i]) / (PARAMS.kC + Math.max(0, f.co2[i]));
         const benthicFactor = 1 + Math.pow(y / Math.max(1, ROWS - 1), 3) * 1.6;
-        const decomposition = f.detritus[i] * f.bacteria[i] * 0.045 * metabolic * benthicFactor * dt;
-        const nitrify1 = Math.min(f.nh3[i], f.bacteria[i] * 0.020 * clamp(f.o2[i] / 5, 0, 1) * dt);
-        const nitrify2 = Math.min(f.no2[i], f.bacteria[i] * 0.016 * clamp(f.o2[i] / 5, 0, 1) * dt);
+        const decomposition = Math.min(f.detritus[i] / 0.30,
+          f.detritus[i] * f.bacteria[i] * P.decompRate * metabolic * benthicFactor * dt);
+        const nitrify1 = Math.min(f.nh3[i], f.bacteria[i] * P.nitrifyRate1 * clamp(f.o2[i] / 5, 0, 1) * dt);
+        const nitrify2 = Math.min(f.no2[i], f.bacteria[i] * P.nitrifyRate2 * clamp(f.o2[i] / 5, 0, 1) * dt);
 
-        f.o2[i] += photo - producerResp - decomposition * 0.7 - (nitrify1 + nitrify2) * 0.45;
-        recordOxygen(state,i,'photosynthesis',photo);
-        recordOxygen(state,i,'producerRespiration',-producerResp);
-        recordOxygen(state,i,'decomposition',-decomposition*0.7);
-        recordOxygen(state,i,'nitrification',-(nitrify1+nitrify2)*0.45);
-        f.co2[i] += producerResp + decomposition * 0.65 - photo * 0.80;
-        f.nh3[i] += decomposition * 0.12 - nitrify1;
+        // Nitrification stoichiometry: 3.43 mg O2 per mg N oxidized to nitrite,
+        // 1.14 mg O2 per mg N oxidized to nitrate.
+        const nitrificationO2 = Math.min(Math.max(0, f.o2[i]), nitrify1 * 3.43 + nitrify2 * 1.14);
+        f.o2[i] -= nitrificationO2;
+        recordOxygen(state,i,'nitrification',-nitrificationO2);
+
+        // Decomposition: detritus -> bacterial biomass + CO2, NH4+, PO4.
+        const omDecomposed = decomposition * 0.30;
+        // Heterotrophic bacteria keep about a third of the organic matter they
+        // process as new biomass (growth yield), so they bloom after die-offs.
+        const decomposerGrowth = omDecomposed * P.bacterialYield;
+        f.detritus[i] -= omDecomposed;
+        mineralize(state, i, omDecomposed - decomposerGrowth, 'decomposition');
+
+        // Nitrification conserves nitrogen: NH4+ -> NO2- -> NO3-.
+        f.nh3[i] -= nitrify1;
         f.no2[i] += nitrify1 - nitrify2;
-        f.no3[i] += nitrify2 - photo * 0.025;
-        // 'decomposition' represents organic matter actually being processed.
-        // The older 3% removal allowed a die-off to behave like a nearly
-        // permanent oxygen sink. Faster turnover now permits ecological recovery.
-        f.detritus[i] = clamp(f.detritus[i] - decomposition * 0.30, ...LIMITS.detritus);
-        // Growth uses the material processed by existing microbes. Maintenance
-        // scales with biomass, so resource-poor populations decline gradually.
-        // There is no imposed minimum biomass or spontaneous recruitment.
-        const bacterialGrowth = decomposition * 0.040 + (nitrify1 + nitrify2) * 0.040;
-        const bacterialLoss = f.bacteria[i] * 0.0005 * metabolic * dt;
-        f.bacteria[i] = clamp(f.bacteria[i] + bacterialGrowth - bacterialLoss, ...LIMITS.bacteria);
+        f.no3[i] += nitrify2;
+        // Nitrifiers are chemoautotrophs: their growth fixes CO2 and takes up N and P.
+        const nitrifierGrowth = assimilate(state, i, (nitrify1 + nitrify2) * 0.040);
+        const bacterialLoss = f.bacteria[i] * P.bacterialLoss * metabolic * dt;
+        f.bacteria[i] += decomposerGrowth + nitrifierGrowth - bacterialLoss;
+        f.detritus[i] += bacterialLoss;
 
-        const algaeGrowth = producer * (0.05 * Math.pow(2,(temp - 22) / 10) * light * nutrientFactor * carbonFactor - 0.0035 * metabolic) * dt;
-        // Existing algae can grow; an empty compartment has no implicit seed bank.
-        f.algae[i] = clamp(producer + algaeGrowth, ...LIMITS.algae);
-        // Dead algal cells are organic matter: return them to the detritus pool so decomposers and nitrifiers can recycle nutrients.
-        f.detritus[i] = clamp(f.detritus[i] + producer * 0.0035 * metabolic * 0.1 * dt, ...LIMITS.detritus);
+        // Algae: gross growth draws CO2, DIN and PO4; losses return as
+        // detritus (a fraction) or are mineralized. Existing algae can grow;
+        // an empty zone has no implicit seed bank.
+        const room = Math.max(0, LIMITS.algae[1] - producer);
+        const gross = Math.min(room, producer * P.algaeMaxGrowth * growthTemp * lightEff * nutrientFactor * carbonFactor * dt);
+        // Photosynthesis: O2 released in proportion to carbon fixed (quotient 1).
+        const grown = assimilate(state, i, gross * P.algaeOM, i, true) / P.algaeOM;
+        const loss = Math.min(producer + grown, producer * P.algaeLoss * metabolic * dt);
+        const lossToDetritus = loss * P.algaeLossToDetritus;
+        f.algae[i] = producer + grown - loss;
+        f.detritus[i] += lossToDetritus;
+        mineralize(state, i, loss * P.algaeOM - lossToDetritus, 'producerRespiration');
 
         if (y === 0) {
           const exchange = (saturation - f.o2[i]) * state.settings.gasExchange * dt;
           f.o2[i] += exchange;
           recordOxygen(state,i,'gasExchange',exchange);
-          f.co2[i] += (2.5 - f.co2[i]) * state.settings.gasExchange * 0.35 * dt;
+          const co2Exchange = (2.5 - f.co2[i]) * state.settings.gasExchange * 0.35 * dt;
+          f.co2[i] += co2Exchange;
+          if (flux) flux.C.atmosphere += co2Exchange * 12 / 44;
         }
 
-        // Atmospheric exchange occurs only at water that actually reaches the
-        // modeled surface. Deeper cells equilibrate through barrier-aware
-        // diffusion, so an underwater glass compartment can develop chemistry
-        // independent from surface-connected water.
+        // Sediment phosphorus (Mortimer redox model): oxic sediment binds
+        // phosphate to iron; anoxic bottom water releases it (internal loading).
+        if (y === ROWS - 1) {
+          const oxic = clamp(f.o2[i] / 4, 0, 1);
+          const anoxic = clamp((3 - f.o2[i]) / 3, 0, 1);
+          const sorbed = Math.max(0, f.po4[i]) * P.pSorption * oxic * dt;
+          const released = Math.min(state.sediment.p[x],
+            state.sediment.p[x] * P.pRelease * (1 + (P.anoxicReleaseFactor - 1) * anoxic) * metabolic * dt);
+          f.po4[i] += released - sorbed;
+          state.sediment.p[x] += sorbed - released;
+        }
 
-        const unionizedPenalty = clamp((pH - 7) * 0.12 + (temp - 20) * 0.01, 0, 0.45);
-        f.nh3[i] = clamp(f.nh3[i] * (1 + unionizedPenalty * 0.001), ...LIMITS.nh3);
         const unboundedO2 = f.o2[i];
         f.o2[i] = clamp(f.o2[i], ...LIMITS.o2);
         recordOxygen(state,i,'bounds',f.o2[i]-unboundedO2);
-        f.co2[i] = clamp(f.co2[i], ...LIMITS.co2);
-        f.no2[i] = clamp(f.no2[i], ...LIMITS.no2);
-        f.no3[i] = clamp(f.no3[i], ...LIMITS.no3);
+        for (const k of ['co2','nh3','no2','no3','po4','algae','bacteria','detritus']) {
+          const v = f[k][i], c = clamp(v, ...LIMITS[k]);
+          if (c !== v) { f[k][i] = c; if (flux) recordBound(flux, k, c - v); }
+        }
       }
     }
 
@@ -1331,9 +1629,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         const below = idx(x, y + 1);
         const trappedBySubstrate = particulateBarrierBelow(state,x,y);
         if (!chemistryBarrierBetween(state, x, y, x, y + 1) && !trappedBySubstrate) {
-          const amount = Math.min(settled[i], settled[i] * 0.020 * dt);
+          const room = Math.max(0, LIMITS.detritus[1] - settled[below]);
+          const amount = Math.min(settled[i] * 0.020 * dt, room);
           settled[i] -= amount;
-          settled[below] = clamp(settled[below] + amount, ...LIMITS.detritus);
+          settled[below] += amount;
         }
       }
     }
@@ -1346,6 +1645,79 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     f.nh3 = diffuse(state, f.nh3, 0.06 * dt);
     f.no2 = diffuse(state, f.no2, 0.06 * dt);
     f.no3 = diffuse(state, f.no3, 0.045 * dt);
+    f.po4 = diffuse(state, f.po4, 0.06 * dt);
+  }
+
+  // ---- Mass-balance ledger ------------------------------------------
+  // Totals of carbon, nitrogen and phosphorus (mg, with each chemistry zone
+  // treated as 1 L) in every pool. Inside a step, every process moves mass
+  // between pools; only the atmosphere (CO2 exchange), runoff and user
+  // actions add or remove it. The residual measures how closely the model
+  // conserves mass.
+  function recordBound(flux, key, delta) {
+    const C = 12 / 44, n = PARAMS.omN, p = omP();
+    if (key === 'co2') flux.C.bounds += delta * C;
+    else if (key === 'nh3' || key === 'no2' || key === 'no3') flux.N.bounds += delta;
+    else if (key === 'po4') flux.P.bounds += delta;
+    else {
+      const om = key === 'algae' ? delta * PARAMS.algaeOM : delta;
+      flux.C.bounds += om * PARAMS.omCO2 * C; flux.N.bounds += om * n; flux.P.bounds += om * p;
+    }
+  }
+  function massPools(state) {
+    ensureNutrientState(state);
+    const f = state.fields, C = 12 / 44, n = PARAMS.omN, p = omP();
+    let co2 = 0, din = 0, po4 = 0, algae = 0, det = 0, bact = 0;
+    for (let i = 0; i < ZONE_COUNT; i++) {
+      co2 += f.co2[i]; din += f.nh3[i] + f.no2[i] + f.no3[i]; po4 += f.po4[i];
+      algae += f.algae[i]; det += f.detritus[i]; bact += f.bacteria[i];
+    }
+    const plantOM = state.plants.reduce((s, q) => s + q.biomass, 0) * PARAMS.plantOM;
+    const animalOM = state.animals.reduce((s, a) => s + (a.bodyOM ?? BODY_OM[a.kind] ?? 0) + (a.store || 0), 0);
+    const carcassOM = (state.carcasses || []).reduce((s, c) => s + c.mass, 0);
+    const sedP = state.sediment.p.reduce((s, v) => s + v, 0);
+    const om = { algae: algae * PARAMS.algaeOM, detritus: det, bacteria: bact, plants: plantOM, animals: animalOM, carcasses: carcassOM };
+    const pools = {
+      dissolved: { C: co2 * C, N: din, P: po4 },
+      sediment: { C: 0, N: 0, P: sedP },
+    };
+    for (const [k, v] of Object.entries(om)) pools[k] = { C: v * PARAMS.omCO2 * C, N: v * n, P: v * p };
+    const totals = { C: 0, N: 0, P: 0 };
+    for (const pool of Object.values(pools)) for (const e of ['C','N','P']) totals[e] += pool[e];
+    return { pools, totals };
+  }
+  function blankFlux() {
+    const z = () => ({ atmosphere: 0, runoff: 0, user: 0, bounds: 0, residual: 0 });
+    return { C: z(), N: z(), P: z() };
+  }
+  function resetLedger(state) {
+    const m = massPools(state);
+    state.ledger = { startTime: state.timeHours, start: { ...m.totals }, last: { ...m.totals }, cumulative: blankFlux() };
+  }
+  // Add mass from outside the tank (runoff), keeping the ledger exact.
+  function ledgerExternal(state, key, dC, dN, dP) {
+    const L = state.ledger;
+    if (!L) return;
+    L.cumulative.C[key] += dC; L.cumulative.N[key] += dN; L.cumulative.P[key] += dP;
+    L.last.C += dC; L.last.N += dN; L.last.P += dP;
+  }
+  function massBalanceSummary(state) {
+    if (!state.ledger) resetLedger(state);
+    const L = state.ledger, now = massPools(state);
+    const out = { startTime: L.startTime, hours: state.timeHours - L.startTime, pools: now.pools, elements: {} };
+    for (const e of ['C','N','P']) {
+      const c = L.cumulative[e];
+      const inputs = c.atmosphere + c.runoff + c.user;
+      // Changes made between steps (user edits since the last step) are
+      // not yet in `user`; count them so the summary is always current.
+      const pendingUser = now.totals[e] - L.last[e];
+      const explained = inputs + pendingUser + c.bounds;
+      const change = now.totals[e] - L.start[e];
+      out.elements[e] = { start: L.start[e], now: now.totals[e], change, atmosphere: c.atmosphere, runoff: c.runoff,
+        user: c.user + pendingUser, bounds: c.bounds, residual: change - explained,
+        relativeResidual: (change - explained) / Math.max(1e-9, L.start[e]) };
+    }
+    return out;
   }
 
   function animalStress(state, animal) {
@@ -1360,7 +1732,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     let penalty = 0;
     if (o2 < 4.0) { problems.push('hypoxia'); penalty += animal.kind === 'fish' ? 0.025 : 0.015; }
     if (o2 < 2.0) penalty += 0.045;
-    if (nh3 > 0.7) { problems.push('ammonia'); penalty += 0.020; }
+    // Toxicity depends on the un-ionized NH3 fraction, which rises steeply
+    // with pH and temperature (Emerson et al. 1975), not on total ammonia.
+    const nh3u = nh3 * unionizedFraction(temp, pH);
+    if (nh3u > PARAMS.nh3uChronic) {
+      problems.push('ammonia toxicity');
+      penalty += 0.020 * clamp((nh3u - PARAMS.nh3uChronic) / (PARAMS.nh3uAcute - PARAMS.nh3uChronic), 0, 1)
+               + 0.030 * clamp((nh3u - PARAMS.nh3uAcute) / PARAMS.nh3uAcute, 0, 1);
+    }
     if (no2 > 0.8) { problems.push('nitrite'); penalty += 0.018; }
     if (co2 > 18) { problems.push('high CO₂'); penalty += animal.kind === 'fish' ? 0.008 : 0.004; }
     if (co2 > 25) penalty += animal.kind === 'fish' ? 0.014 : 0.007;
@@ -1528,7 +1907,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     if (animal.y > ROWS - margin) animal.vy -= (animal.y - (ROWS - margin)) * strength;
   }
 
-  function rockBinKey(bx, by) { return `${bx},${by}`; }
+  function rockBinKey(bx, by) { return bx * 4096 + by; }
 
   function ensureRockIndex(state) {
     const version = state._habitatVersion || 0;
@@ -1553,7 +1932,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const result=[];
     for(let by=minBY;by<=maxBY;by++)for(let bx=minBX;bx<=maxBX;bx++){
       const arr=bins.get(rockBinKey(bx,by));
-      if(arr)result.push(...arr);
+      if(arr)for(let k=0;k<arr.length;k++)result.push(arr[k]);
     }
     return result;
   }
@@ -1694,16 +2073,27 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     return arr;
   }
 
-  function rockBlocksTerrainCell(state,tx,ty){
-    const p=terrainToModel(tx,ty);
-    for(const r of nearbyRocks(state,p.x,p.y,1.25)){
+  // Rasterized rock footprint on the fine terrain grid. Rebuilt only when
+  // rocks change, so collision tests are an O(1) lookup instead of a search.
+  function rockMask(state){
+    const key=(state._habitatVersion||0)+'|'+state.rocks.length;
+    if(state._rockMask && state._rockMaskKey===key && state._rockMaskRef===state.rocks)return state._rockMask;
+    const mask=new Uint8Array(TERRAIN_COLS*TERRAIN_ROWS);
+    for(const r of state.rocks){
       if(r.kind==='gravel')continue;
-      const rx=0.30+(r.size||.4)*.72;
-      const ry=0.22+(r.size||.4)*.52;
-      const dx=(p.x-r.x)/rx,dy=(p.y-r.y)/ry;
-      if(dx*dx+dy*dy<1)return true;
+      const rx=0.30+(r.size||.4)*.72, ry=0.22+(r.size||.4)*.52;
+      const t0=modelToTerrain(r.x-rx,r.y-ry), t1=modelToTerrain(r.x+rx,r.y+ry);
+      for(let ty=t0.ty;ty<=t1.ty;ty++)for(let tx=t0.tx;tx<=t1.tx;tx++){
+        const p=terrainToModel(tx,ty),dx=(p.x-r.x)/rx,dy=(p.y-r.y)/ry;
+        if(dx*dx+dy*dy<1)mask[terrainIdx(tx,ty)]=1;
+      }
     }
-    return false;
+    state._rockMask=mask;state._rockMaskKey=key;state._rockMaskRef=state.rocks;
+    return mask;
+  }
+  function rockBlocksTerrainCell(state,tx,ty){
+    if(tx<0||ty<0||tx>=TERRAIN_COLS||ty>=TERRAIN_ROWS)return false;
+    return rockMask(state)[terrainIdx(tx,ty)]===1;
   }
 
   function terrainSolidCell(state,tx,ty){
@@ -1798,6 +2188,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   function stepGranular(state,passes=1){
     if(!state.terrain)return 0;
+    // Skip the full scan when nothing has changed since sand last came to rest.
+    const stableKey=`${state.terrain.version}|${state._habitatVersion||0}|${state.rocks.length}`;
+    if(state._granularStableKey===stableKey&&state._granularStableRocks===state.rocks)return 0;
     const cells=state.terrain.cells;let moved=0;
     for(let pass=0;pass<passes;pass++){
       const leftFirst=((state.timeHours*4+pass)|0)%2===0;
@@ -1825,6 +2218,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     if(moved){
       state.terrain.version=(state.terrain.version||0)+1;
       syncPlantRoots(state);
+    }else{
+      state._granularStableKey=`${state.terrain.version}|${state._habitatVersion||0}|${state.rocks.length}`;
+      state._granularStableRocks=state.rocks;
     }
     return moved;
   }
@@ -2006,13 +2402,57 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     for (const group of groups) {
       group.algae/=group.cells; group.o2/=group.cells; group.detritus/=group.cells;
       const c=group.counts, capacity=group.cells*.30;
-      const load=c.fish*6 + c.snail*1.6 + c.scud*.75 + c.daphnia*.28;
+      const load=c.fish*4 + c.snail*1.6 + c.scud*.75 + c.daphnia*.28;
       group.pressure=Math.max(0,load-capacity)/capacity;
       const oxygenFactor=clamp((group.o2-2.5)/4.5,.15,1.15);
       // Carrying capacity scales with compartment volume, preserving open-tank tuning.
       group.daphCap=clamp((10+group.algae*42)*oxygenFactor,8,75)*group.cells/ZONE_COUNT;
     }
     return {groups, labels};
+  }
+
+  // Ingested organic matter: a fraction is egested as feces (detritus), a
+  // fraction is stored for growth and reproduction, and the rest is
+  // respired / excreted as CO2, ammonium and phosphate.
+  function ingest(state, animal, i, om) {
+    if (!(om > 0)) return;
+    const feces = om * PARAMS.egestion;
+    state.fields.detritus[i] += feces;
+    const assimilated = om - feces;
+    const room = Math.max(0, BODY_OM[animal.kind] * 2 - (animal.store || 0));
+    const stored = Math.min(room, assimilated * GROWTH_EFFICIENCY[animal.kind]);
+    animal.store = (animal.store || 0) + stored;
+    mineralize(state, i, assimilated - stored, 'animalRespiration');
+  }
+
+  function growJuvenile(animal, dt) {
+    const adult = BODY_OM[animal.kind];
+    if (!(animal.bodyOM < adult)) return;
+    // After maturity, growth uses only stores above a reproductive reserve.
+    const reserve = animal.age >= LIFE_HISTORY[animal.kind].maturity ? adult * BIRTH_FRACTION[animal.kind] * 1.5 : 0;
+    const g = Math.min(Math.max(0, (animal.store || 0) - reserve), adult - animal.bodyOM, adult * 0.004 * dt);
+    if (g <= 0) return;
+    animal.store -= g;
+    animal.bodyOM += g;
+    if (BIRTH_FRACTION[animal.kind] < 1) animal.size = (animal.adultSize || 1) * (0.6 + 0.4 * animal.bodyOM / adult);
+  }
+
+  // Minnows are omnivores: when hungry and not catching prey they graze
+  // algae/periphyton and detritus, which are less digestible than animal prey.
+  function fishGraze(state, animal, i, dt) {
+    const f = state.fields;
+    const a0 = Math.max(0, f.algae[i]), d0 = Math.max(0, f.detritus[i]);
+    if (a0 + d0 < 0.05) return false;
+    // Intake saturates with food concentration (type II response to food density).
+    const da = Math.min(a0, PARAMS.fishGraze * dt * a0 / (a0 + 0.10));
+    const dd = Math.min(d0, PARAMS.fishGraze * 0.7 * dt * d0 / (d0 + 0.10));
+    f.algae[i] -= da; f.detritus[i] -= dd;
+    const om = da * PARAMS.algaeOM + dd;
+    if (!(om > 0)) return false;
+    animal.energy = clamp(animal.energy + om * PARAMS.fishGrazeEnergy, 0, 1.25);
+    ingest(state, animal, i, om);
+    if (om > 0.0004 * dt) animal.lastAte = 0;
+    return true;
   }
 
   function stepAnimals(state, dt = 1) {
@@ -2030,6 +2470,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
     for (const animal of state.animals) {
       if (dead.has(animal.id) || eaten.has(animal.id)) continue;
+      if (animal.bodyOM == null) animal.bodyOM = BODY_OM[animal.kind];
+      if (animal.store == null) animal.store = BODY_OM[animal.kind] * 0.25;
       animal.age += dt;
       animal.lastAte += dt;
       animal.lastReproduced = (animal.lastReproduced ?? 1e9) + dt;
@@ -2043,13 +2485,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       const baseUse = animal.kind === 'fish' ? 0.00065 : animal.kind === 'snail' ? 0.00045 : animal.kind === 'scud' ? 0.00060 : 0.0009;
       const crowdPenalty = crowd.pressure * (animal.kind === 'fish' ? 0.007 : animal.kind === 'snail' ? 0.0045 : animal.kind === 'scud' ? 0.0040 : 0.0030);
       animal.energy -= (baseUse + stress.penalty + crowdPenalty) * dt;
-      const animalResp = baseUse * 0.18 * dt;
-      const beforeAnimalO2 = state.fields.o2[i];
-      state.fields.o2[i] = clamp(beforeAnimalO2 - animalResp, ...LIMITS.o2);
-      recordOxygen(state,i,'animalRespiration',-animalResp);
-      recordOxygen(state,i,'bounds',state.fields.o2[i]-(beforeAnimalO2-animalResp));
-      state.fields.co2[i] = clamp(state.fields.co2[i] + baseUse * 0.15 * dt, ...LIMITS.co2);
-      state.fields.nh3[i] = clamp(state.fields.nh3[i] + baseUse * 0.018 * dt, ...LIMITS.nh3);
+      // Maintenance metabolism burns stored organic matter, releasing CO2,
+      // ammonium and phosphate; juveniles grow from the same store.
+      const burn = Math.min(animal.store, baseUse * 0.06 * dt);
+      if (burn > 0) { animal.store -= burn; mineralize(state, i, burn, 'animalRespiration'); }
+      growJuvenile(animal, dt);
 
       if (animal.kind === 'fish') {
         const localO2 = state.fields.o2[i];
@@ -2078,10 +2518,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           // Fish alternate between feeding and purposeful cruising. The old
           // model had no horizontal cruise target, which could leave a fish
           // pressed against a wall while it only corrected depth.
-          const eligibleDaphnia = Math.max(0, countsAtStart.daphnia - crowd.consumed.daphnia - 6);
-          const eligibleScuds = Math.max(0, countsAtStart.scud - crowd.consumed.scud - 3);
+          // A few prey per compartment are protected in refuges; the rest are
+          // available to minnows through a Holling type II functional response.
+          const eligibleDaphnia = Math.max(0, countsAtStart.daphnia - crowd.consumed.daphnia - PARAMS.daphniaRefuge);
+          const eligibleScuds = Math.max(0, countsAtStart.scud - crowd.consumed.scud - PARAMS.scudRefuge);
           const eligiblePrey = eligibleDaphnia + eligibleScuds;
-          const hungryEnough = animal.lastAte >= 24 || animal.energy < 0.62;
+          // Appetite reflects both energy and body reserves: a full but small
+          // or reserve-poor fish keeps feeding to grow and to provision eggs.
+          const reserveTarget = animal.bodyOM < BODY_OM.fish ? BODY_OM.fish * 0.5 : BODY_OM.fish * BIRTH_FRACTION.fish * 2;
+          const reserveHunger = clamp(1 - (animal.store || 0) / reserveTarget, 0, 1) * 0.6;
+          const hunger = Math.max(clamp((1.15 - animal.energy) / 0.55, 0, 1), reserveHunger);
+          const hungryEnough = hunger > 0.15 || animal.lastAte >= 24;
           const prey = hungryEnough && eligiblePrey > 0
             ? nearestPrey(state, animal, 5.2, eligibleDaphnia > 0, eligibleScuds > 0, eaten, dead)
             : null;
@@ -2089,20 +2536,28 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           if (prey) {
             behavior = `hunting ${prey.animal.kind === 'scud' ? 'scud' : 'Daphnia'}`;
             moveFishTowardNavigable(state,animal,prey.animal.x,prey.animal.y,0.075);
-            const huntChance = eligiblePrey <= 5 ? 0.018 : eligiblePrey <= 12 ? 0.050 : 0.10;
+            // Holling type II: intake = aN / (1 + a h N), N = prey per zone.
+            const density = eligiblePrey / Math.max(1, crowd.cells);
+            const intake = PARAMS.attackRate * density / (1 + PARAMS.attackRate * PARAMS.handlingTime * density);
+            animal.lastIntakeRate = intake;
             const refugeFactor = 1 - 0.78 * clamp(prey.shelter || 0, 0, 1);
             if ((prey.shelter || 0) > 0.55) behavior = `probing ${prey.animal.kind === 'scud' ? 'scud' : 'Daphnia'} refuge`;
-            if (prey.distance < 0.95 && rng() < huntChance * refugeFactor * dt) {
+            if (prey.distance < 3.0 && rng() < intake * hunger * refugeFactor * dt) {
               eaten.add(prey.animal.id);
               crowd.consumed[prey.animal.kind]++;
               animal.energy = clamp(animal.energy + (prey.animal.kind === 'scud' ? 0.14 : 0.11), 0, 1.25);
               animal.lastAte = 0;
+              ingest(state, animal, i, (prey.animal.bodyOM ?? BODY_OM[prey.animal.kind]) + (prey.animal.store || 0));
               const preyName = prey.animal.kind === 'scud' ? 'scud' : 'Daphnia';
               addEvent(state, `A minnow ate a ${preyName}.`, 'action', {
                 x: prey.animal.x, y: prey.animal.y, popup: `${preyName} eaten by minnow`
               });
+            } else if (hunger > 0.3) {
+              // Searching minnows also pick at algae and detritus they pass.
+              fishGraze(state, animal, i, dt);
             }
           } else {
+            if (hungryEnough && fishGraze(state, animal, i, dt)) behavior = 'grazing algae / detritus';
             const dark = effectiveSurfaceLight(state) < 0.045;
             const restingCover = !hungryEnough && dark ? nearestShelter(state, animal, 4.5) : null;
             if (restingCover && restingCover.score > 0.18) {
@@ -2116,7 +2571,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
               if(target.kind!=='shelter')moveToward(animal, animal.x, ROWS * 0.46, 0.006);
               const school = localFishCenter(state, animal);
               if (school && target.kind!=='shelter') moveToward(animal, school.x, school.y, 0.006);
-              behavior = hungryEnough ? 'searching for prey' : target.kind==='shelter'?'exploring shelter':'cruising';
+              if (!behavior.startsWith('grazing')) behavior = hungryEnough ? 'searching for prey' : target.kind==='shelter'?'exploring shelter':'cruising';
             }
           }
         }
@@ -2137,7 +2592,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
                 tissue.plant.biomass = clamp(tissue.plant.biomass - bite, 0, 1.35);
                 tissue.plant.grazingDamage = clamp((tissue.plant.grazingDamage || 0) + bite * 5.0, 0, 1);
                 const zi = zoneAt(tissue.plant.x, tissue.plant.y);
-                state.fields.detritus[zi] = clamp(state.fields.detritus[zi] + bite * 0.20, ...LIMITS.detritus);
+                ingest(state, animal, zi, bite * PARAMS.plantOM);
                 animal.energy = clamp(animal.energy + bite * 22, 0, 1.2);
                 animal.lastAte = 0;
                 fed = true;
@@ -2150,19 +2605,29 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         if (food) {
           moveToward(animal, food.x, food.y, animal.kind === 'snail' ? 0.025 : animal.kind === 'scud' ? 0.035 : 0.05);
           const d = Math.hypot(food.x - animal.x, food.y - animal.y);
-          if (d < 0.5 && food.value > 0.03) {
-            if (animal.kind === 'snail') {
-              state.fields.algae[food.i] = clamp(state.fields.algae[food.i] - 0.0055 * dt, ...LIMITS.algae);
-              state.fields.detritus[food.i] = clamp(state.fields.detritus[food.i] - 0.0045 * dt, ...LIMITS.detritus);
-              animal.energy = clamp(animal.energy + 0.028 * dt, 0, 1.2);
-            } else if (animal.kind === 'scud') {
-              state.fields.algae[food.i] = clamp(state.fields.algae[food.i] - 0.0030 * dt, ...LIMITS.algae);
-              state.fields.detritus[food.i] = clamp(state.fields.detritus[food.i] - 0.0060 * dt, ...LIMITS.detritus);
-              animal.energy = clamp(animal.energy + 0.022 * dt, 0, 1.2);
-            } else {
-              state.fields.algae[food.i] = clamp(state.fields.algae[food.i] - 0.0042 * dt, ...LIMITS.algae);
-              animal.energy = clamp(animal.energy + 0.014 * dt, 0, 1.2);
-            }
+          // Grazers feed on the zone they occupy (periphyton, settled detritus,
+          // suspended algae) while moving toward richer patches. Previously
+          // they ate only within 0.5 of a zone centre, so benthic snails held
+          // down by their substrate preference rarely fed at all.
+          const here = zoneAt(animal.x, animal.y);
+          const hereValue = animal.kind === 'daphnia' ? state.fields.algae[here]
+            : state.fields.algae[here] + state.fields.detritus[here] * (animal.kind === 'scud' ? 1.05 : 0.8);
+          const fi = d < 0.5 && food.value > 0.03 ? food.i : hereValue > 0.005 ? here : -1;
+          if (fi >= 0) {
+            food.i = fi;
+            // [algae, detritus, energy] per hour. Energy scales with what was
+            // actually eaten; eaten matter is egested, stored or mineralized.
+            const rates = animal.kind === 'snail' ? [0.0055, 0.0045, 0.028]
+              : animal.kind === 'scud' ? [0.0030, 0.0060, 0.022] : [0.0042, 0, 0.014];
+            // Intake saturates with food concentration (Holling type II, K = 0.1).
+            const a0 = Math.max(0, state.fields.algae[food.i]), d0 = Math.max(0, state.fields.detritus[food.i]);
+            const da = Math.min(a0, rates[0] * dt * a0 / (a0 + PARAMS.grazerK));
+            const dd = Math.min(d0, rates[1] * dt * d0 / (d0 + PARAMS.grazerK));
+            state.fields.algae[food.i] -= da;
+            state.fields.detritus[food.i] -= dd;
+            const share = (da + dd) / Math.max(1e-9, (rates[0] + rates[1]) * dt);
+            animal.energy = clamp(animal.energy + rates[2] * share * dt, 0, 1.2);
+            ingest(state, animal, food.i, da * PARAMS.algaeOM + dd);
             animal.lastAte = 0;
           }
         }
@@ -2171,7 +2636,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           const predator = state.animals.find(a => a.kind === 'fish' &&
             chemistryCompartmentAt(state,a.x,a.y).id===myComp &&
             Math.hypot(a.x - animal.x, a.y - animal.y) < 2.5);
-          if (predator) {
+          // Risk-sensitive foraging (Lima & Dill 1990): well-fed prey hide from
+          // predators, but hungry prey accept more risk to keep feeding.
+          if (predator && animal.energy < PARAMS.riskForagingEnergy) animal.behavior = 'risk-foraging near fish';
+          else if (predator) {
             const cover = nearestShelter(state, animal, 3.6);
             if (cover && cover.score > 0.16) {
               moveToward(animal, cover.x, cover.y, 0.105);
@@ -2191,7 +2659,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           const predator = state.animals.find(a => a.kind === 'fish' &&
             chemistryCompartmentAt(state,a.x,a.y).id===myComp &&
             Math.hypot(a.x - animal.x, a.y - animal.y) < 2.3);
-          if (predator) {
+          if (predator && animal.energy < PARAMS.riskForagingEnergy) animal.behavior = 'risk-foraging near fish';
+          else if (predator) {
             const cover = nearestShelter(state, animal, 3.8);
             if (cover && cover.score > 0.12) {
               moveToward(animal, cover.x, cover.y, 0.080);
@@ -2224,7 +2693,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       animal.vx += (rng() - 0.5) * noise;
       animal.vy += (rng() - 0.5) * noise;
       if (animal.kind === 'snail' && !String(animal.behavior||'').includes('higher O₂'))
-        animal.vy += (ROWS - 1.3 - animal.y) * 0.02;
+        // Snails prefer the substrate but, when hungry, climb plants and glass
+        // to graze periphyton higher in the water column.
+        animal.vy += (ROWS - 1.3 - animal.y) * (animal.energy > 0.6 ? 0.02 : 0.004);
       const speed = animal.kind === 'fish' ? 0.32 : animal.kind === 'daphnia' ? 0.22 : animal.kind === 'scud' ? 0.16 : 0.10;
       animal.vx = clamp(animal.vx, -speed, speed);
       animal.vy = clamp(animal.vy, -speed, speed);
@@ -2261,14 +2732,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       // a synchronized hard die-off at one exact age.
       const ageRatio = animal.age / life;
       const senescenceRisk = ageRatio > 0.82 ? Math.pow((ageRatio - 0.82) / 0.18, 3) * 0.020 * dt : 0;
-      if (animal.energy <= 0 || ageRatio >= 1.08 || rng() < senescenceRisk) {
+      // Starvation is a rising hazard in poor body condition, so the weakest
+      // individuals die first and survivors gain food. A hard threshold made
+      // equally starved cohorts die together.
+      const starvationRisk = animal.energy < 0.25 ? 0.006 * Math.pow((0.25 - animal.energy) / 0.25, 2) * dt : 0;
+      // Background (disease, injury) mortality keeps age structure mixed.
+      const backgroundRisk = (LIFE_HISTORY[animal.kind].backgroundMortality || 0) * dt;
+      if (animal.energy <= 0 || ageRatio >= 1.08 || rng() < senescenceRisk || rng() < starvationRisk || rng() < backgroundRisk) {
         dead.add(animal.id);
         const deathReason = animal.status || 'energy depletion';
         if (animal.kind === 'fish') {
           createMinnowCarcass(state, animal, deathReason, true);
         } else {
           const zi = zoneAt(animal.x, animal.y);
-          state.fields.detritus[zi] = clamp(state.fields.detritus[zi] + 0.06, ...LIMITS.detritus);
+          state.fields.detritus[zi] += animal.bodyOM + (animal.store || 0);
           const deathName = animal.kind === 'daphnia' ? 'Daphnia' : animal.kind === 'scud' ? 'Scud' : 'Snail';
           addEvent(state, `${deathName} died: ${deathReason}.`, 'warning', {
             x: animal.x, y: animal.y, popup: `${deathName} died`
@@ -2293,13 +2770,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         canReproduce = canReproduce && countsAtStart.daphnia < daphCap;
       } else if (animal.kind === 'snail') {
         const foodFactor = clamp((crowd.algae + crowd.detritus * 0.6 - 0.04) / 0.20, 0, 1);
-        chance *= foodFactor;
-        canReproduce = canReproduce && countsAtStart.snail >= 2 && countsAtStart.snail < 10;
+        // Logistic-style crowding instead of a hard ceiling, so births keep
+        // pace with deaths and age cohorts overlap.
+        chance *= foodFactor * clamp(1 - countsAtStart.snail / PARAMS.snailCapacity, 0, 1);
+        canReproduce = canReproduce && countsAtStart.snail >= 2;
       } else if (animal.kind === 'scud') {
         const plantBiomass = crowd.plantBiomass;
         const foodFactor = clamp((crowd.detritus * 0.9 + crowd.algae * 0.7 + plantBiomass * 0.012 - 0.035) / 0.18, 0, 1);
-        chance *= foodFactor;
-        canReproduce = canReproduce && countsAtStart.scud >= 2 && countsAtStart.scud < 24;
+        chance *= foodFactor * clamp(1 - countsAtStart.scud / PARAMS.scudCapacity, 0, 1);
+        canReproduce = canReproduce && countsAtStart.scud >= 2;
       } else if (animal.kind === 'fish') {
         const preyFactor = clamp((countsAtStart.daphnia - 8) / 18, 0, 1);
         chance *= preyFactor;
@@ -2309,6 +2788,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
                        (!state._lastFishBirth || state.timeHours - state._lastFishBirth >= 240);
       }
 
+      const newbornOM = BODY_OM[animal.kind] * BIRTH_FRACTION[animal.kind];
+      if (animal.kind !== 'fish') canReproduce = canReproduce && animal.store >= newbornOM;
       animal.reproProgress = animal.reproProgress ?? 0;
       if (canReproduce) {
         // Reproductive readiness accumulates gradually under good conditions.
@@ -2324,6 +2805,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         animal.lastReproduced = 0;
         animal.reproProgress -= 1;
         const newborn = createAnimal(animal.kind, animal.x, animal.y, rng, true);
+        animal.store -= newborn.bodyOM;
         births.push(newborn);
         if (animal.kind === 'fish') state._lastFishBirth = state.timeHours;
       }
@@ -2342,14 +2824,23 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
         births.filter(a => a.kind==='daphnia' && ecology.labels[zoneAt(a.x,a.y)]===compartment).length;
       const energy=mature.length ? mature.reduce((sum,a)=>sum+a.energy,0)/mature.length : 0;
       const spawning=state._fishSpawning[compartment] ||= {progress:0,lastBirth:null};
-      if (mature.length>=2 && fish.length<3 && prey>=12 && energy>=.48 && crowd.pressure<.45) {
-        spawning.progress+=.0030*clamp((prey-8)/18,0,1)*dt;
-      } else spawning.progress=Math.max(0,spawning.progress-.00012*dt);
-      if (spawning.progress>=1 && (spawning.lastBirth===null || state.timeHours-spawning.lastBirth>=720) &&
-          mature.length>=2 && fish.length<3 && prey>=12 && energy>=.48 && crowd.pressure<.45) {
-        const [a,b]=mature;
+      // Spawning depends on food (prey plus algal/detrital forage), body
+      // condition and stored organic matter that provisions the fry.
+      const fryOM=BODY_OM.fish*BIRTH_FRACTION.fish;
+      const pair=mature.slice().sort((p,q)=>q.energy-p.energy).slice(0,2);
+      const pairStore=pair.reduce((sum,a)=>sum+(a.store||0),0);
+      const foodIndex=clamp((prey-4)/14,0,1)*.6+clamp(crowd.algae/.3,0,1)*.4;
+      const pairEnergy=pair.length===2?Math.min(pair[0].energy,pair[1].energy):0;
+      const ready=mature.length>=2 && fish.length<PARAMS.fishMax && pairEnergy>=PARAMS.spawnEnergy && crowd.pressure<.45 && pairStore>=fryOM;
+      if (ready) spawning.progress+=.0030*foodIndex*dt;
+      else spawning.progress=Math.max(0,spawning.progress-.00012*dt);
+      if (spawning.progress>=1 && (spawning.lastBirth===null || state.timeHours-spawning.lastBirth>=480) && ready) {
+        const [a,b]=pair;
         a.energy=Math.max(.15,a.energy-.05); b.energy=Math.max(.15,b.energy-.05);
-        births.push(createAnimal('fish',a.x,a.y,rng,true));
+        const fry=createAnimal('fish',a.x,a.y,rng,true);
+        const fromA=Math.min(a.store,fry.bodyOM*(a.store/pairStore));
+        a.store-=fromA; b.store-=fry.bodyOM-fromA;
+        births.push(fry);
         spawning.progress-=1; spawning.lastBirth=state.timeHours;
       }
     }
@@ -2372,7 +2863,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
 
     state.animals.push(...births);
-    if (state.animals.length > 260) state.animals.length = 260;
+    if (state.animals.length > 260) {
+      for (const a of state.animals.slice(260)) state.fields.detritus[zoneAt(a.x,a.y)] += a.bodyOM + (a.store || 0);
+      state.animals.length = 260;
+    }
   }
 
   function summaries(state) {
@@ -2384,6 +2878,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       nh3: mean(state.fields.nh3),
       no2: mean(state.fields.no2),
       no3: mean(state.fields.no3),
+      po4: mean(state.fields.po4 || blankField(PARAMS.po4Init)),
+      nh3u: mean(state.fields.nh3) * unionizedFraction(state.settings.temperatureC, state.settings.pH),
+      sedimentP: (state.sediment?.p || []).reduce((a, b) => a + b, 0) / COLS,
+      limitingNutrient: limitingNutrient(mean(state.fields.no3) + mean(state.fields.nh3), mean(state.fields.po4 || blankField(PARAMS.po4Init))),
       algae: mean(state.fields.algae),
       bacteria: mean(state.fields.bacteria),
       detritus: mean(state.fields.detritus),
@@ -2412,7 +2910,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const s = summariesCore(state);
     let score = 100;
     score -= Math.max(0, 5 - s.o2) * 10;
-    score -= Math.max(0, s.nh3 - 0.5) * 28;
+    score -= Math.max(0, s.nh3u - PARAMS.nh3uChronic) * 400;
     score -= Math.max(0, s.no2 - 0.5) * 20;
     score -= Math.max(0, s.no3 - 25) * 0.9;
     score -= Math.max(0, s.co2 - 15) * 2.5;
@@ -2428,6 +2926,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       nh3: mean(state.fields.nh3),
       no2: mean(state.fields.no2),
       no3: mean(state.fields.no3),
+      nh3u: mean(state.fields.nh3) * unionizedFraction(state.settings.temperatureC, state.settings.pH),
     };
   }
 
@@ -2475,8 +2974,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function stepInterval(state, dt) {
+    ensureNutrientState(state);
+    if (!state.ledger) resetLedger(state);
+    const ledger = state.ledger;
+    const before = massPools(state).totals;
+    // Anything that changed since the last step was done by the user
+    // (adding organisms, food, harvesting plants, editing habitat).
+    for (const e of ['C','N','P']) ledger.cumulative[e].user += before[e] - ledger.last[e];
+    const flux = state._ledgerFlux = blankFlux();
     beginOxygenBudget(state,dt);
-    syncPlantRoots(state);
+    const rootKey = `${state.terrain?.version}|${state._habitatVersion||0}|${state.rocks.length}|${state.plants.length}`;
+    if (state._rootKey !== rootKey) { syncPlantRoots(state); state._rootKey = rootKey; }
     stepPlants(state, dt);
     stepChemistry(state, dt);
     stepAnimals(state, dt);
@@ -2484,11 +2992,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     stepSand(state, 2);
     state.timeHours += dt;
     state.oxygenBudget.endO2=state.fields.o2.slice();
+    const after = massPools(state).totals;
+    for (const e of ['C','N','P']) {
+      const c = ledger.cumulative[e];
+      c.atmosphere += flux[e].atmosphere;
+      c.bounds += flux[e].bounds;
+      c.residual += (after[e] - before[e]) - flux[e].atmosphere - flux[e].bounds;
+    }
+    ledger.last = { ...after };
+    state._ledgerFlux = null;
 
     const s = summariesCore(state);
     const prev = state._lastSummary || s;
     if (prev.o2 >= 4 && s.o2 < 4) addEvent(state, 'Average dissolved oxygen entered a low-oxygen range.', 'warning');
-    if (prev.nh3 <= 0.5 && s.nh3 > 0.5) addEvent(state, 'Average ammonia rose above the model comfort range.', 'warning');
+    if (prev.nh3u <= PARAMS.nh3uChronic && s.nh3u > PARAMS.nh3uChronic) addEvent(state, 'Un-ionized ammonia (NH₃) reached levels that stress animals. Higher pH and temperature make the same total ammonia more toxic.', 'warning');
     if (prev.no3 <= 20 && s.no3 > 20) addEvent(state, 'Nitrate accumulation is becoming substantial.', 'info');
     state._lastSummary = s;
     return state;
@@ -2579,6 +3096,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function stepPlants(state,dt=1){
     if(!state.plants.length)return;
     const daughters=[];
+    const deadPlants=[];
     const maxPlants=90;
 
     for(const p of state.plants){
@@ -2592,17 +3110,40 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       p.localLight=leafLight;
       p.lightFactor=lightInfo.factor;
       p.shadeClass=lightInfo.shadeClass;
-      const rootI=zoneAt(p.x,p.y);
-      const nutrient=clamp((state.fields.no3[rootI]+state.fields.nh3[rootI]*4)/8,0,1.25);
-      const lightScore=clamp(leafLight/.18,0,1.25);
+      const rootI=zoneAt(p.x,p.y), midI=zoneAt(p.x,midY);
+      const f=state.fields;
+      // Rooted macrophytes take N and P from the root zone (Monod, Liebig
+      // minimum) and use the same saturating light curve as algae.
+      const nutrient=nutrientLimitation(f.no3[rootI]+f.nh3[rootI],f.po4[rootI]);
+      p.limitingNutrient=limitingNutrient(f.no3[rootI]+f.nh3[rootI],f.po4[rootI]);
+      const lightScore=clamp(lightResponse(leafLight)/.18,0,1.25);
       const resource=clamp(lightScore*nutrient,0,1.35);
       const room=clamp((1.36-p.biomass)/.70,0,1);
       const lowResource=Math.max(0,.18-resource);
 
       const oldBiomass=p.biomass;
-      const growth=(.00155*Math.max(0,resource-.16)*room-.00055*lowResource)*dt;
-      p.biomass=clamp(p.biomass+growth,.12,1.35);
+      const temp=state.settings.temperatureC;
+      // Tissue turnover (sloughing) and heat stress return plant matter to detritus.
+      const heat=Math.max(0,temp-PARAMS.plantHeatStressC)*0.0015;
+      const sloughed=Math.min(p.biomass,(PARAMS.plantTurnover+heat)*p.biomass*dt);
+      // Gross photosynthesis (daytime) builds tissue from CO2 in the leaf zone
+      // and DIN + phosphate from the root zone, releasing O2. Maintenance
+      // respiration continues day and night. Space/self-shading slows growth
+      // in large plants.
+      const gross=PARAMS.plantMaxGrowth*resource*room*dt;
+      const grown=assimilate(state,rootI,gross*PARAMS.plantOM,midI,true)/PARAMS.plantOM;
+      const respired=Math.min(Math.max(0,p.biomass+grown-sloughed),PARAMS.plantResp*p.biomass*Math.pow(2,(temp-20)/10)*dt);
+      p.biomass=p.biomass+grown-sloughed-respired;
+      f.detritus[midI]+=sloughed*PARAMS.plantOM;
+      mineralize(state,midI,respired*PARAMS.plantOM,'producerRespiration');
       p.growthRate=dt>0?(p.biomass-oldBiomass)/dt:0;
+      p.heatStressed=heat>0;
+
+      // Stress-driven die-off: a plant that stays below the threshold dies,
+      // and all of its tissue becomes detritus that bacteria must decompose.
+      if(p.biomass<PARAMS.plantDeathBiomass)p.lowHours=(p.lowHours||0)+dt;
+      else p.lowHours=Math.max(0,(p.lowHours||0)-dt*.5);
+      if(p.lowHours>=PARAMS.plantDeathHours){deadPlants.push(p);continue;}
       p.grazingDamage=Math.max(0,(p.grazingDamage||0)-.0016*resource*dt);
 
       // As biomass accumulates, natural-height plants become visibly larger.
@@ -2625,15 +3166,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
       // Grass and ribbon forms can spread clonally. The daughter begins small,
       // must find real substrate, and local crowding suppresses spread.
-      const spreads=p.type==='grass'||p.type==='ribbon';
-      const mature=p.ageHours>(p.type==='grass'?96:180);
-      const strong=p.biomass>(p.type==='grass'?.92:1.02);
-      const cooldown=state.timeHours-p.lastSpread>(p.type==='grass'?96:180);
+      // Grass and ribbon plants spread by runners; stem plants by rooting fragments.
+      const spreads=true;
+      const mature=p.ageHours>(p.type==='grass'?96:p.type==='stem'?240:180);
+      const strong=p.biomass>(p.type==='grass'?.92:p.type==='stem'?1.10:1.02);
+      const cooldown=state.timeHours-p.lastSpread>(p.type==='grass'?96:p.type==='stem'?240:180);
       if(spreads&&mature&&strong&&cooldown&&resource>.58&&
          state.plants.length+daughters.length<maxPlants){
         const local=state.plants.filter(q=>Math.hypot(q.x-p.x,q.y-p.y)<1.8).length+
                     daughters.filter(q=>Math.hypot(q.x-p.x,q.y-p.y)<1.8).length;
-        const chance=(p.type==='grass'?.00135:.00070)*resource*dt*Math.max(.15,1-local/7);
+        const chance=(p.type==='grass'?.00135:p.type==='stem'?.00045:.00070)*resource*dt*Math.max(.15,1-local/7);
         if(local<7 && state.rng()<chance){
           const side=state.rng()<.5?-1:1;
           const nx=clamp(p.x+side*(.48+state.rng()*.72),.25,COLS-.25);
@@ -2641,25 +3183,45 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
           const referenceY=clamp(parentTop+(p.y-parentTop)*.45,.20,ROWS-.35);
           const support=findPlantSupport(state,nx,referenceY);
           if(support && chemistryCompartmentAt(state,nx,support.y).id===chemistryCompartmentAt(state,p.x,p.y).id){
-            const child=createPlant(p.type,nx,support.y,.24+state.rng()*.10,state.rng,null);
+            // The daughter's tissue comes from the parent (clonal ramet).
+            const childBiomass=.20+state.rng()*.06;
+            const child=createPlant(p.type,nx,support.y,childBiomass,state.rng,null);
+            child.biomass=childBiomass;
             child.rootMaterial=support.material;
             child.rootSearchY=support.searchY;
             child.cavityTopY=support.cavityTopY;
             child.ageHours=0;
             daughters.push(child);
-            p.biomass=clamp(p.biomass-.055,.12,1.35);
+            p.biomass-=childBiomass;
             p.lastSpread=state.timeHours;
             addEvent(state,
-              p.type==='grass'?'A grass clump spread vegetatively.':'A ribbon plant produced a daughter shoot.',
-              'birth',{x:child.x,y:child.y,popup:p.type==='grass'?'New grass clump':'New ribbon shoot'}
+              p.type==='grass'?'A grass clump spread vegetatively.':p.type==='stem'?'A stem-plant fragment rooted nearby.':'A ribbon plant produced a daughter shoot.',
+              'birth',{x:child.x,y:child.y,popup:p.type==='grass'?'New grass clump':p.type==='stem'?'New stem fragment':'New ribbon shoot'}
             );
           }
         }
       }
     }
 
+    if(deadPlants.length){
+      const gone=new Set(deadPlants);
+      for(const p of deadPlants){
+        const h=p.heightCells||plantProfile(p.type).height;
+        const cells=[];
+        for(let yy=Math.floor(Math.max(0,p.y-h));yy<=Math.floor(Math.min(ROWS-1,p.y));yy++)cells.push(zoneAt(p.x,yy));
+        const share=p.biomass*PARAMS.plantOM/Math.max(1,cells.length);
+        for(const ci of cells)state.fields.detritus[ci]+=share;
+        const name=plantProfile(p.type).label;
+        const cause=p.heatStressed?'heat stress':p.shadeClass!=='open'?'low light (shade)':state.settings.turbidityPercent>45?'low light (turbidity)':'insufficient light or nutrients';
+        addEvent(state,`A ${name.toLowerCase()} died back (${cause}). Its tissue became detritus, adding oxygen demand.`,'warning',{x:p.x,y:p.y-h*.5,popup:'Plant died back'});
+      }
+      state.plants=state.plants.filter(p=>!gone.has(p));
+    }
     if(daughters.length)state.plants.push(...daughters);
-    if(state.plants.length>maxPlants)state.plants.length=maxPlants;
+    if(state.plants.length>maxPlants){
+      for(const p of state.plants.slice(maxPlants))state.fields.detritus[zoneAt(p.x,p.y)]+=p.biomass*PARAMS.plantOM;
+      state.plants.length=maxPlants;
+    }
   }
 
   function addPatch(state, type, x, y, strength = 0.25) {
@@ -2681,11 +3243,19 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   function applyDisturbance(state, type, hidden = false) {
     const rng = state.rng;
     if (type === 'runoff') {
+      ensureNutrientState(state);
+      let addedN = 0, addedP = 0;
       for (let x = 0; x < COLS; x++) {
         const i = idx(x, 0);
+        const n0 = state.fields.no3[i] + state.fields.nh3[i], p0 = state.fields.po4[i];
         state.fields.no3[i] = clamp(state.fields.no3[i] + 8, ...LIMITS.no3);
         state.fields.nh3[i] = clamp(state.fields.nh3[i] + 0.18, ...LIMITS.nh3);
+        // Agricultural runoff carries phosphate as well as nitrogen.
+        state.fields.po4[i] = clamp(state.fields.po4[i] + 0.10, ...LIMITS.po4);
+        addedN += state.fields.no3[i] + state.fields.nh3[i] - n0;
+        addedP += state.fields.po4[i] - p0;
       }
+      ledgerExternal(state, 'runoff', 0, addedN, addedP);
       state.flags.runoffUsed = true; state.flags.runoffTime = state.timeHours;
       if (!hidden) addEvent(state, 'Nutrient runoff entered the surface water.', 'disturbance');
     }
@@ -2707,11 +3277,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     }
     if (type === 'pesticide') {
       state.animals = state.animals.filter(a => {
-        if (a.kind === 'daphnia') return rng() > 0.55;
-        if (a.kind === 'snail') return rng() > 0.25;
-        return true;
+        const survives = a.kind === 'daphnia' ? rng() > 0.55 : a.kind === 'snail' ? rng() > 0.25 : true;
+        if (!survives) state.fields.detritus[zoneAt(a.x, a.y)] += (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0);
+        return survives;
       });
-      for (let i = 0; i < ZONE_COUNT; i++) state.fields.detritus[i] = clamp(state.fields.detritus[i] + 0.015, ...LIMITS.detritus);
       if (!hidden) addEvent(state, 'Pesticide pulse reduced sensitive invertebrates.', 'disturbance');
     }
     if (type === 'fishkill') {
@@ -2780,6 +3349,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       indirectLight: lightInfo.indirect,
       shadeClass: lightInfo.shadeClass,
       o2: state.fields.o2[zi], co2: state.fields.co2[zi], nh3: state.fields.nh3[zi], no2: state.fields.no2[zi], no3: state.fields.no3[zi],
+      po4: state.fields.po4 ? state.fields.po4[zi] : PARAMS.po4Init,
+      nh3u: state.fields.nh3[zi] * unionizedFraction(state.settings.temperatureC, state.settings.pH),
+      limitingNutrient: limitingNutrient(state.fields.no3[zi] + state.fields.nh3[zi], state.fields.po4 ? state.fields.po4[zi] : PARAMS.po4Init),
+      sedimentP: state.sediment ? state.sediment.p[clamp(Math.floor(x), 0, COLS - 1)] : 0,
       algae: state.fields.algae[zi], bacteria: state.fields.bacteria[zi], detritus: state.fields.detritus[zi], nearby, nearbyPlants,
       nearbyCarcasses: (state.carcasses || []).filter(sameCompartment).filter(c => Math.hypot(c.x - x, c.y - y) < 2.0).map(c => ({ mass:c.mass, age:c.age, settled:c.settled })),
       habitatStructure: habitatStructureAt(state, x, y),
@@ -2804,6 +3377,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       if (isSL) return 'Dissolved oxygen is low. Explain the pattern using photosynthesis, respiration, and decomposition, and support your explanation with quantitative evidence from at least two variables.';
       return 'Dissolved oxygen is low. Trace the process-level chain through respiration, decomposition, nitrification, oxygen saturation, and spatial gradients. Evaluate which mechanism is best supported by the data.';
     }
+    if (s.nh3u > PARAMS.nh3uChronic) {
+      if (isIntegrated) return 'Toxic ammonia (NH₃) is rising. Check the pH and temperature sliders: warmer, more alkaline water turns more ammonium into toxic ammonia.';
+      if (isAdvanced) return 'Un-ionized ammonia is above the stress threshold. Compare total ammonia with the un-ionized fraction, and predict how lowering pH would change animal stress without changing total ammonia.';
+      if (isSL) return 'Un-ionized NH₃ is stressing animals. Explain why the same total ammonia is more toxic at higher pH and temperature, and identify the source of the ammonia using carcass, detritus and nitrification data.';
+      return 'Un-ionized NH₃ exceeds the chronic threshold. Evaluate the NH₄⁺ ⇌ NH₃ equilibrium (pKa ≈ 9.3 at 22 °C) alongside ammonification and nitrification rates. Which lever—pH, temperature or source reduction—would most quickly reduce toxicity?';
+    }
+    if (s.algae > 0.45 || s.po4 > 0.04) {
+      if (isIntegrated) return 'Algae are blooming. Predict what will happen to oxygen at night and after the algae die.';
+      if (isAdvanced) return 'A bloom is developing. Use phosphate, algae and oxygen graphs to explain the sequence from nutrient input to producer growth, and predict the delayed effect on oxygen.';
+      if (isSL) return 'Algal biomass or phosphate is high. Identify the limiting nutrient (probe card), explain why adding that nutrient caused growth, and predict how decomposition of the bloom will affect O₂.';
+      return 'Eutrophication is under way. Evaluate internal phosphorus loading: if bottom water becomes hypoxic, sediment releases phosphate. Probe the benthic zone and test whether a positive feedback is developing.';
+    }
     if (s.nh3 > 0.5) {
       if (isIntegrated) return 'Ammonia is increasing. What source of waste or decay could be adding it, and what other measurement should change next?';
       if (isAdvanced) return 'Ammonia is accumulating. Compare waste/decomposition with bacterial processing. Predict what should happen to nitrite and oxygen if nitrification increases.';
@@ -2821,6 +3406,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       if (isAdvanced) return 'It is night. Predict the direction of O₂ and CO₂ change and explain why respiration continues while photosynthesis falls.';
       if (isSL) return 'It is night. Predict O₂ and CO₂ trends, then compare the graph with your prediction and explain any lag between the variables.';
       return 'It is night. Analyze how respiration, vertical oxygen gradients, and temperature-dependent oxygen saturation may interact before dawn.';
+    }
+    if (s.no3 > 20 && s.limitingNutrient === 'phosphorus') {
+      if (isIntegrated) return 'Nitrate is high, but algae are not growing much. Something else is limiting growth—check phosphate on the probe card.';
+      if (isAdvanced) return 'Nitrate is high but phosphorus is limiting producers. Predict what would happen if phosphate were added instead of more nitrogen.';
+      if (isSL) return 'Nitrate is high yet producers are phosphorus-limited (Liebig’s law of the minimum). Design a test that adds one nutrient at a time and predict the response of each.';
+      return 'Nitrate accumulates because phosphorus limits uptake. Use Monod kinetics to explain why adding more N has little effect, and evaluate what N:P ratio would switch the limiting nutrient.';
     }
     if (s.no3 > 20) {
       if (isIntegrated) return 'Nitrate is high. Predict what may happen to algae first and what could happen to oxygen later.';
@@ -2840,7 +3431,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   global.EcoEngine = {
-    COLS, ROWS, LIMITS, PLANT_TYPES,
+    COLS, ROWS, LIMITS, PLANT_TYPES, PARAMS, PARAM_INFO, BODY_OM, LIFE_HISTORY,
+    deriveParams, serializeState, deserializeState, lightResponse, nutrientLimitation, limitingNutrient, unionizedFraction, massPools, massBalanceSummary, resetLedger,
     createState, step, summaries, oxygenBudgetSummary, waterChemistryScore, sunFraction, effectiveSurfaceLight, lightAtDepth, localLightAt, computeHabitatLightFactor, ensureHabitatLightGrid, oxygenSaturation,
     addOrganism, addPlant, addPatch, applyDisturbance, triggerMystery, revealMystery, probe,
     coachPrompt, scenarioPrompt, mulberry32, diffuse, mean, idx, clamp, shelterScoreAt, nearestShelter, habitatStructureAt, paintTerrain, eraseTerrain, stepSand, stepGranular, terrainSolidAt, markHabitatChanged, findPlantSupportY, findOpenCavityTop, syncPlantRoots, stepPlants, stepAnimals, nearestFoodZone, nearestPlantTissue, bestOxygenZone, bestSurfaceOxygenZone, stepCarcasses, carcassSupportBelow, particulateBarrierBelow, fishPositionOpen, shelteredFishTarget, chemistryBarrierBetween, chemistryCompartments, chemistryCompartmentAt, compartmentSummaries, createMinnowCarcass,
@@ -2894,13 +3486,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
   const gctx = graph.getContext('2d');
 
-  const COLORS = { o2: '#67e8f9', co2: '#fb923c', nh3: '#facc15', no2: '#c084fc', no3: '#bef264', algae:'#4ade80', detritus:'#c08457', daphnia:'#f0abfc', snail:'#fbbf24', scud:'#d6b87a', fish:'#94a3b8', carcass:'#d88772', plants:'#22c55e', plantBiomass:'#86efac', stability: '#e2e8f0' };
+  const COLORS = { o2: '#67e8f9', co2: '#fb923c', nh3: '#facc15', no2: '#c084fc', no3: '#bef264', po4: '#38bdf8', nh3u: '#fb7185', algae:'#4ade80', detritus:'#c08457', daphnia:'#f0abfc', snail:'#fbbf24', scud:'#d6b87a', fish:'#94a3b8', carcass:'#d88772', plants:'#22c55e', plantBiomass:'#86efac', stability: '#e2e8f0' };
   const SERIES = [
     { key: 'o2', short: 'O₂', label: 'Dissolved O₂', unit: 'mg/L', color: COLORS.o2, max: 14, autoPad: 0.05 },
     { key: 'co2', short: 'CO₂', label: 'Dissolved CO₂', unit: 'mg/L', color: COLORS.co2, max: 30, autoPad: 0.08 },
     { key: 'nh3', short: 'NH₃-N', label: 'Ammonia-N', unit: 'mg/L as N', color: COLORS.nh3, max: 2.5, autoPad: 0.005 },
     { key: 'no2', short: 'NO₂-N', label: 'Nitrite-N', unit: 'mg/L as N', color: COLORS.no2, max: 2.5, autoPad: 0.003 },
     { key: 'no3', short: 'NO₃-N', label: 'Nitrate-N', unit: 'mg/L as N', color: COLORS.no3, max: 50, autoPad: 0.05 },
+    { key: 'po4', short: 'PO₄-P', label: 'Phosphate-P', unit: 'mg/L as P', color: COLORS.po4, max: 0.5, autoPad: 0.002 },
+    { key: 'nh3u', short: 'NH₃ toxic', label: 'Un-ionized (toxic) ammonia-N', unit: 'mg/L as N', color: COLORS.nh3u, max: 0.3, autoPad: 0.0005 },
     { key: 'algae', short: 'Algae', label: 'Mean algae biomass', unit: 'relative biomass', color: COLORS.algae, max: 1.5, autoPad: 0.01 },
     { key: 'detritus', short: 'Detritus', label: 'Mean detritus', unit: 'relative biomass', color: COLORS.detritus, max: 1.5, autoPad: 0.01 },
     { key: 'daphnia', short: 'Daphnia', label: 'Daphnia population', unit: 'individuals', color: COLORS.daphnia, max: 80, autoPad: 1 },
@@ -2914,9 +3508,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   const LEVEL_CONFIG = {
     'Integrated Science': {badge:'Integrated',focus:'Patterns and cause → effect',chemistry:['o2','co2','no3'],allowedSeries:['o2','co2','no3','algae','daphnia','scud','fish','carcasses','plants','plantBiomass'],primary:'o2',compare:'none',compareEnabled:false,probe:'core',expectation:'Observe a pattern, make a prediction, then explain one direct and one indirect effect using evidence.',question:'Research question: How does changing ___ affect ___?',prediction:'I predict ___ because ___. I will look for ___ as evidence.'},
-    'Advanced Integrated Science': {badge:'Advanced IS',focus:'Mechanisms and interacting variables',chemistry:['o2','co2','nh3','no2','no3'],allowedSeries:['o2','co2','nh3','no2','no3','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'o2',compare:'co2',compareEnabled:true,probe:'full',expectation:'Use two interacting variables, distinguish correlation from mechanism, and explain feedback within the system.',question:'Research question linking an abiotic factor to a biological response',prediction:'Predict the direction and sequence of changes. Explain the mechanism.'},
-    'IB SL': {badge:'IB SL',focus:'Quantitative evidence and ecosystem mechanisms',chemistry:['o2','co2','nh3','no2','no3'],allowedSeries:['o2','co2','nh3','no2','no3','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'no3',compare:'o2',compareEnabled:true,probe:'full',expectation:'Use IB command-term thinking: describe the pattern, explain the mechanism, and support the claim with quantitative evidence.',question:'IB-style research question: effect of an independent variable on a measurable ecosystem response',prediction:'State a directional prediction and biological rationale. Identify the evidence that would support it.'},
-    'IB HL': {badge:'IB HL',focus:'Processes, feedbacks, spatial gradients, and nitrogen cycling',chemistry:['o2','co2','nh3','no2','no3'],allowedSeries:['o2','co2','nh3','no2','no3','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'nh3',compare:'no2',compareEnabled:true,probe:'hl',expectation:'Integrate spatial gradients, limiting factors, nitrification, trophic interactions, and feedback. Evaluate competing mechanisms when possible.',question:'HL investigation question linking mechanism, spatial pattern, or interacting ecosystem variables',prediction:'Predict the sequence of responses and justify it using process-level biology. Identify an alternative explanation to test.'}
+    'Advanced Integrated Science': {badge:'Advanced IS',focus:'Mechanisms and interacting variables',chemistry:['o2','co2','nh3','no2','no3'],allowedSeries:['o2','co2','nh3','no2','no3','po4','nh3u','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'o2',compare:'co2',compareEnabled:true,probe:'full',expectation:'Use two interacting variables, distinguish correlation from mechanism, and explain feedback within the system.',question:'Research question linking an abiotic factor to a biological response',prediction:'Predict the direction and sequence of changes. Explain the mechanism.'},
+    'IB SL': {badge:'IB SL',focus:'Quantitative evidence and ecosystem mechanisms',chemistry:['o2','co2','nh3','no2','no3','po4'],allowedSeries:['o2','co2','nh3','no2','no3','po4','nh3u','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'no3',compare:'o2',compareEnabled:true,probe:'full',expectation:'Use IB command-term thinking: describe the pattern, explain the mechanism, and support the claim with quantitative evidence.',question:'IB-style research question: effect of an independent variable on a measurable ecosystem response',prediction:'State a directional prediction and biological rationale. Identify the evidence that would support it.'},
+    'IB HL': {badge:'IB HL',focus:'Processes, feedbacks, spatial gradients, and nitrogen cycling',chemistry:['o2','co2','nh3','no2','no3','po4','nh3u'],allowedSeries:['o2','co2','nh3','no2','no3','po4','nh3u','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'],primary:'nh3',compare:'no2',compareEnabled:true,probe:'hl',expectation:'Integrate spatial gradients, limiting factors, nitrification, trophic interactions, and feedback. Evaluate competing mechanisms when possible.',question:'HL investigation question linking mechanism, spatial pattern, or interacting ecosystem variables',prediction:'Predict the sequence of responses and justify it using process-level biology. Identify an alternative explanation to test.'}
   };
   function levelConfig(){return LEVEL_CONFIG[$('levelSelect').value]||LEVEL_CONFIG['IB SL'];}
 
@@ -2925,6 +3519,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     { title: 'Eutrophication recovery', goal: 'Trigger runoff, then restore O2 above 5 mg/L and nitrate below 18 mg/L.', test: (s, m) => s.flags.runoffUsed && s.timeHours - (s.flags.runoffTime ?? s.timeHours) >= 48 && m.o2 > 5 && m.no3 < 18 },
     { title: 'Spatial investigation', goal: 'Use probes to compare surface and deep water, then reach water chemistry condition above 65/100 at day 3 or later.', test: (s, m) => s.timeHours >= 72 && m.waterChemistry > 65 && s.flags.probeTop && s.flags.probeDeep },
     { title: 'Habitat Architect', goal: 'Use drawn rock/gravel habitat to keep minnows, Daphnia, and scuds present through day 10. Probe at least one high-refuge zone.', test: (s, m) => s.timeHours >= 10 * 24 && m.fish > 0 && m.daphnia > 0 && m.scud > 0 && s.rocks.length >= 10 && s.flags.probeRefuge },
+    { title: 'Phosphorus & eutrophication', goal: 'Trigger runoff, then track PO₄-P and algae. Complete when an algal bloom (mean algae ≥ 0.45) develops. Use the probe to name the limiting nutrient before and after.', test: (s, m) => s.flags.runoffUsed && (s.flags.peakAlgaeAfterRunoff || 0) >= 0.45 },
+    { title: 'Closed-system accounting', goal: 'Run at least 5 days without adding, removing or disturbing anything. Open Mass balance: total nitrogen and phosphorus must stay constant while they cycle between pools.', test: (s, m) => { const mb = E.massBalanceSummary(s), N = mb.elements.N, P = mb.elements.P; return mb.hours >= 120 && Math.abs(N.user) + Math.abs(P.user) + Math.abs(N.runoff) + Math.abs(P.runoff) < 1e-9 && Math.abs(N.relativeResidual) < 1e-4 && Math.abs(P.relativeResidual) < 1e-4; } },
   ];
 
   const TOOL_GROUPS = {
@@ -3134,6 +3730,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
   function resetHistory() {
     if(performanceEnabled)resetPerformanceStats();
+    // A newly loaded or reset tank starts a fresh mass-balance ledger.
+    if(typeof state!=='undefined'&&state)E.resetLedger(state);
     history = [snapshot()];
   }
 
@@ -3443,7 +4041,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const ageDays=(a.age/24).toFixed(1), energy=Math.round(E.clamp(a.energy,0,1.25)/1.25*100);
     const behavior=a.behavior || (a.kind==='snail'?'grazing / moving along substrate':a.status||'active');
     const meal=a.lastAte<99999?`${(a.lastAte/24).toFixed(1)} d ago`:'not recorded';
-    $('organismCard').innerHTML=`<b>${names[a.kind]||a.kind}</b> · ${a.status||'healthy'}<br><span class="behavior">Behavior: ${behavior}</span><br>Energy: ${energy}% · Age: ${ageDays} d<br>Local O₂: ${localO2.toFixed(2)} mg/L · Last feeding: ${meal}<br><span class="shelter">Local refuge: ${Math.round(shelter*100)}%</span><div class="shelter-key">Refuge combines nearby vegetation, rocks, and gravel. It can reduce fish capture success for small prey.</div>`;
+    const adultOM=E.BODY_OM[a.kind]||1, grown=Math.round(E.clamp((a.bodyOM??adultOM)/adultOM,0,1)*100);
+    const reserveLine=`<br>Body size: ${grown}% of adult · Food reserves: ${((a.store||0)/adultOM*100).toFixed(0)}% of body mass${a.kind==='fish'&&a.lastIntakeRate!=null?` · Holling intake ${(a.lastIntakeRate*24).toFixed(2)} prey/day at current density`:''}`;
+    $('organismCard').innerHTML=`<b>${names[a.kind]||a.kind}</b> · ${a.status||'healthy'}<br><span class="behavior">Behavior: ${behavior}</span><br>Energy: ${energy}% · Age: ${ageDays} d<br>Local O₂: ${localO2.toFixed(2)} mg/L · Last feeding: ${meal}${reserveLine}<br><span class="shelter">Local refuge: ${Math.round(shelter*100)}%</span><div class="shelter-key">Refuge combines nearby vegetation, rocks, and gravel. It can reduce fish capture success for small prey.</div>`;
   }
 
   function toolMeta(toolId) {
@@ -3584,6 +4184,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     if (key === 'nh3') return value > 0.5 ? 'high' : 'ok';
     if (key === 'no2') return value > 0.5 ? 'high' : 'ok';
     if (key === 'no3') return value > 20 ? 'high' : 'ok';
+    if (key === 'po4') return value > 0.035 ? 'high' : 'ok';
+    if (key === 'nh3u') return value > E.PARAMS.nh3uChronic ? 'high' : 'ok';
     return 'ok';
   }
 
@@ -3637,17 +4239,42 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
       <div class="budget-note">Rates are spatial means over the last simulated step. Paused values describe that previous step. Mixing redistributes oxygen; its whole-tank net is zero.${boundsNote}</div>`;
   }
 
+  function updateMassBalance() {
+    const el=$('massBalanceContent');
+    if(!el||!$('massBalancePanel').open)return;
+    const mb=E.massBalanceSummary(state);
+    const f=v=>Math.abs(v)<.005?'0.00':(v>0?'+':'')+v.toFixed(2);
+    const names={C:'Carbon',N:'Nitrogen',P:'Phosphorus'};
+    const rows=['C','N','P'].map(e=>{const x=mb.elements[e];
+      return `<tr><td><b>${names[e]}</b></td><td>${x.start.toFixed(1)}</td><td>${x.now.toFixed(1)}</td><td>${f(x.atmosphere)}</td><td>${f(x.runoff)}</td><td>${f(x.user)}</td><td>${f(x.bounds+x.residual)}</td></tr>`;}).join('');
+    const closed=['N','P'].every(e=>Math.abs(mb.elements[e].runoff)<1e-9&&Math.abs(mb.elements[e].user)<1e-9);
+    const worst=Math.max(...['C','N','P'].map(e=>Math.abs(mb.elements[e].relativeResidual)));
+    const verdict=closed
+      ? `<b style="color:#86efac">Closed system:</b> no runoff or user changes since the ledger started, so total N and P stay constant while atoms move between pools. Carbon also exchanges CO₂ with the air.`
+      : `<b style="color:#fde68a">Open system:</b> runoff or your own actions added or removed matter. Every change is accounted for in the columns above.`;
+    const poolNames={dissolved:'Dissolved (CO₂, NH₄⁺/NO₂⁻/NO₃⁻, PO₄³⁻)',sediment:'Sediment-bound P',algae:'Algae',plants:'Plants',animals:'Animals',carcasses:'Carcasses',detritus:'Detritus',bacteria:'Bacteria'};
+    const pools=Object.entries(mb.pools).map(([k,v])=>`<tr><td>${poolNames[k]||k}</td><td>${v.C.toFixed(1)}</td><td>${v.N.toFixed(2)}</td><td>${v.P.toFixed(3)}</td></tr>`).join('');
+    el.innerHTML=`<div class="budget-note">Since day ${(mb.startTime/24).toFixed(1)} (${(mb.hours/24).toFixed(1)} days). Totals in mg for the whole tank (each chemistry zone ≈ 1 L).</div>
+      <table class="budget-table"><thead><tr><th>Element</th><th>Start</th><th>Now</th><th>Air</th><th>Runoff</th><th>You</th><th>Unaccounted</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="budget-note">${verdict} Largest unaccounted change: ${(worst*100).toExponential(1)}% of the starting total (numerical rounding).</div>
+      <table class="budget-table"><thead><tr><th>Where the atoms are now</th><th>C</th><th>N</th><th>P</th></tr></thead><tbody>${pools}</tbody></table>`;
+  }
+
   function updateProbeCard() {
     updateOxygenBudget();
+    updateMassBalance();
     if(!lastProbe){$('probeCard').innerHTML='Probe a location in the tank to inspect spatial chemistry.';return;}
     const p=lastProbe,cfg=levelConfig();
     const habitat=p.depthFraction<.22?'surface exchange zone':p.depthFraction>.72?'benthic zone':'open water';
     const lightPath=p.directLight>=.75?'direct surface light':'direct surface light blocked';
     const near=p.nearby.length?p.nearby.map(a=>`${a.kind}: energy ${a.energy.toFixed(2)}, ${a.status}`).join('<br>'):'No animal within probe radius.';
     let chem=`<span style="color:${COLORS.o2}">O₂ ${p.o2.toFixed(2)} mg/L</span> · <span style="color:${COLORS.co2}">CO₂ ${p.co2.toFixed(2)} mg/L</span><br><span style="color:${COLORS.no3}">Nitrate-N ${p.no3.toFixed(2)} mg/L as N</span>`;
-    if(cfg.probe!=='core')chem+=`<br><span style="color:${COLORS.nh3}">Ammonia-N ${p.nh3.toFixed(3)} mg/L as N</span> · <span style="color:${COLORS.no2}">Nitrite-N ${p.no2.toFixed(3)} mg/L as N</span>`;
+    if(cfg.probe!=='core'){
+      chem+=`<br><span style="color:${COLORS.nh3}">Ammonia-N ${p.nh3.toFixed(3)} mg/L as N</span> · <span style="color:${COLORS.no2}">Nitrite-N ${p.no2.toFixed(3)} mg/L as N</span>`;
+      chem+=`<br><span style="color:${COLORS.po4}">Phosphate-P ${p.po4.toFixed(3)} mg/L</span> · <span style="color:${COLORS.nh3u}">toxic NH₃-N ${p.nh3u.toFixed(4)} mg/L</span><br>Producers here are limited most by <b>${p.limitingNutrient}</b>`;
+    }
     let process='';
-    if(cfg.probe==='hl'){const sat=E.oxygenSaturation(state.settings.temperatureC),pct=sat>0?p.o2/sat*100:0;process=`<br><b>HL process view:</b> local O₂ ≈ ${pct.toFixed(0)}% of modeled saturation · bacteria ${p.bacteria.toFixed(2)} · detritus ${p.detritus.toFixed(2)}`;}
+    if(cfg.probe==='hl'){const sat=E.oxygenSaturation(state.settings.temperatureC),pct=sat>0?p.o2/sat*100:0;process=`<br><b>HL process view:</b> local O₂ ≈ ${pct.toFixed(0)}% of modeled saturation · bacteria ${p.bacteria.toFixed(2)} · detritus ${p.detritus.toFixed(2)} · sediment P below ${p.sedimentP.toFixed(2)} mg · NH₃ fraction ${(E.unionizedFraction(state.settings.temperatureC,state.settings.pH)*100).toFixed(2)}% of total ammonia`;}
     else if(cfg.probe==='full')process=`<br>Algae ${p.algae.toFixed(2)} · Detritus ${p.detritus.toFixed(2)}`;
     const plantNames=(p.nearbyPlants||[]).map(pl=>`${E.PLANT_TYPES[pl.type]?.label||pl.type} (${pl.heightCells.toFixed(1)} cells, biomass ${pl.biomass.toFixed(2)}, ${pl.growthRate>=0?'growing':'declining'}, ${pl.shadeClass})`).join(', ');
     const plantLine=plantNames?`<br>Macrophytes: ${plantNames}`:'';
@@ -3702,8 +4329,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function checkMission() {
-    if (missionComplete) return;
     const summary = E.summaries(state);
+    if (state.flags.runoffUsed) state.flags.peakAlgaeAfterRunoff = Math.max(state.flags.peakAlgaeAfterRunoff || 0, summary.algae);
+    if (missionComplete) return;
     if (MISSIONS[missionIndex].test(state, summary)) {
       missionComplete = true;
       state.events.unshift({ time: state.timeHours, text: `Mission complete: ${MISSIONS[missionIndex].title}. Choose the next mission from the dropdown.`, severity: 'info' });
@@ -4163,7 +4791,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
   function drawNight(daylight){if(daylight>=.6)return;const wr=waterRect();ctx.fillStyle=`rgba(3,9,26,${(.6-daylight)*.55})`;ctx.fillRect(wr.x,wr.y,wr.w,wr.h);}
   let lensMode=0;
-  const LENS=[null,{k:'o2',l:'O₂ (mg/L)',lo:0,hi:12,inv:1},{k:'co2',l:'CO₂ (mg/L)',lo:0,hi:15},{k:'nh3',l:'NH₃ (mg/L)',lo:0,hi:1},{k:'no2',l:'NO₂ (mg/L)',lo:0,hi:1},{k:'no3',l:'NO₃ (mg/L)',lo:0,hi:30},{k:'algae',l:'Algae biomass',lo:0,hi:1},{k:'light',l:'Light (fraction)',lo:0,hi:1,inv:1}];
+  const LENS=[null,{k:'o2',l:'O₂ (mg/L)',lo:0,hi:12,inv:1},{k:'co2',l:'CO₂ (mg/L)',lo:0,hi:15},{k:'nh3',l:'NH₃ (mg/L)',lo:0,hi:1},{k:'no2',l:'NO₂ (mg/L)',lo:0,hi:1},{k:'no3',l:'NO₃ (mg/L)',lo:0,hi:30},{k:'po4',l:'PO₄-P (mg/L)',lo:0,hi:0.08},{k:'algae',l:'Algae biomass',lo:0,hi:1},{k:'light',l:'Light (fraction)',lo:0,hi:1,inv:1}];
   const lensCv=document.createElement('canvas');lensCv.width=E.COLS;lensCv.height=E.ROWS;const lensCx=lensCv.getContext('2d');
   function lensColor(t){const s=[[30,80,200],[40,200,190],[250,220,60],[240,70,70]],f=t*3,i=Math.min(2,Math.floor(f)),u=f-i,a=s[i],b=s[i+1];return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,a[2]+(b[2]-a[2])*u];}
   function drawLens(){
@@ -4264,7 +4892,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     const height=(p.heightCells||profile.height)*cellH;
     const t=targetFPS>=25?performance.now()/1000:state.timeHours*.65,ph=p.x*.7+p.y*.3;
     const sway=Math.sin(t*1.15+ph)*4+Math.sin(t*2.1+ph*1.9)*1.3;
-    const st=E.clamp((p.grazingDamage||0)*.9+(1-E.clamp(p.lightFactor??1,0,1))*.3,0,1);
+    const st=E.clamp((p.grazingDamage||0)*.9+(1-E.clamp(p.lightFactor??1,0,1))*.3+Math.max(0,.35-(p.biomass??.8))*2.2+(p.heatStressed?.3:0)+Math.min(.4,(p.lowHours||0)/240),0,1);
     const R=Math.round(70+st*85),G=Math.round(150-st*40);
     const dark=`rgb(${R-25},${G-55},62)`,mid=`rgb(${R},${G},82)`,hi=`rgba(${R+85},${G+75},120,.55)`;
     ctx.save();ctx.beginPath();ctx.rect(wr.x,wr.y,wr.w,wr.h);ctx.clip();ctx.translate(base.x,base.y);ctx.lineCap='round';
@@ -4615,8 +5243,85 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     updateAll();
   }
 
+  // ---- Saving progress -------------------------------------------------
+  // The tank autosaves to this browser every 20 s while it changes and
+  // whenever the tab is hidden or closed, so a reload or interruption can
+  // be resumed. "Save tank to file" makes a portable copy.
+  const AUTOSAVE_KEY='ecosphere-lab-autosave-v1';
+  let lastAutosaveAt=0,lastAutosaveTime=null,autosaveBlocked=false;
+  function buildSave(){
+    return {app:'EcoSphere Lab',appVersion:'3.18.1',savedAt:new Date().toISOString(),
+      state:E.serializeState(state),history:history.slice(-1400),
+      missionIndex,missionComplete,level:$('levelSelect').value,speed};
+  }
+  function setSaveStatus(text){const el=$('saveStatus');if(el)el.textContent=text;}
+  function autosave(force=false){
+    if(autosaveBlocked||document.getElementById('resumeCard'))return;
+    if(!force&&lastAutosaveTime===state.timeHours)return;
+    try{
+      localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(buildSave()));
+      lastAutosaveAt=Date.now();lastAutosaveTime=state.timeHours;
+      setSaveStatus(`Autosaved ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})} · ${formatTime(state.timeHours)}`);
+    }catch(err){
+      setSaveStatus('Autosave unavailable in this browser window. Use “Save tank to file”.');
+      autosaveBlocked=true;
+    }
+  }
+  function readAutosave(){
+    try{const raw=localStorage.getItem(AUTOSAVE_KEY);return raw?JSON.parse(raw):null;}catch(err){return null;}
+  }
+  function applySave(save){
+    const loaded=E.deserializeState(save.state);
+    cancelActiveTrial();clearOxygenBubbles();animalTransitions.clear();carcassTransitions.clear();
+    selectedAnimalId=null;selectedCarcassId=null;lastProbe=null;habitatUndoStack=[];habitatDraw=null;
+    actionPopups=[];seenPopupEvents.clear();running=false;
+    state=loaded;
+    history=Array.isArray(save.history)&&save.history.length?save.history:[snapshot()];
+    if(save.level&&Array.from($('levelSelect').options).some(o=>o.value===save.level)){$('levelSelect').value=save.level;updateLevelMode(true);}
+    if(Number.isInteger(save.missionIndex)&&MISSIONS[save.missionIndex]){missionIndex=save.missionIndex;$('missionSelect').value=String(missionIndex);}
+    missionComplete=!!save.missionComplete;
+    const hasTerrain=state.terrain&&state.terrain.cells.some(c=>c!==0);
+    if(hasTerrain)setWorkspace('sandbox');
+    E.markHabitatChanged(state);habitatCacheDirty=true;terrainSettling=true;waterDetailsDirty=true;
+    timeTransition={from:state.timeHours,to:state.timeHours,start:performance.now(),duration:1};
+    lastAutosaveTime=state.timeHours;
+    updateAll();
+  }
+  function saveToFile(){
+    const blob=new Blob([JSON.stringify(buildSave())],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`ecosphere-tank-${formatTime(state.timeHours).replace(/[^A-Za-z0-9]+/g,'-')}.json`;a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    setSaveStatus(`Saved to file · ${formatTime(state.timeHours)}`);
+  }
+  function openSaveFile(file){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{applySave(JSON.parse(reader.result));setPresetMessage(`Saved tank loaded: ${formatTime(state.timeHours)}. Press Run to continue.`);autosave(true);}
+      catch(err){setPresetMessage(`Could not open that file: ${err.message}`);}
+    };
+    reader.readAsText(file);
+  }
+  function showResumeCard(save){
+    const wrap=tank.closest('.canvas-wrap');if(!wrap)return;
+    const card=document.createElement('div');
+    card.id='resumeCard';
+    card.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;background:rgba(9,20,33,.96);border:1px solid #67e8f9;border-radius:14px;padding:16px 18px;max-width:340px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.5)';
+    const day=formatTime(save.state.timeHours);
+    const when=new Date(save.savedAt);
+    const ago=Math.max(0,Math.round((Date.now()-when.getTime())/60000));
+    const agoText=ago<1?'just now':ago<60?`${ago} min ago`:ago<1440?`${Math.round(ago/60)} h ago`:when.toLocaleDateString();
+    const counts={fish:0,daphnia:0,snail:0,scud:0};for(const a of save.state.animals||[])if(counts[a.kind]!=null)counts[a.kind]++;
+    card.innerHTML=`<div style="font-weight:800;color:#bff8ff;font-size:14px;margin-bottom:4px">Resume your tank?</div>
+      <div class="small" style="margin-bottom:10px">Saved ${agoText} at <b>${day}</b> · ${counts.fish} minnows, ${counts.daphnia} Daphnia, ${counts.snail} snails, ${counts.scud} scuds, ${(save.state.plants||[]).length} plants</div>
+      <div style="display:flex;gap:8px;justify-content:center"><button class="btn primary" id="resumeYes">Resume</button><button class="btn" id="resumeNo">Start fresh</button></div>`;
+    wrap.appendChild(card);
+    $('resumeYes').addEventListener('click',()=>{try{applySave(save);setPresetMessage(`Resumed your saved tank at ${day}. Press Run to continue.`);}catch(err){setPresetMessage('The saved tank could not be restored, so a new tank was started.');}card.remove();});
+    $('resumeNo').addEventListener('click',()=>{card.remove();autosave(true);});
+  }
+
   function exportCSV() {
-    const columns=['t','o2','co2','nh3','no2','no3','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'];
+    const columns=['t','o2','co2','nh3','no2','no3','po4','nh3u','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'];
     const lines=[columns.join(',')];for(const row of history)lines.push(columns.map(k=>Number.isFinite(row[k])?row[k]:'').join(','));
     const blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ecosphere-lab-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -4706,7 +5411,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     $('performanceMonitor').textContent='Measuring animation on this device…';
     document.querySelector('.top-menu').open=false;
   });
-  document.addEventListener('visibilitychange',()=>{if(performanceEnabled)resetPerformanceStats();});
+  document.addEventListener('visibilitychange',()=>{if(performanceEnabled)resetPerformanceStats();if(document.visibilityState==='hidden')autosave(true);});
+  window.addEventListener('pagehide',()=>autosave(true));
+  $('saveFileBtn').addEventListener('click',()=>{document.querySelector('.top-menu').open=false;saveToFile();});
+  $('openFileBtn').addEventListener('click',()=>$('openFileInput').click());
+  $('openFileInput').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(file){document.querySelector('.top-menu').open=false;openSaveFile(file);}e.target.value='';});
   $('oxygenBudgetBtn').addEventListener('click', () => {
     document.querySelector('.top-menu').open=false;
     activateRailTab('analysis');activateAnalysisTab('coach');
@@ -4714,8 +5423,25 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     $('oxygenBudgetPanel').scrollIntoView({block:'nearest'});
   });
   $('oxygenBudgetScope').addEventListener('change',updateOxygenBudget);
+  $('massBalancePanel').addEventListener('toggle',updateMassBalance);
+  $('massBalanceResetBtn').addEventListener('click',()=>{E.resetLedger(state);updateMassBalance();});
+  $('massBalanceBtn').addEventListener('click',()=>{
+    document.querySelector('.top-menu').open=false;
+    activateRailTab('analysis');activateAnalysisTab('coach');
+    $('massBalancePanel').open=true;updateMassBalance();
+    $('massBalancePanel').scrollIntoView({block:'nearest'});
+  });
   $('oxygenBudgetPanel').addEventListener('toggle',()=>{if($('oxygenBudgetPanel').open)updateOxygenBudget();});
-  $('assumptionsBtn').addEventListener('click',()=>{$('assumptionsModal').classList.add('open');$('assumptionsModal').setAttribute('aria-hidden','false');});
+  function buildParamTable(){
+    const el=$('paramTable');if(!el||el.dataset.built)return;
+    const groups={};
+    for(const [k,info] of Object.entries(E.PARAM_INFO)){(groups[info.group]||(groups[info.group]=[])).push([k,info]);}
+    const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    const fmt=v=>typeof v!=='number'?String(v):Math.abs(v)>=100||v===Math.round(v)?String(v):Number(v.toPrecision(3)).toString();
+    el.innerHTML=Object.entries(groups).map(([g,rows])=>`<h3 style="margin:8px 0 4px">${esc(g)}</h3><table class="budget-table"><thead><tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Meaning</th><th>Source</th></tr></thead><tbody>${rows.map(([k,i])=>`<tr><td><b>${esc(i.label)}</b><br><code style="font-size:9px;color:#8ea1b7">${k}</code></td><td>${fmt(E.PARAMS[k])}</td><td>${esc(i.unit)}</td><td>${esc(i.desc)}</td><td style="text-align:left">${esc(i.source)}</td></tr>`).join('')}</tbody></table>`).join('');
+    el.dataset.built='1';
+  }
+  $('assumptionsBtn').addEventListener('click',()=>{document.querySelector('.top-menu').open=false;buildParamTable();$('assumptionsModal').classList.add('open');$('assumptionsModal').setAttribute('aria-hidden','false');});
   $('closeAssumptionsBtn').addEventListener('click',()=>{$('assumptionsModal').classList.remove('open');$('assumptionsModal').setAttribute('aria-hidden','true');});
   $('assumptionsModal').addEventListener('click',e=>{if(e.target.id==='assumptionsModal')$('closeAssumptionsBtn').click();});
   $('activityBtn').addEventListener('click',()=>{
@@ -4905,7 +5631,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     if(e.target.closest('[data-context-clear]')){selectedAnimalId=null;selectedCarcassId=null;lastProbe=null;liveContextMode=null;updateOrganismCard();updateProbeCard();updateMessage();drawTank();}
   });
   $$('.rail-tab').forEach(btn => btn.addEventListener('click', () => activateRailTab(btn.dataset.rail)));
-  $('missionSelect').addEventListener('change', e => { missionIndex = Number(e.target.value); missionComplete = false; updateAll(); });
+  $('missionSelect').addEventListener('change', e => {
+    missionIndex = Number(e.target.value); missionComplete = false;
+    if (MISSIONS[missionIndex].title === 'Closed-system accounting') { E.resetLedger(state); $('massBalancePanel').open = true; }
+    updateAll();
+  });
   $('levelSelect').addEventListener('change',()=>updateLevelMode(true));
   $('metrics').addEventListener('click', (e) => {
     const card = e.target.closest('[data-metric]');
@@ -5057,6 +5787,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   }
 
   function animationLoop(now) {
+    if(Date.now()-lastAutosaveAt>20000&&!document.getElementById('resumeCard'))autosave();
     if(terrainSettling && state.terrain && now-lastGranularStep>=32){
       lastGranularStep=now;
       const granularStart=performanceEnabled?performance.now():0;
@@ -5094,6 +5825,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     updateAll();
   });
   activateRailTab('system');
+  {
+    const saved=readAutosave();
+    if(saved&&saved.state&&saved.state.timeHours>state.timeHours+0.5)showResumeCard(saved);
+    else lastAutosaveAt=Date.now();
+  }
   requestAnimationFrame(animationLoop);
 })();
 

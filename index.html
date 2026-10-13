@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.24 — Game Modes</title>
+  <title>EcoSphere Lab 3.30 — Tournament, Snails &amp; Probe</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -217,7 +217,60 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   color:#d8e7f4;
   overflow:hidden;
 }
-.activity-strip.hidden{display:none}
+.activity-strip{display:flex;flex-wrap:wrap;align-items:center;column-gap:12px;row-gap:6px}
+.activity-strip-info{flex:1 1 300px;min-width:0;display:grid;gap:3px}
+.activity-strip.info-off .activity-strip-info{display:none}
+.activity-strip.info-off{min-height:0;padding:5px 8px;justify-content:flex-end}
+/* 3.29 tank toolbar: day/night badge and tank tools, outside the habitat */
+.tank-controls{flex:0 1 auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.tank-controls .btn{position:static!important;font-size:11px;padding:5px 9px;opacity:1}
+.tank-controls .disco-btn{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 6px}
+.sky-badge{display:flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 8px;border-radius:999px;border:1.5px solid;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums;transition:background .6s,border-color .6s}
+.sky-badge.day{background:rgba(92,60,4,.72);border-color:#fbbf24;color:#f8fafc}
+.sky-badge.day b{color:#fde68a}
+.sky-badge.night{background:rgba(24,22,70,.85);border-color:#818cf8;color:#f1f5f9}
+.sky-badge.night b{color:#c7d2fe}
+.sky-badge b{font-weight:800;letter-spacing:.02em}
+.sky-badge .sky-sep{opacity:.55}
+.sky-ico{width:18px;height:18px;flex:0 0 18px}
+.sky-badge.day .moon,.sky-badge.night .sun{display:none}
+#skyBadgeLight{color:#fde68a}
+.sky-badge.night #skyBadgeLight{color:#a5b4fc}
+/* 3.30 tournament and mode clarity */
+.btn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.5)}
+.btn.primary:disabled{background:#1f3a44;color:#9fb8c2;border-color:#2c4b56}
+.t-field.t-bad .field,.t-field.t-bad input{border-color:#fb7185!important;box-shadow:0 0 0 2px rgba(251,113,133,.22)}
+#tWhy{font-size:11px;color:#fda4af;margin-top:4px;text-align:right;min-height:15px}
+#tWhy.ok{color:#86efac}
+.mode-locked-el{opacity:.38;filter:grayscale(.65);cursor:not-allowed!important;position:relative}
+.btn.mode-locked-el::after,.tool.mode-locked-el::after{content:'🔒';position:absolute;top:1px;right:3px;font-size:8px;filter:none;opacity:.9}
+#tourBar{display:none}
+body.tour-active .panel.mission{border-color:#facc15;box-shadow:0 0 0 1px rgba(250,204,21,.35),0 0 18px rgba(250,204,21,.12);background:linear-gradient(90deg,rgba(66,48,6,.55),rgba(15,27,44,.96) 55%)}
+body.tour-active .panel.mission>*:not(#tourBar){display:none!important}
+body.tour-active #tourBar{display:flex;grid-column:1/-1;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:#e2e8f0}
+body.tour-active #modeHud{display:none!important}
+body.tour-active .canvas-wrap{box-shadow:0 0 0 2px #facc15,0 0 22px rgba(250,204,21,.28)}
+.tour-live{font-weight:900;letter-spacing:.08em;color:#facc15;font-size:11.5px;white-space:nowrap}
+.tour-live i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:5px;vertical-align:0;box-shadow:0 0 6px #22c55e;animation:tourpulse 1.6s ease-in-out infinite}
+.tour-live.paused i{background:#94a3b8;box-shadow:none;animation:none}
+@keyframes tourpulse{50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.tour-live i{animation:none}}
+.tour-team{font-weight:800;color:#fff}
+.tour-day{min-width:150px;flex:1 1 150px}
+.tour-day .mode-bar{margin-top:3px}
+.tour-next b{color:#fde68a}
+.tour-score b{font-size:15px;color:#facc15}
+.tour-btns{display:flex;gap:6px;margin-left:auto}
+@media (max-width:1500px){body.tour-active #tourBar{gap:8px;font-size:10.5px}.tour-day{min-width:110px;flex-basis:110px}.tour-btns .btn{padding:3px 7px}.tour-code{display:none}}
+.tour-btns .btn{font-size:10.5px;padding:4px 9px}
+.tour-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.96);z-index:7;min-width:300px;max-width:80%;text-align:center;padding:16px 24px;border-radius:16px;background:rgba(10,18,32,.92);border:2px solid #facc15;color:#fef3c7;box-shadow:0 12px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+.tour-banner.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto;cursor:pointer}
+.tour-banner.warn{border-color:#fb923c;color:#ffedd5}
+.tour-banner.done{border-color:#4ade80;color:#dcfce7}
+.tour-banner .tb-big{font-size:26px;font-weight:900;letter-spacing:.02em;margin-top:4px}
+.tour-banner .tb-count{font-size:44px;font-weight:900;color:#facc15;line-height:1.1;margin-top:4px}
+.tour-banner .tb-small{font-size:12px;color:#cbd5e1;margin-top:4px}
+@media (max-width:1440px){.activity-strip-info{flex-basis:190px}.tank-controls{gap:4px}.tank-controls .btn{padding:4px 7px;font-size:10.5px}.tank-controls .disco-btn{padding:2px 8px 2px 4px}.sky-badge{font-size:11px;padding:0 9px 0 6px;gap:4px;height:26px}.sky-ico{width:16px;height:16px;flex-basis:16px}}
 .activity-strip-main{
   display:flex;
   align-items:center;
@@ -272,6 +325,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .habitat-action-row .btn{font-size:9px;padding:5px}
 #habitatHint{line-height:1.35;color:#9fb4c7}
 .canvas-wrap.habitat-drawing{cursor:crosshair}
+/* 3.30 probe cursor: a small sensor probe whose tip marks the sampled point */
+.canvas-wrap.probe-mode #tank{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2730%27%20height%3D%2730%27%20viewBox%3D%270%200%2030%2030%27%3E%3Cpath%20d%3D%27M27%203%20C24%201%2021%202%2020%204%27%20fill%3D%27none%27%20stroke%3D%27%2394a3b8%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27/%3E%3Cg%20transform%3D%27rotate%2845%2015%2015%29%27%3E%3Crect%20x%3D%2712%27%20y%3D%27-1%27%20width%3D%276%27%20height%3D%2718%27%20rx%3D%272.5%27%20fill%3D%27%23e2e8f0%27%20stroke%3D%27%230f172a%27%20stroke-width%3D%271.2%27/%3E%3Crect%20x%3D%2712%27%20y%3D%274%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%2322d3ee%27/%3E%3Cpath%20d%3D%27M13%2017%20L17%2017%20L16%2025%20L14%2025%20Z%27%20fill%3D%27%23cbd5e1%27%20stroke%3D%27%230f172a%27%20stroke-width%3D%271%27/%3E%3C/g%3E%3Ccircle%20cx%3D%273.6%27%20cy%3D%2726.4%27%20r%3D%272.4%27%20fill%3D%27%2367e8f9%27%20stroke%3D%27%230f172a%27%20stroke-width%3D%271%27/%3E%3C/svg%3E") 4 26, crosshair}
 .tool[data-tool="habitatErase"] strong{color:#fda4af}
 .tool[data-tool="rock"] strong{color:#cbd5e1}
 .tool[data-tool="substrate"] strong{color:#d6c5a2}
@@ -358,7 +413,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .app.focus-tank .layout{grid-template-columns:minmax(0,1fr);gap:0;height:100%;min-height:0}
 .app.focus-tank .left,.app.focus-tank .right{display:none}
 .app.focus-tank .center{grid-template-rows:minmax(0,1fr);gap:0;height:100%;min-height:0}
-.app.focus-tank .mission,.app.focus-tank .activity-strip,.app.focus-tank .bottom-controls{display:none!important}
+.app.focus-tank .mission,.app.focus-tank .bottom-controls,.app.focus-tank .activity-strip-info{display:none!important}
+.app.focus-tank .activity-strip{display:contents!important}
+.app.focus-tank .tank-controls{position:fixed;top:10px;left:12px;z-index:13;justify-content:flex-start}
 .app.focus-tank .canvas-wrap{padding:0;border:0;border-radius:0;background:#06101d;height:100%;min-height:0;position:relative}
 .app.focus-tank #tank{width:100%;height:100%;max-width:none;max-height:none;border:0;border-radius:0}
 .app.focus-tank .focus-exit-hint{opacity:1;visibility:visible}
@@ -467,11 +524,11 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 .disco-btn svg{display:block;transition:transform .3s}
 .disco-btn.on{border-color:#f0abfc!important;animation:discoGlow 2s linear infinite}
 .disco-btn.on svg{animation:discoSpin 2.4s linear infinite}
-.disco-sound{position:absolute;top:128px;right:14px;z-index:3;font-size:11px;padding:4px 9px;display:none}
+.disco-sound{position:absolute;top:12px;right:14px;z-index:3;font-size:11px;padding:4px 9px;display:none}
 .disco-sound.show{display:block}
-.disco-track{position:absolute;top:204px;right:14px;z-index:3;font-size:11px;padding:4px 9px;display:none}
+.disco-track{position:absolute;top:84px;right:14px;z-index:3;font-size:11px;padding:4px 9px;display:none}
 .disco-track.show{display:block}
-.disco-pick{position:absolute;top:166px;right:14px;z-index:3;font-size:11px;padding:4px 6px;display:none;max-width:150px}
+.disco-pick{position:absolute;top:48px;right:14px;z-index:3;font-size:11px;padding:4px 6px;display:none;max-width:150px}
 .disco-pick.show{display:block}
 @keyframes discoSpin{to{transform:rotate(360deg)}}
 @keyframes discoGlow{0%{box-shadow:0 0 12px #f472b6}33%{box-shadow:0 0 12px #67e8f9}66%{box-shadow:0 0 12px #facc15}100%{box-shadow:0 0 12px #f472b6}}
@@ -497,13 +554,70 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 @media (prefers-reduced-motion: reduce){.cycle-dash{animation:none}}
 .cycle-node text{pointer-events:none;paint-order:stroke;stroke:#07111d;stroke-width:3.5px;stroke-linejoin:round}
 .cycle-edge-label{font-size:11px;font-weight:700;paint-order:stroke;stroke:#07111d;stroke-width:4px;pointer-events:none}
+
+/* 3.26 Cycle view investigation tools */
+.cycle-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:5px 10px;border-bottom:1px solid #18293e;background:#081422}
+.cycle-tools-lab{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7f93aa;margin-right:2px}
+.cycle-tools button{background:#0d1b2d;color:#d6e2ef;border:1px solid #26364d;border-radius:8px;padding:4px 9px;font-size:11px;cursor:pointer}
+.cycle-tools button:hover{border-color:#3f5b7d}
+.cycle-tools button.on{background:#facc15;color:#1b1600;border-color:#facc15;font-weight:800}
+.cycle-tools-hint{margin-left:auto;font-size:10.5px;color:#7f93aa}
+#cycleExpandBtn{background:#10233a;border-color:#2c4a6e;margin-left:auto}
+.cycle-view.expanded #cycleExpandBtn{margin-left:0}
+#cycleExpandBtn.nudge{background:#3a3108;border-color:#facc15;color:#fef3c7}
+.cycle-view:not(.expanded) .cycle-tools-hint{display:none}
+.cycle-body{flex:1;min-height:0;display:flex}
+.cycle-body .cycle-svg{flex:1 1 auto;min-width:0;width:auto;height:100%}
+.cycle-side{display:none;width:310px;flex:0 0 310px;overflow:auto;border-left:1px solid #18293e;padding:10px 12px 12px;background:#091626;font-size:11.5px;line-height:1.45;color:#d3deea;position:relative}
+.cycle-view.side-open .cycle-side{display:block}
+.cycle-side h3{margin:0 22px 2px 0;font-size:13.5px;color:#f1f5f9}
+.cycle-side-sub{font-size:10.5px;color:#8ea1b7;margin-bottom:6px}
+.cycle-x{position:absolute;top:7px;right:8px;background:none;border:0;color:#8ea1b7;font-size:14px;cursor:pointer}
+.cycle-note{font-size:10.5px;color:#9fb1c5;margin:8px 0 0;border-top:1px dashed #26364d;padding-top:6px}
+.cycle-warn{font-size:10.5px;color:#fde68a;background:#2a2108;border:1px solid #5b4a12;border-radius:7px;padding:5px 7px;margin:6px 0}
+.cycle-steps{margin:4px 0 6px;padding-left:18px}
+.cycle-steps li{margin-bottom:4px}
+.cycle-pick{background:#0d1b2d;border:1px solid #3a3410;border-radius:8px;padding:6px 8px;margin:6px 0}
+.cycle-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.cycle-row .btn{font-size:11px;padding:4px 9px}
+.cycle-row .btn[disabled]{opacity:.45;cursor:not-allowed}
+.cycle-kv{display:flex;justify-content:space-between;gap:8px;padding:2px 0;font-variant-numeric:tabular-nums}
+.cycle-kv.tot{border-top:1px solid #1f3550;margin-bottom:4px;color:#e6eef8}
+.cycle-kv.big{font-size:12.5px;margin-top:4px}
+.cycle-h4{display:flex;justify-content:space-between;margin:8px 0 2px;font-weight:700;color:#e6eef8;font-size:11.5px}
+.cycle-h4 span{font-weight:400;color:#8ea1b7;font-size:10px}
+.cycle-tbl{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+.cycle-tbl td,.cycle-tbl th{padding:2px 3px;border-bottom:1px solid #132438;vertical-align:top}
+.cycle-tbl td:last-child{text-align:right;white-space:nowrap}
+.cycle-tbl3 th{font-weight:600;color:#8ea1b7;font-size:10px;text-align:right}
+.cycle-tbl3 th:first-child,.cycle-tbl3 td:first-child{text-align:left}
+.cycle-tbl3 td{text-align:right;white-space:nowrap}
+.cycle-tbl3 td:first-child{white-space:normal}
+.cycle-tbl-left td,.cycle-tbl-left td:last-child{text-align:left;white-space:normal}
+.cycle-quick{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0 4px}
+.cycle-quick button{background:#1a1424;color:#f5d0fe;border:1px solid #4a2d5c;border-radius:7px;padding:3px 7px;font-size:10.5px;cursor:pointer}
+.cycle-quick button:hover{border-color:#a855f7}
+.cycle-view.expanded{position:fixed;inset:12px;z-index:80;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cycle-bar{height:7px;border-radius:5px;background:#132438;overflow:hidden;margin:4px 0}
+.cycle-bar i{display:block;height:100%;background:#facc15}
+.cycle-verdict{font-size:13px;font-weight:700;color:#fef3c7;margin:2px 0 6px}
+.cycle-mini{display:inline-block;height:7px;border-radius:3px;margin-right:5px;vertical-align:middle;opacity:.8}
+.cycle-pyr{width:100%;height:auto;margin:4px 0 6px}
+.cycle-seg-sm button{padding:3px 10px;font-size:10.5px}
+.cycle-seg-sm button.on{background:#67e8f9;color:#06202a;font-weight:800}
+.cycle-node{cursor:pointer}
+.cycle-picked{filter:drop-shadow(0 0 5px #facc15)}
+.cycle-tracer-ring{animation:tracerpulse 1.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes tracerpulse{0%{opacity:.9;transform:scale(.7)}100%{opacity:0;transform:scale(1.8)}}
+@media (prefers-reduced-motion: reduce){.cycle-tracer-ring{animation:none}}
+@media (max-width:900px){.cycle-side{width:240px;flex-basis:240px}.cycle-tools-hint{display:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.24</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.30</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -610,13 +724,22 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         <div class="timebox small">Time <b id="timeLabel" style="color:white"></b></div>
       </div>
 
-      <div id="activityStrip" class="activity-strip" aria-live="polite">
-        <div class="activity-strip-main">
-          <span class="activity-strip-title">Live activity</span>
-          <span id="activityStripMetrics"></span>
-          <span id="activityStripFish"></span>
+      <div id="activityStrip" class="activity-strip">
+        <div class="activity-strip-info" aria-live="polite">
+          <div class="activity-strip-main">
+            <span class="activity-strip-title">Live activity</span>
+            <span id="activityStripMetrics"></span>
+            <span id="activityStripFish"></span>
+          </div>
+          <div id="activityStripEvent" class="activity-strip-event"></div>
         </div>
-        <div id="activityStripEvent" class="activity-strip-event"></div>
+        <div id="tankControls" class="tank-controls">
+          <div id="skyBadge" class="sky-badge day" role="status" title="Time of day in the tank. Light = sunlight reaching the water surface (after the Light slider and turbidity).">
+            <svg class="sky-ico sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="4.4" fill="#fcd34d"/><g stroke="#fcd34d" stroke-width="1.7" stroke-linecap="round"><path d="M10 1.6v2.4M10 16v2.4M1.6 10H4M16 10h2.4M4.1 4.1l1.7 1.7M14.2 14.2l1.7 1.7M4.1 15.9l1.7-1.7M14.2 5.8l1.7-1.7"/></g></svg>
+            <svg class="sky-ico moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.6 3.2A7.2 7.2 0 1 0 16.8 13 6 6 0 0 1 13.6 3.2z" fill="#e0e7ff"/></svg>
+            <b id="skyBadgeLabel">DAY</b><span id="skyBadgeClock">Day 0 · 00:00</span><span class="sky-sep">·</span><span id="skyBadgeLight">light 0%</span>
+          </div>
+        </div>
       </div>
 
       <div class="canvas-wrap">
@@ -861,6 +984,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       <div class="assumption-box"><b>Food webs & reproduction</b><br>Minnows capture prey following a Holling type II functional response (intake = aN / (1 + ahN)), so feeding saturates when prey are plentiful. A few prey per compartment are protected in refuges. Minnows also graze algae and detritus. Grazers feed at a rate that saturates with food concentration. Eaten food is egested (30%), stored as body reserves, or respired. Offspring are built from stored reserves, so births depend on food; juveniles grow from reserves before they reach adult size. Hungry prey accept more predation risk to keep feeding. Starvation is a rising risk in poor condition rather than a sudden threshold, and minnows have a small background mortality.</div>
       <div class="assumption-box"><b>Plant dynamics</b><br>Macrophytes photosynthesize by day, respire continuously, and shed about 1% of their tissue per day as detritus. They take N and P from the root zone. Shade, turbidity or heat above 30 °C can push a plant below its die-back threshold; after 4 days there it dies and all its tissue becomes detritus that bacteria must decompose. Healthy plants spread by runners (grass, ribbon) or rooting fragments (stem plants), with the daughter’s tissue coming from the parent.</div>
       <div class="assumption-box"><b>Cycle view (3.19)</b><br>The 🔄 Cycle view draws every recorded transfer of carbon, nitrogen or phosphorus between pools while the model runs. Arrow width follows the flow rate and circle size the amount stored (log scale, because the dissolved pools are much larger). “Right now” averages roughly the last hour, so it shows day/night changes; “24-hour average” smooths them. The flows add up exactly to each pool’s change, so the picture is a complete account of where matter went.</div>
+      <div class="assumption-box"><b>Snails (3.30)</b><br>Pond snails crawl; they do not swim. Each snail is always on a surface (the bottom, a rock, a plant, the tank glass or a glass wall, or the underside of the surface film) and climbs only where there is something to climb. Snails make regular grazing trips up plants and the glass to scrape periphyton (the algae film on surfaces), and graze algae and detritus on the bottom. A snail that lets go sinks back down. In low oxygen they crawl to the surface to breathe air, because pond snails such as Physa and Lymnaea are pulmonates with a lung. Click a snail with Inspect to see what it is doing.</div>
+      <div class="assumption-box"><b>Day and night (3.27–3.29)</b><br>The sun is above the horizon exactly when the model has daylight (06:00–18:00), following the same half-sine the model uses for photosynthesis. The “light” figure in the day/night badge above the tank is the sunlight reaching the water surface after the Light slider and turbidity. Dawn and dusk colours appear in the hour or so either side of sunrise and sunset, when the model's light is zero or very low. The moon is decorative and does not light the model.</div>
+      <div class="assumption-box"><b>Cycle view investigations (3.26)</b><br>An <b>Oxygen</b> tab shows O₂ made by photosynthesis and used by respiration, decomposition and nitrification, plus exchange with the air; these add up exactly to the change in dissolved O₂. <b>Predict</b> hides the arrow sizes so students choose which flow a change will alter most, then compares the 24 h before with the 24 h after. <b>Before / after</b> does the same comparison for any change. Both use exact running totals of every flow, so the numbers are precise rather than smoothed. <b>Tracer atom</b> moves one atom between pools at random, with each pool's stay drawn from an exponential distribution whose mean is the amount stored ÷ the outflow, and exits chosen in proportion to the flows (a simple Markov model of real isotope-tracer studies). The <b>Energy pyramid</b> converts the 24-h carbon flows to energy at ≈39 J per mg C and computes production as assimilation (70% of food eaten) minus respiration. Clicking a circle opens its <b>balance sheet</b>: inflows, outflows, net change and turnover time. None of these tools change the model.</div>
       <div class="assumption-box" style="grid-column:1/-1"><b>Parameter table</b><br>Every tuned rate in the model, with units and the kind of evidence behind it. Values marked instructional are tuned for a stable classroom model rather than taken from one study. Run <code>node tests/sensitivity.js</code> to see how each parameter affects persistence.<div id="paramTable" style="margin-top:8px;max-height:340px;overflow:auto"></div></div>
       <div class="assumption-box"><b>What the * preset means</b><br>The hidden * configuration is a reference ecosystem that has been stability-tested within this model. It is not a claim that those exact organism numbers form an optimal real ecosystem. Scuds remain intentionally absent from that preset.</div>
       <div class="assumption-box"><b>Interpretation</b><br>Use the model to investigate mechanisms, patterns, feedbacks, and evidence. Treat exact numerical outcomes as outputs of this educational model rather than measured ecological forecasts.</div>
@@ -1078,6 +1204,15 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     recordFlowEl(state, from, to, om * PARAMS.omCO2 * 12 / 44, om * PARAMS.omN, om * PARAMS.omN / PARAMS.omNP);
   }
   function animalNode(animal) { return animal.kind === 'fish' ? 'fish' : 'invertebrates'; }
+  // Oxygen produced (+) or used (-) by each process, in mg O2, for the
+  // Cycle view's oxygen layer. Keys: photoAlgae, photoPlants, respAlgae,
+  // respPlants, respInvert, respFish, decomp, nitrify, gas (+ = into water), bounds.
+  const O2_RESP_KEY = { algae: 'respAlgae', plants: 'respPlants', invertebrates: 'respInvert', fish: 'respFish', detritus: 'decomp', carcasses: 'decomp' };
+  function recordO2(state, key, mg) {
+    if (!mg) return;
+    const acc = state._o2Step || (state._o2Step = {});
+    acc[key] = (acc[key] || 0) + mg;
+  }
   const FLOW_TAU_NOW = 1, FLOW_TAU_DAY = 24;
   function updateFlowRates(state, dt) {
     const step = state._flowStep || {};
@@ -1094,7 +1229,32 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       }
     }
     state.flowRatesHours = (state.flowRatesHours || 0) + dt;
+    // Exact running totals (mg) of every edge, so any period can be
+    // compared precisely: total(t2) - total(t1).
+    const totals = state.flowTotals || (state.flowTotals = {});
+    for (const [k, s] of Object.entries(step)) {
+      const t = totals[k] || (totals[k] = { C: 0, N: 0, P: 0 });
+      t.C += s.C; t.N += s.N; t.P += s.P;
+    }
+    const o2Step = state._o2Step || {};
+    const o2Rates = state.o2Rates || (state.o2Rates = {});
+    const o2Totals = state.o2Totals || (state.o2Totals = {});
+    for (const k of new Set([...Object.keys(o2Rates), ...Object.keys(o2Step)])) {
+      const r = o2Rates[k] || (o2Rates[k] = { now: 0, day: 0 });
+      const v = o2Step[k] || 0, perHour = v / dt;
+      r.now += (perHour - r.now) * aNow;
+      r.day += (perHour - r.day) * aDay;
+      o2Totals[k] = (o2Totals[k] || 0) + v;
+    }
     state._flowStep = {};
+    state._o2Step = {};
+    // Hourly snapshots of the totals (last 50 h; not saved with the tank).
+    const hour = Math.floor(state.timeHours + 1e-9);
+    const hist = state._flowHist || (state._flowHist = []);
+    if (!hist.length || hist[hist.length - 1].hour !== hour) {
+      hist.push({ hour, t: state.timeHours, f: JSON.parse(JSON.stringify(totals)), o: { ...o2Totals } });
+      if (hist.length > 50) hist.shift();
+    }
   }
 
   // Aerobic respiration uses 1 mol O2 per mol CO2 released (32/44 by mass).
@@ -1108,6 +1268,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const used = Math.min(Math.max(0, f.o2[i]), demand);
     f.o2[i] -= used;
     recordOxygen(state, i, proc, -used);
+    recordO2(state, O2_RESP_KEY[from] || 'decomp', -used);
     f.co2[i] += om * PARAMS.omCO2;
     f.nh3[i] += om * PARAMS.omN;
     f.po4[i] += om * omP();
@@ -1136,6 +1297,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const o2 = actual * PARAMS.omCO2 * O2_PER_CO2;
       f.o2[ci] += o2;
       recordOxygen(state, ci, 'photosynthesis', o2);
+      recordO2(state, to === 'plants' ? 'photoPlants' : 'photoAlgae', o2);
     }
     return actual;
   }
@@ -1193,8 +1355,13 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     return state;
   }
 
+  // Dissolved-oxygen saturation in fresh water at 1 atm (mg/L), Benson & Krause
+  // (1984) as given in APHA Standard Methods 4500-O: 9.09 mg/L at 20 °C,
+  // 8.26 at 25 °C, 11.29 at 10 °C. (Before 3.25 a quadratic read ~1 mg/L high.)
   function oxygenSaturation(tempC) {
-    return clamp(14.6 - 0.29 * tempC + 0.003 * tempC * tempC, 6.2, 13.2);
+    const T = clamp(tempC, 0, 40) + 273.15;
+    return Math.exp(-139.34411 + 1.575701e5 / T - 6.642308e7 / (T * T)
+      + 1.243800e10 / (T * T * T) - 8.621949e11 / (T * T * T * T));
   }
 
   function dayHour(timeHours) {
@@ -1734,6 +1901,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         const nitrificationO2 = Math.min(Math.max(0, f.o2[i]), nitrify1 * 3.43 + nitrify2 * 1.14);
         f.o2[i] -= nitrificationO2;
         recordOxygen(state,i,'nitrification',-nitrificationO2);
+        recordO2(state,'nitrify',-nitrificationO2);
 
         // Decomposition: detritus -> bacterial biomass + CO2, NH4+, PO4.
         const omDecomposed = decomposition * 0.30;
@@ -1779,6 +1947,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
           if (jar && exchange > jar.o2) exchange = Math.max(0, jar.o2);
           f.o2[i] += exchange;
           recordOxygen(state,i,'gasExchange',exchange);
+          recordO2(state,'gas',exchange);
           let co2Exchange = (co2Target - f.co2[i]) * state.settings.gasExchange * 0.35 * dt;
           if (jar && co2Exchange > jar.co2) co2Exchange = Math.max(0, jar.co2);
           f.co2[i] += co2Exchange;
@@ -1804,6 +1973,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         const unboundedO2 = f.o2[i];
         f.o2[i] = clamp(f.o2[i], ...LIMITS.o2);
         recordOxygen(state,i,'bounds',f.o2[i]-unboundedO2);
+        recordO2(state,'bounds',f.o2[i]-unboundedO2);
         for (const k of ['co2','nh3','no2','no3','po4','algae','bacteria','detritus']) {
           const v = f[k][i], c = clamp(v, ...LIMITS[k]);
           if (c !== v) { f[k][i] = c; if (flux) recordBound(flux, k, c - v); }
@@ -1944,8 +2114,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const pH = state.settings.pH;
     const problems = [];
     let penalty = 0;
-    if (o2 < 4.0) { problems.push('hypoxia'); penalty += animal.kind === 'fish' ? 0.025 : 0.015; }
-    if (o2 < 2.0) penalty += 0.045;
+    const airBreather = animal.kind === 'snail' ? (animal.attach === 'film' ? 0 : animal.breathing > 0 ? 0.3 : 1) : 1;
+    if (o2 < 4.0 && airBreather > 0) { problems.push('hypoxia'); penalty += (animal.kind === 'fish' ? 0.025 : 0.015) * airBreather; }
+    if (o2 < 2.0) penalty += 0.045 * airBreather;
     // Toxicity depends on the un-ionized NH3 fraction, which rises steeply
     // with pH and temperature (Emerson et al. 1975), not on total ammonia.
     const nh3u = nh3 * unionizedFraction(temp, pH);
@@ -2498,10 +2669,11 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     };
   }
 
-  function shelterScoreAt(state, x, y, preference = 'general') {
+  function shelterScoreAt(state, x, y, preference = 'general', rockScore = null) {
     let score = 0;
     const compartment=chemistryCompartmentAt(state,x,y).id;
-    for (const r of nearbyRocks(state,x,y,2.6)) {
+    if (rockScore !== null) score = rockScore;
+    else for (const r of nearbyRocks(state,x,y,2.6)) {
       if (chemistryCompartmentAt(state,r.x,Math.min(ROWS-.7,r.y-.25)).id!==compartment) continue;
       const d = Math.hypot((r.x - x) * 1.0, (r.y - y) * 0.9);
       const radius = r.kind === 'gravel' ? 1.05 + (r.size || 0.2) * 1.4 : 0.85 + (r.size || 0.4) * 1.75;
@@ -2539,6 +2711,32 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     }
     return clamp(score, 0, 1);
   }
+  // The rock part of the shelter score at a rock's own position depends only on
+  // the habitat, so it is computed once per rock and preference and reused
+  // until the habitat changes (performance: avoids an all-rocks-by-all-rocks
+  // scan every time an animal looks for cover).
+  function rockShelterPart(state, r, pref) {
+    const key=`${state.terrain?.version}|${state.terrain?.glassVersion}|${state._habitatVersion||0}|${state.rocks.length}`;
+    if (state._shelterKey!==key || !state._shelterCache) { state._shelterCache=new Map(); state._shelterKey=key; }
+    let entry=state._shelterCache.get(r);
+    if (!entry) { entry={}; state._shelterCache.set(r,entry); }
+    if (entry[pref]===undefined) {
+      let score=0;
+      const compartment=chemistryCompartmentAt(state,r.x,r.y).id;
+      for (const q of nearbyRocks(state,r.x,r.y,2.6)) {
+        if (chemistryCompartmentAt(state,q.x,Math.min(ROWS-.7,q.y-.25)).id!==compartment) continue;
+        const d = Math.hypot((q.x - r.x) * 1.0, (q.y - r.y) * 0.9);
+        const radius = q.kind === 'gravel' ? 1.05 + (q.size || 0.2) * 1.4 : 0.85 + (q.size || 0.4) * 1.75;
+        if (d < radius) {
+          let value = (1 - d / radius) * (q.kind === 'gravel' ? 0.20 : 0.32 + (q.size || 0.4) * 0.20);
+          if (pref === 'scud' && q.kind === 'gravel') value *= 1.35;
+          score += value;
+        }
+      }
+      entry[pref]=score;
+    }
+    return entry[pref];
+  }
 
   function nearestShelter(state, animal, radius = 3.5) {
     let best = null;
@@ -2548,8 +2746,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     for (const r of nearbyRocks(state,animal.x,animal.y,radius+1.4)) {
       const d = Math.hypot(r.x - animal.x, r.y - animal.y);
       if (d > radius) continue;
-      const score = shelterScoreAt(state, r.x, r.y, pref);
       if (chemistryCompartmentAt(state,r.x,Math.min(ROWS-.7,r.y-.25)).id!==compartment) continue;
+      const score = shelterScoreAt(state, r.x, r.y, pref, rockShelterPart(state, r, pref));
       const utility = score / (0.7 + d);
       if (utility > bestUtility) { bestUtility = utility; best = { x:r.x, y:Math.min(ROWS - 0.7, r.y - 0.25), score, source:r.kind === 'gravel' ? 'gravel' : 'rocks' }; }
     }
@@ -2674,6 +2872,131 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ingest(state, animal, i, dd, 'detritus');
     if (om > 0.0004 * dt) animal.lastAte = 0;
     return true;
+  }
+
+  // ---- Snail locomotion (3.30) -------------------------------------------
+  // Snails crawl; they do not swim. A snail is always on a surface: the
+  // bottom or anything resting on it, a rock, a plant, the tank glass or
+  // a glass wall, or the underside of the surface film. It climbs only where
+  // there is something to climb, and if it lets go it sinks back down.
+  // footAngle points the foot at the surface for drawing (0 = foot down).
+  const SNAIL_BODY=.22,SNAIL_SPEED=.10;
+  function snailSurface(state,x,y){
+    const sup=carcassSupportBelow(state,x,Math.max(0,y-.05));
+    const gap=sup.y-y;
+    if(gap>=-.12&&gap<=SNAIL_BODY+.32)return {kind:sup.source==='rock'?'rock':'floor',angle:0,floorY:sup.y-SNAIL_BODY,label:sup.source};
+    if(x<=.42)return {kind:'wall',angle:Math.PI/2,label:'glass'};
+    if(x>=COLS-.42)return {kind:'wall',angle:-Math.PI/2,label:'glass'};
+    if(y<=.40)return {kind:'film',angle:Math.PI,label:'surface film'};
+    for(const p of state.plants){
+      if((p.biomass??1)<.18)continue;
+      const h=p.heightCells||plantProfile(p.type).height;
+      if(y<p.y-h-.05||y>p.y+1.4)continue;   // stem reaches down to the bottom
+      const w=.30+Math.min(.18,(plantProfile(p.type).width||.5)*.15);
+      if(Math.abs(x-p.x)<=w)return {kind:'plant',angle:x<p.x?-Math.PI/2:Math.PI/2,label:'plant',plant:p};
+    }
+    for(const r of nearbyRocks(state,x,y,1.4)){
+      if(r.kind==='gravel')continue;
+      const rx=.30+(r.size||.4)*.72+SNAIL_BODY,ry=.22+(r.size||.4)*.52+SNAIL_BODY;
+      const dx=(x-r.x)/rx,dy=(y-r.y)/ry;
+      if(dx*dx+dy*dy<=1.05)return {kind:'rock',angle:Math.atan2(-(r.x-x),(r.y-y)),label:'rock'};
+    }
+    if(state.terrain){
+      if(terrainSolidAt(state,x-.16,y))return {kind:'wall',angle:Math.PI/2,label:'glass wall'};
+      if(terrainSolidAt(state,x+.16,y))return {kind:'wall',angle:-Math.PI/2,label:'glass wall'};
+      if(terrainSolidAt(state,x,y-.16))return {kind:'film',angle:Math.PI,label:'glass ledge'};
+    }
+    return null;
+  }
+  // Nearest thing to climb. To breathe, only the glass or a plant that
+  // reaches the surface will do.
+  function nearestClimbX(state,x,y,toSurface=false){
+    let best=x<COLS/2?.3:COLS-.3,bd=Math.abs(best-x);
+    for(const p of state.plants){if((p.biomass??1)<.18)continue;
+      if(toSurface&&p.y-(p.heightCells||plantProfile(p.type).height)>.9)continue;
+      const d=Math.abs(p.x-x);if(d<bd){bd=d;best=p.x+(x<p.x?-.25:.25);}}
+    return best;
+  }
+  function crawlSnail(state,a,dt,rng){
+    const here=snailSurface(state,a.x,a.y);
+    if(a.breathing>0)a.breathing-=dt;
+    // Detached: sink straight down until something catches it.
+    if(!here){
+      const sup=carcassSupportBelow(state,a.x,a.y);
+      let ny=Math.min(a.y+.32*dt,sup.y-SNAIL_BODY);
+      if(!animalPathOpen(state,a.x,a.y,a.x,ny))ny=a.y;
+      a.vx*=.3;a.vy=.32;a.y=ny;a.attach='sinking';
+      a.behavior='sinking after letting go';
+      return;
+    }
+    a.attach=here.kind;a.footAngle=here.angle;
+    if(a.climb>0)a.climb-=dt;
+    // Snails make regular grazing trips up plants and the glass (periphyton),
+    // more often when hungry; a trip lasts several hours.
+    if(!(a.climb>0)&&(here.kind==='floor'||here.kind==='rock')&&rng()<(a.energy<.7?.02:.008)*dt){
+      a.climb=4+rng()*10;
+      // about a third of trips go to the glass, the rest to the nearest plant
+      a.climbX=rng()<.35?(a.x<COLS/2?.3:COLS-.3):nearestClimbX(state,a.x,a.y);
+    }
+    const wantUp=(a.breathing>0)||(a.climb>0)||a.vy<-.035;
+    const wantDown=!wantUp&&(here.kind==='wall'||here.kind==='plant');
+    // Desired motion comes from feeding and oxygen steering (vx, vy), plus a
+    // slow wander along the surface.
+    let vx=a.vx+(rng()-.5)*.03,vy=a.vy+(rng()-.5)*.03;
+    if(a.breathing>0)vy=-SNAIL_SPEED*2.2;
+    if(here.kind==='floor'||(here.kind==='rock'&&here.angle===0)){
+      if(wantUp){const cx=a.breathing>0?nearestClimbX(state,a.x,a.y,true):a.climb>0&&a.climbX!=null?a.climbX:nearestClimbX(state,a.x,a.y);vx=Math.sign(cx-a.x)*(a.breathing>0?SNAIL_SPEED*2.2:SNAIL_SPEED)*(Math.abs(cx-a.x)>.05?1:0);}
+      vy=Math.min(vy,0);
+      // Stay on the bottom until reaching the chosen plant or glass, then climb.
+      if(wantUp&&Math.abs(vx)>0)vy=(here.floorY-a.y)*.8;
+      if(!wantUp)vy=(here.floorY-a.y)*.8;
+    }else if(here.kind==='film'){
+      if(a.breathing>0){vy=0;}
+      else if(rng()<.12*dt){a.y+=.12;a.vy=.3;a.behavior='letting go of the surface film';return;}
+    }else if(here.kind==='rock'){
+      // Crawling over a rock: free to move any way along its surface.
+      if(wantUp){const cx=a.breathing>0?nearestClimbX(state,a.x,a.y,true):a.climb>0&&a.climbX!=null?a.climbX:nearestClimbX(state,a.x,a.y);
+        vx=Math.sign(cx-a.x)*(a.breathing>0?SNAIL_SPEED*2.2:SNAIL_SPEED);vy=-SNAIL_SPEED*.5;}
+      else vy=Math.max(vy,.04);
+    }else{
+      // On glass or a plant: mostly vertical crawling.
+      vx*=.25;
+      // A plant that does not reach the surface is no use for breathing:
+      // the snail drops off and heads for the glass instead.
+      if(a.breathing>0&&here.kind==='plant'&&here.plant&&here.plant.y-(here.plant.heightCells||plantProfile(here.plant.type).height)>.9&&rng()<.3*dt){
+        a.x+=here.angle>0?.25:-.25;a.behavior='dropping off a short plant to find the glass';return;}
+      if(wantUp)vy=Math.min(vy,-SNAIL_SPEED*(a.breathing>0?2.2:.6));
+      else if(here.kind==='rock')vy=Math.max(vy,.04);
+      else if(wantDown){vy=Math.max(vy,SNAIL_SPEED*.6);if(rng()<.06*dt){a.x+=here.angle>0?.25:-.25;a.behavior='letting go';return;}}
+    }
+    const cap=a.breathing>0?SNAIL_SPEED*2.2:SNAIL_SPEED;
+    const sp=Math.hypot(vx,vy);if(sp>cap){vx*=cap/sp;vy*=cap/sp;}
+    a.vx=vx;a.vy=vy;
+    // On the bottom, follow the ground's contour (sand bumps, gravel, rock tops).
+    const onGround=(here.kind==='floor'||(here.kind==='rock'&&here.angle===0))&&!(wantUp&&Math.abs(vx)<1e-9);
+    if(onGround){
+      const nx=clamp(a.x+vx*dt,.2,COLS-.2),g=carcassSupportBelow(state,nx,a.y-.75).y-SNAIL_BODY;
+      if(g>=a.y-.75&&!terrainSolidAt(state,nx,g)){a.x=nx;a.y=g;a.vx=vx;a.vy=0;
+        const s2=snailSurface(state,a.x,a.y)||here;a.attach=s2.kind;a.footAngle=s2.angle;a.stuck=0;
+        if(!String(a.behavior||'').startsWith('climbing to breathe'))a.behavior=a.attach==='rock'?'grazing on a rock':'grazing detritus and algae on the bottom';
+        return;}
+    }
+    const tries=[[a.x+vx*dt,a.y+vy*dt],[a.x+vx*dt,a.y],[a.x,a.y+vy*dt]];
+    let moved=false;
+    for(const [tx,ty] of tries){
+      const nx=clamp(tx,.2,COLS-.2),ny=clamp(ty,.2,ROWS-.2);
+      if(!animalPathOpen(state,a.x,a.y,nx,ny))continue;
+      const s=snailSurface(state,nx,ny);if(!s)continue;
+      a.x=nx;a.y=s.kind==='floor'&&!wantUp?Math.max(ny,Math.min(s.floorY,ny+.3)):ny;moved=true;break;
+    }
+    if(!moved){a.vx*=-.5;a.vy*=-.5;a.stuck=(a.stuck||0)+dt;}else a.stuck=0;
+    if(a.stuck>3){a.stuck=0;a.climb=0;a.x=clamp(a.x+(rng()-.5)*.5,.25,COLS-.25);a.y=Math.min(ROWS-.25,a.y+.15);a.behavior='letting go';return;}
+    const s=snailSurface(state,a.x,a.y)||here;a.attach=s.kind;a.footAngle=s.angle;
+    if(!String(a.behavior||'').startsWith('climbing to breathe')||a.attach==='film'){
+      a.behavior=a.attach==='film'?(a.breathing>0?'breathing air at the surface':'resting on the surface film')
+        :a.attach==='plant'?'grazing periphyton on a plant':a.attach==='wall'?`grazing periphyton on the ${s.label}`
+        :a.attach==='rock'?'grazing on a rock':'grazing detritus and algae on the bottom';
+    }
   }
 
   function stepAnimals(state, dt = 1) {
@@ -2911,7 +3234,12 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       if (animal.kind === 'daphnia' || animal.kind === 'snail' || animal.kind === 'scud') {
           const localO2=state.fields.o2[zoneAt(animal.x,animal.y)];
           const threshold=animal.kind==='daphnia'?3.4:animal.kind==='scud'?3.1:2.8;
-          if(localO2<threshold){
+          if(localO2<threshold&&animal.kind==='snail'){
+            // Pond snails (Physa, Lymnaea) are pulmonates: they breathe air, so in
+            // low oxygen they crawl up a plant or the glass to the surface film.
+            animal.breathing=Math.max(animal.breathing||0,6);
+            animal.behavior='climbing to breathe air (low O₂)';
+          }else if(localO2<threshold){
             const oxy=bestOxygenZone(state,animal,3);
             moveToward(animal,oxy.x,oxy.y,animal.kind==='daphnia'?.055:animal.kind==='scud'?.042:.026);
             animal.behavior='seeking higher O₂';
@@ -2919,17 +3247,14 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         }
 
 
-      if (!animal.isPlayer) {
+      if (animal.kind === 'snail' && !animal.isPlayer) crawlSnail(state, animal, dt, rng);
+      else if (!animal.isPlayer) {
       steerFromWalls(animal);
       steerFromRockStructure(state, animal);
       steerFromTerrain(state, animal);
       const noise=animal.kind==='fish'?0.012:0.03;
       animal.vx += (rng() - 0.5) * noise;
       animal.vy += (rng() - 0.5) * noise;
-      if (animal.kind === 'snail' && !String(animal.behavior||'').includes('higher O₂'))
-        // Snails prefer the substrate but, when hungry, climb plants and glass
-        // to graze periphyton higher in the water column.
-        animal.vy += (ROWS - 1.3 - animal.y) * (animal.energy > 0.6 ? 0.02 : 0.004);
       const speed = (animal.kind === 'fish' ? 0.32 : animal.kind === 'daphnia' ? 0.22 : animal.kind === 'scud' ? 0.16 : 0.10) * (animal.kind === 'fish' ? trait(animal, 'speed') : 1);
       animal.vx = clamp(animal.vx, -speed, speed);
       animal.vy = clamp(animal.vy, -speed, speed);
@@ -3801,6 +4126,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   let running = false;
   let speed = 1;
   let activeTool = 'probe';
+  let probeHover = null;
   let placementLevel = 3;
   let selectedAnimalId = null;
   let selectedCarcassId = null;
@@ -4214,6 +4540,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if(box) box.classList.toggle('visible',habitatMode);
     document.querySelector('.builder-head')?.classList.toggle('habitat-active',habitatMode);
     document.querySelector('.canvas-wrap')?.classList.toggle('habitat-drawing',habitatMode);
+    document.querySelector('.canvas-wrap')?.classList.toggle('probe-mode',activeTool==='probe');
     if($('undoHabitatBtn')) {
       $('undoHabitatBtn').disabled=habitatUndoStack.length===0;
       $('undoHabitatBtn').title=habitatUndoStack.at(-1)?.kind==='plantRemoval'?'Undo the most recent plant harvest':'Undo the most recent habitat drawing stroke';
@@ -4883,7 +5210,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   function updateActivityStrip() {
     const strip = $('activityStrip');
     if (!strip) return;
-    strip.classList.toggle('hidden', !activityPanelEnabled);
+    strip.classList.toggle('info-off', !activityPanelEnabled);
     if (!activityPanelEnabled) return;
 
     const sm = E.summaries(state);
@@ -5037,7 +5364,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x0,wr.y);ctx.lineTo(x0+w,wr.y);ctx.lineTo(x0+w+dr,wr.y+wr.h*.85);ctx.lineTo(x0+dr-w*.2,wr.y+wr.h*.85);ctx.closePath();ctx.fill();}
     ctx.restore();
   }
-  function drawNight(daylight){if(daylight>=.6)return;const wr=waterRect();ctx.fillStyle=`rgba(3,9,26,${(.6-daylight)*.55})`;ctx.fillRect(wr.x,wr.y,wr.w,wr.h);}
+  // Night dims the water in step with the sky (smooth through dawn and dusk).
+  function drawNight(sky){const a=.42*(1-sky.day);if(a<.005)return;const wr=waterRect();ctx.fillStyle=`rgba(3,9,28,${a.toFixed(3)})`;ctx.fillRect(wr.x,wr.y,wr.w,wr.h);}
   let lensMode=0;
   const LENS=[null,{k:'o2',l:'O₂ (mg/L)',lo:0,hi:12,inv:1},{k:'co2',l:'CO₂ (mg/L)',lo:0,hi:15},{k:'nh3',l:'NH₃ (mg/L)',lo:0,hi:1},{k:'no2',l:'NO₂ (mg/L)',lo:0,hi:1},{k:'no3',l:'NO₃ (mg/L)',lo:0,hi:30},{k:'po4',l:'PO₄-P (mg/L)',lo:0,hi:0.08},{k:'algae',l:'Algae biomass',lo:0,hi:1},{k:'light',l:'Light (fraction)',lo:0,hi:1,inv:1}];
   const lensCv=document.createElement('canvas');lensCv.width=E.COLS;lensCv.height=E.ROWS;const lensCx=lensCv.getContext('2d');
@@ -5055,12 +5383,12 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const g=ctx.createLinearGradient(lx,0,lx+134,0);for(let i=0;i<=4;i++){const c=lensColor(m.inv?1-i/4:i/4);g.addColorStop(i/4,`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`);}
     ctx.fillStyle=g;ctx.fillRect(lx,ly,134,8);ctx.fillStyle='#d7e3f1';ctx.font='10px system-ui';ctx.fillText(m.l,lx,ly-4);ctx.fillText(String(m.lo),lx,ly+20);ctx.textAlign='right';ctx.fillText(String(m.hi),lx+134,ly+20);ctx.restore();
   }
-  (function(){const wrap=tank.closest('.canvas-wrap');if(!wrap)return;wrap.style.position='relative';const b=document.createElement('button');b.className='btn';b.id='lensBtn';b.textContent='🔬 Lens: off';b.title='Cycle a smoothed heatmap of one variable (shortcut: L)';b.style.cssText='position:absolute;top:14px;right:14px;z-index:3;font-size:11px;padding:5px 9px;opacity:.92';
+  (function(){const wrap=tank.closest('.canvas-wrap');if(!wrap)return;wrap.style.position='relative';const b=document.createElement('button');b.className='btn';b.id='lensBtn';b.textContent='🔬 Lens: off';b.title='Cycle a smoothed heatmap of one variable (shortcut: L)';b.style.cssText='';
     const cycle=()=>{lensMode=(lensMode+1)%LENS.length;b.textContent=lensMode?`🔬 Lens: ${LENS[lensMode].l.split(' ')[0]}`:'🔬 Lens: off';};b.addEventListener('click',cycle);
     const db=document.createElement('button');db.className='btn disco-btn';db.id='discoBtn';db.setAttribute('aria-pressed','false');
     db.title='Celebration of life! Every creature dances (shortcut: D). Visual only — the ecosystem model is not changed.';
     db.innerHTML=`<svg width="22" height="24" viewBox="0 0 32 34" aria-hidden="true"><defs><radialGradient id="discoIconGrad" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#b8c4d4"/><stop offset="1" stop-color="#3b4a60"/></radialGradient><clipPath id="discoIconClip"><circle cx="16" cy="20" r="12"/></clipPath></defs><line x1="16" y1="0" x2="16" y2="8" stroke="#cbd5e1" stroke-width="1.5"/><circle cx="16" cy="20" r="12" fill="url(#discoIconGrad)"/><g clip-path="url(#discoIconClip)" stroke="rgba(30,41,59,.55)" stroke-width="1" fill="none"><path d="M4 14h24M4 18h24M4 22h24M4 26h24"/><ellipse cx="16" cy="20" rx="4" ry="12"/><ellipse cx="16" cy="20" rx="9" ry="12"/></g><rect x="9" y="15" width="3" height="3" fill="#f0abfc"/><rect x="18" y="19" width="3" height="3" fill="#67e8f9"/><rect x="13" y="23" width="3" height="3" fill="#fde047"/><path d="M27 4l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z" fill="#fde047"/></svg><span>Disco</span>`;
-    db.addEventListener('click',()=>setDisco(!discoOn));wrap.appendChild(db);
+    db.addEventListener('click',()=>setDisco(!discoOn));
     const ds=document.createElement('button');ds.className='btn disco-sound';ds.id='discoSoundBtn';ds.textContent='🔊 Music on';
     ds.addEventListener('click',()=>{discoSound=!discoSound;try{localStorage.setItem('ecosphere-disco-sound',discoSound?'on':'off');}catch(err){}if(discoSound)startDiscoMusic();else stopDiscoMusic();ds.textContent=discoSound?'🔊 Music on':'🔇 Music off';});
     wrap.appendChild(ds);
@@ -5073,10 +5401,11 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     dt.addEventListener('click',async()=>{dt.textContent='Rendering…';try{const blob=await renderDiscoTrack(32);const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`ecosphere-${discoTrack}.wav`;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}catch(err){setPresetMessage(err.message);}dt.textContent='⬇ Save track';});
     wrap.appendChild(dt);
     window.addEventListener('keydown',e=>{if((e.key==='d'||e.key==='D')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))setDisco(!discoOn);});
-    const cb=document.createElement('button');cb.className='btn';cb.id='cycleBtn';cb.textContent='🔄 Cycle view';cb.title='Show carbon, nitrogen and phosphorus flowing between pools (shortcut: C)';cb.style.cssText='position:absolute;top:52px;right:14px;z-index:3;font-size:11px;padding:5px 9px;opacity:.92';
-    cb.addEventListener('click',()=>toggleCycleView());wrap.appendChild(cb);
+    const cb=document.createElement('button');cb.className='btn';cb.id='cycleBtn';cb.textContent='🔄 Cycle view';cb.title='Show carbon, nitrogen and phosphorus flowing between pools (shortcut: C)';cb.style.cssText='';
+    cb.addEventListener('click',()=>toggleCycleView());
     window.addEventListener('keydown',e=>{if((e.key==='c'||e.key==='C')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))toggleCycleView();});
-    window.addEventListener('keydown',e=>{if((e.key==='l'||e.key==='L')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))cycle();});wrap.appendChild(b);})();
+    window.addEventListener('keydown',e=>{if((e.key==='l'||e.key==='L')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))cycle();});
+    const bar=$('tankControls');if(bar){bar.appendChild(b);bar.appendChild(cb);bar.appendChild(db);}else{wrap.appendChild(b);wrap.appendChild(cb);wrap.appendChild(db);}})();
 
   // ---- Disco: a celebration of life --------------------------------------
   // Purely visual and musical; the ecosystem model is untouched. Colour
@@ -5435,15 +5764,11 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   function drawTank() {
     const now = performance.now();
     updateOxygenBubbles(now);
-    const displayTime = visualTimeHours(now);
+    const displayTime = skyClock(now);
     const w = tank.width, h = tank.height;
     ctx.clearRect(0, 0, w, h);
     const daylight = E.sunFraction(displayTime);
-    const sky = ctx.createLinearGradient(0, 0, 0, 115);
-    sky.addColorStop(0, daylight > 0 ? `rgb(${16 + daylight * 20},${42 + daylight * 65},${71 + daylight * 95})` : '#020617');
-    sky.addColorStop(1, daylight > 0 ? '#12314d' : '#07111f');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, 130);
-    drawSunMoon(daylight, displayTime);
+    const skyNow = drawSky(now, displayTime);
 
     const wr = waterRect();
     const turb = state.settings.turbidityPercent / 100;
@@ -5463,7 +5788,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     drawHabitatLayer();
     drawRays(now,daylight,turb);
     drawDiscoBackdrop();
-    drawNight(daylight);
+    drawNight(skyNow);
     state.plants.forEach(p => drawPlant(p));
     drawOxygenBubbles();
     if (plantDrag) {
@@ -5475,6 +5800,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     }
     (state.carcasses || []).forEach(c => drawCarcass(c));
     state.animals.forEach(a => drawAnimal(a));
+    drawProbeOverlay();
     if (selectedAnimalId) {
       const a=state.animals.find(x=>x.id===selectedAnimalId);
       if(a){const p=modelToCanvas(a.x,a.y);ctx.save();ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(p.x,p.y,a.kind==='fish'?24:16,0,Math.PI*2);ctx.stroke();ctx.restore();}
@@ -5495,19 +5821,135 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ctx.strokeStyle = 'rgba(176,218,245,.45)'; ctx.strokeRect(wr.x, wr.y, wr.w, wr.h);
   }
 
-  function drawSunMoon(daylight, displayTime = state.timeHours) {
-    const h = ((displayTime % 24) + 24) % 24;
-    const isDay = h >= 6 && h <= 18;
-    const phase = isDay ? (h - 6) / 12 : h > 18 ? (h - 18) / 12 : (h + 6) / 12;
-    const x = 60 + phase * (tank.width - 120);
-    const y = 76 - Math.sin(phase * Math.PI) * 46;
-    const glow = ctx.createRadialGradient(x, y, 2, x, y, isDay ? 55 : 38);
-    glow.addColorStop(0, isDay ? 'rgba(255,232,145,.95)' : 'rgba(215,228,255,.85)');
-    glow.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, isDay ? 55 : 38, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = isDay ? '#fde68a' : '#dbeafe'; ctx.beginPath(); ctx.arc(x, y, isDay ? 15 : 12, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#d7e5f4'; ctx.font = '12px system-ui'; ctx.fillText(`${isDay ? 'DAY' : 'NIGHT'} · ${formatTime(displayTime)}`, 15, 22);
-    ctx.fillStyle = '#8ca2b9'; ctx.fillText(`surface light ${(E.effectiveSurfaceLight(state) * 100).toFixed(0)}%`, 15, 39);
+  // ---- Sky, sun and moon (3.27) -----------------------------------------
+  // The sky keeps its own clock that glides at the simulation's pace, so the
+  // sun and moon move steadily instead of easing hour by hour. The sun is
+  // above the horizon exactly when the model has daylight (06:00–18:00);
+  // dawn and dusk colours fall in the hour either side, when the model's
+  // light is still zero or very low.
+  let skyAnim=null;
+  function skyValue(now){const a=skyAnim,t=E.clamp((now-a.start)/a.dur,0,1);return a.from+(a.to-a.from)*t;}
+  function skyClock(now){
+    const target=state.timeHours;
+    if(!skyAnim||skyAnim.state!==state){skyAnim={state,from:target,to:target,start:now,dur:1,gap:300,last:now};return target;}
+    if(Math.abs(target-skyAnim.to)>1e-9){
+      const cur=skyValue(now),gap=now-skyAnim.last;skyAnim.last=now;
+      if(gap>4&&gap<3000)skyAnim.gap=skyAnim.gap*.7+gap*.3;
+      const jump=target<cur-1e-6||target-cur>6;
+      skyAnim.from=jump?target:cur;skyAnim.to=target;skyAnim.start=now;skyAnim.dur=E.clamp(skyAnim.gap*1.08,16,900);
+    }
+    return skyValue(now);
+  }
+  const SKY_STARS=(()=>{let s=20261012;const r=()=>(s=(s*16807)%2147483647)/2147483647;return Array.from({length:70},()=>({x:r(),y:r()*.9,m:.35+r()*.65,p:r()*6.28,z:r()<.15?1.6:1}));})();
+  const mixRGB=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+  const rgbA=(c,a=1)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const SKY={nightTop:[4,8,26],nightBot:[12,22,52],dayTop:[38,104,164],dayBot:[92,150,196],twiTop:[62,52,118],twiBot:[238,134,92]};
+  function skyStateAt(t){
+    const h=((t%24)+24)%24,alt=Math.sin((h-6)/12*Math.PI);
+    let day=E.clamp((alt+.12)/.42,0,1);day=day*day*(3-2*day);
+    const dRise=Math.abs(h-6),dSet=Math.abs(h-18);
+    let tw=E.clamp(1-Math.min(dRise,dSet)/1.4,0,1);tw=tw*tw*(3-2*tw);
+    const top=mixRGB(mixRGB(SKY.nightTop,SKY.dayTop,day),SKY.twiTop,tw*.4);
+    const bot=mixRGB(mixRGB(SKY.nightBot,SKY.dayBot,day),SKY.twiBot,tw*.7);
+    return {h,alt,day,tw,dusk:dSet<dRise,top,bot,isDay:h>=6&&h<18};
+  }
+  function drawSky(now,t){
+    const W=tank.width,H0=waterRect().y,st=skyStateAt(t),still=targetFPS<20;
+    const g=ctx.createLinearGradient(0,0,0,H0);g.addColorStop(0,rgbA(st.top));g.addColorStop(1,rgbA(st.bot));
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H0+40);
+    ctx.save();ctx.beginPath();ctx.rect(0,0,W,H0);ctx.clip();
+    // twilight glow on the side where the sun is rising or setting
+    if(st.tw>.02){const gx=st.dusk?W-60:60,rg=ctx.createRadialGradient(gx,H0,4,gx,H0,W*.45);
+      rg.addColorStop(0,`rgba(255,150,90,${.42*st.tw})`);rg.addColorStop(.5,`rgba(240,110,120,${.16*st.tw})`);rg.addColorStop(1,'rgba(240,110,120,0)');
+      ctx.fillStyle=rg;ctx.fillRect(0,0,W,H0);}
+    // stars fade in as the sky darkens
+    const starA=(1-st.day)*(1-st.tw*.7);
+    if(starA>.03){ctx.fillStyle='#e2e8f0';
+      for(const s of SKY_STARS){const tw=still?1:.7+.3*Math.sin(now/900+s.p*3);ctx.globalAlpha=starA*s.m*tw*.85;ctx.fillRect(s.x*W,s.y*H0*.92,s.z,s.z);}
+      ctx.globalAlpha=1;}
+    // sun: rises on the left at 06:00, sets on the right at 18:00
+    const arcX=p=>60+p*(W-120);
+    const ps=(st.h-6)/12;
+    if(ps>-.12&&ps<1.12){
+      const x=arcX(ps),y=H0+4-Math.sin(ps*Math.PI)*64,alt=Math.max(0,Math.sin(ps*Math.PI)),warm=1-E.clamp(alt/.38,0,1);
+      const core=mixRGB([255,246,205],[255,196,120],warm),edge=mixRGB([251,191,36],[249,115,22],warm),glowC=mixRGB([255,214,120],[255,140,80],warm);
+      const gl=ctx.createRadialGradient(x,y,4,x,y,62);gl.addColorStop(0,rgbA(glowC,.55));gl.addColorStop(1,rgbA(glowC,0));
+      ctx.fillStyle=gl;ctx.beginPath();ctx.arc(x,y,62,0,Math.PI*2);ctx.fill();
+      const rot=still?0:now/5000;ctx.strokeStyle=rgbA(edge,.75-warm*.3);ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();
+      for(let k=0;k<12;k++){const an=rot+k*Math.PI/6,r1=21,r2=k%2?27:30;ctx.moveTo(x+Math.cos(an)*r1,y+Math.sin(an)*r1);ctx.lineTo(x+Math.cos(an)*r2,y+Math.sin(an)*r2);}
+      ctx.stroke();
+      const dg=ctx.createRadialGradient(x-4,y-4,2,x,y,16);dg.addColorStop(0,rgbA(core));dg.addColorStop(1,rgbA(edge));
+      ctx.fillStyle=dg;ctx.beginPath();ctx.arc(x,y,16,0,Math.PI*2);ctx.fill();
+    }
+    // moon: a small crescent that rises at 18:00 and sets at 06:00
+    let pm=((st.h-18+24)%24)/12;if(pm>1.9)pm-=2;
+    if(pm>-.12&&pm<1.12){
+      const x=arcX(pm),y=H0+4-Math.sin(pm*Math.PI)*54,r=10,vis=1-st.day*.75;
+      const halo=ctx.createRadialGradient(x,y,2,x,y,26);halo.addColorStop(0,`rgba(200,215,255,${.16*vis})`);halo.addColorStop(1,'rgba(200,215,255,0)');
+      ctx.fillStyle=halo;ctx.beginPath();ctx.arc(x,y,26,0,Math.PI*2);ctx.fill();
+      ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.clip();
+      ctx.fillStyle=`rgba(226,232,240,${.14*vis})`;ctx.fillRect(x-r,y-r,2*r,2*r);      // faint earthshine
+      ctx.fillStyle=`rgba(241,245,249,${.95*vis})`;ctx.beginPath();ctx.rect(x-r-1,y-r-1,2*r+2,2*r+2);ctx.arc(x+5,y-3,r*.92,0,Math.PI*2,true);ctx.fill('evenodd');
+      ctx.restore();
+    }
+    ctx.restore();
+    updateSkyBadge(t,st);
+    return st;
+  }
+  // Day/night badge in the toolbar above the tank (3.29). Updated only when its text changes.
+  let skyBadgeLast='';
+  function updateSkyBadge(t,st){
+    const h=st.h,isDay=st.isDay;
+    const hm=`${String(Math.floor(h)).padStart(2,'0')}:${String(Math.floor((h%1)*6)*10).padStart(2,'0')}`;
+    const clock=activeMode?.dayLabel?`${activeMode.dayLabel(t)} · ${hm}`:`Day ${Math.floor(t/24)} · ${hm}`;
+    const light=`light ${(E.effectiveSurfaceLight(state)*100).toFixed(0)}%`;
+    const sig=isDay+clock+light;if(sig===skyBadgeLast)return;skyBadgeLast=sig;
+    const el=$('skyBadge');if(!el)return;
+    el.classList.toggle('day',isDay);el.classList.toggle('night',!isDay);
+    $('skyBadgeLabel').textContent=isDay?'DAY':'NIGHT';$('skyBadgeClock').textContent=clock;$('skyBadgeLight').textContent=light;
+  }
+  // (Pre-3.29 canvas HUD: badge, countdown and light strip; no longer drawn.)
+  function roundRectPath(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function drawSkyHud(t,st){
+    const h=st.h,isDay=st.isDay;
+    const toEvent=isDay?18-h:(h>=18?30-h:6-h);
+    let hh=Math.floor(toEvent),mm=Math.round((toEvent-hh)*6)*10;if(mm===60){hh++;mm=0;}
+    const when=hh===0&&mm===0?'now':`in ${hh?hh+' h':''}${hh&&mm?' ':''}${mm?mm+' min':''}`;
+    const hm=`${String(Math.floor(h)).padStart(2,'0')}:${String(Math.floor((h%1)*6)*10).padStart(2,'0')}`;
+    const clock=activeMode?.dayLabel?`${activeMode.dayLabel(t)} · ${hm}`:`Day ${Math.floor(t/24)} · ${hm}`;
+    const x0=10,y0=8,bw=206,bh=26;
+    ctx.save();
+    roundRectPath(x0,y0,bw,bh,13);ctx.fillStyle=isDay?'rgba(92,60,4,.72)':'rgba(24,22,70,.78)';ctx.fill();
+    ctx.lineWidth=1.5;ctx.strokeStyle=isDay?'#fbbf24':'#818cf8';ctx.stroke();
+    // icon
+    const ix=x0+15,iy=y0+bh/2;
+    if(isDay){ctx.fillStyle='#fcd34d';ctx.beginPath();ctx.arc(ix,iy,4.5,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fcd34d';ctx.lineWidth=1.6;ctx.beginPath();for(let k=0;k<8;k++){const an=k*Math.PI/4;ctx.moveTo(ix+Math.cos(an)*6.5,iy+Math.sin(an)*6.5);ctx.lineTo(ix+Math.cos(an)*9,iy+Math.sin(an)*9);}ctx.stroke();}
+    else{ctx.save();ctx.beginPath();ctx.arc(ix,iy,7,0,Math.PI*2);ctx.clip();ctx.fillStyle='#e0e7ff';ctx.beginPath();ctx.rect(ix-8,iy-8,16,16);ctx.arc(ix+3.6,iy-2,6.4,0,Math.PI*2,true);ctx.fill('evenodd');ctx.restore();}
+    ctx.textBaseline='middle';
+    ctx.font='bold 12px system-ui';ctx.fillStyle=isDay?'#fde68a':'#c7d2fe';const lab=isDay?'DAY':'NIGHT';ctx.fillText(lab,x0+30,iy+.5);
+    const lw=ctx.measureText(lab).width;
+    ctx.font='12px system-ui';ctx.fillStyle='#f1f5f9';ctx.fillText(clock,x0+36+lw,iy+.5);
+    // second line: countdown and surface light
+    ctx.font='11px system-ui';ctx.lineWidth=3;ctx.strokeStyle='rgba(2,6,23,.75)';ctx.lineJoin='round';
+    const line2=`${isDay?'Sunset':'Sunrise'} ${when} · surface light ${(E.effectiveSurfaceLight(state)*100).toFixed(0)}%`;
+    ctx.strokeText(line2,x0+2,y0+bh+11);ctx.fillStyle='#e2e8f0';ctx.fillText(line2,x0+2,y0+bh+11);
+    // light strip: the model's daylight curve over 24 h, with a marker at now
+    const sx=x0,sy=y0+bh+20,sw=bw,sh=16;
+    roundRectPath(sx,sy,sw,sh,4);ctx.fillStyle='rgba(4,10,26,.78)';ctx.fill();
+    ctx.save();roundRectPath(sx,sy,sw,sh,4);ctx.clip();
+    ctx.beginPath();ctx.moveTo(sx+sw*.25,sy+sh);
+    for(let i=0;i<=48;i++){const hr=6+i*12/48,f=Math.sin((hr-6)/12*Math.PI);ctx.lineTo(sx+sw*hr/24,sy+sh-1-f*(sh-3));}
+    ctx.lineTo(sx+sw*.75,sy+sh);ctx.closePath();ctx.fillStyle='rgba(250,204,21,.42)';ctx.fill();
+    ctx.strokeStyle='rgba(250,204,21,.9)';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=48;i++){const hr=6+i*12/48,f=Math.sin((hr-6)/12*Math.PI);const px=sx+sw*hr/24,py=sy+sh-1-f*(sh-3);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();
+    ctx.strokeStyle='rgba(148,163,184,.35)';ctx.lineWidth=1;ctx.beginPath();for(const hr of [6,12,18]){ctx.moveTo(sx+sw*hr/24,sy+2);ctx.lineTo(sx+sw*hr/24,sy+sh-2);}ctx.stroke();
+    const mx=sx+sw*h/24,f=Math.max(0,Math.sin((h-6)/12*Math.PI)),my=sy+sh-1-f*(sh-3);
+    ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(mx,sy+1);ctx.lineTo(mx,sy+sh-1);ctx.stroke();
+    ctx.fillStyle=isDay?'#fde047':'#a5b4fc';ctx.beginPath();ctx.arc(mx,my,3,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+    ctx.font='9px system-ui';ctx.fillStyle='#cbd5e1';ctx.lineWidth=3;ctx.strokeStyle='rgba(2,6,23,.75)';
+    for(const [hr,lb] of [[0,'0'],[6,'6'],[12,'12'],[18,'18'],[24,'24 h']]){const tx=sx+sw*hr/24+(hr===0?1:hr===24?-22:-4);ctx.strokeText(lb,tx,sy+sh+7);ctx.fillText(lb,tx,sy+sh+7);}
+    ctx.strokeText('daylight for photosynthesis',sx+sw+6,sy+sh/2);ctx.fillText('daylight for photosynthesis',sx+sw+6,sy+sh/2);
+    ctx.restore();
   }
 
   function drawPlant(p) {
@@ -5581,10 +6023,44 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   }
 
   let fishBodyGrad=null,waterGrad=null,waterGradKey='';
+  // Probe mode: outline the 1-litre chemistry zone under the cursor with a
+  // live O2 reading, and pin the last probed point.
+  function drawProbeOverlay(){
+    if(activeTool!=='probe'||activeMode?.tankPointer)return;
+    ctx.save();
+    if(lastProbe&&Number.isFinite(lastProbe.x)){
+      const q=modelToCanvas(lastProbe.x,lastProbe.y);
+      ctx.strokeStyle='rgba(103,232,249,.95)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y,6,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(q.x,q.y-6);ctx.lineTo(q.x,q.y-15);ctx.stroke();
+      ctx.fillStyle='#67e8f9';ctx.beginPath();ctx.arc(q.x,q.y-17,3.2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(103,232,249,.9)';ctx.beginPath();ctx.arc(q.x,q.y,2,0,Math.PI*2);ctx.fill();
+    }
+    const p=probeHover;
+    if(p){
+      const zx=Math.floor(p.x),zy=Math.floor(p.y),a=modelToCanvas(zx,zy),b=modelToCanvas(zx+1,zy+1);
+      ctx.fillStyle='rgba(103,232,249,.07)';ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);
+      ctx.setLineDash([4,3]);ctx.strokeStyle='rgba(103,232,249,.75)';ctx.lineWidth=1.2;ctx.strokeRect(a.x+.5,a.y+.5,b.x-a.x-1,b.y-a.y-1);ctx.setLineDash([]);
+      const o2=state.fields.o2[E.idx(zx,zy)],lbl=`O₂ ${o2.toFixed(1)} mg/L · click to probe`;
+      ctx.font='600 10.5px system-ui';const w=ctx.measureText(lbl).width+12,lx=E.clamp(a.x,4,tank.width-w-4),ly=a.y>110?a.y-19:b.y+3;
+      ctx.fillStyle='rgba(5,14,26,.85)';ctx.fillRect(lx,ly,w,16);ctx.fillStyle='#a5f3fc';ctx.textBaseline='middle';ctx.fillText(lbl,lx+6,ly+8.5);
+    }
+    ctx.restore();
+  }
+  const snailAngles=new Map(),snailFacing=new Map();
   function drawAnimal(a) {
     const visual = visualAnimalState(a);
     const p=modelToCanvas(visual.x,visual.y); const bad=a.status!=='healthy'&&a.status!=='hungry'; const outline=bad?'#fb7185':a.status==='hungry'?'#facc15':'#22c55e';
-    const angle=Math.atan2(visual.vy,Math.abs(visual.vx)+.05)*.35;
+    let angle=Math.atan2(visual.vy,Math.abs(visual.vx)+.05)*.35;
+    let snailDir=null;
+    if(a.kind==='snail'){
+      // Turn the snail so its foot grips the surface it is on (smoothly).
+      const target=a.attach==='sinking'?Math.sin(performance.now()/500+(a.x*3))*.6:(a.footAngle||0);
+      let cur=snailAngles.get(a.id);if(cur==null)cur=target;
+      let d=target-cur;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
+      cur+=d*.18;snailAngles.set(a.id,cur);angle=cur;
+      const bx=Math.cos(cur),by=Math.sin(cur),along=visual.vx*bx+visual.vy*by;
+      snailDir=Math.abs(along)>.004?(along>=0?1:-1):(snailFacing.get(a.id)||1);snailFacing.set(a.id,snailDir);
+    }
     const idPhase=(Number(String(a.id).replace(/\D/g,'').slice(-4))||0)*.01;
     const phase=(targetFPS>=25?performance.now()/115:state.timeHours*7)+idPhase;
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate(angle);if(discoOn)discoDance(a,idPhase);ctx.scale(a.size || 1, a.size || 1);
@@ -5624,7 +6100,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       ctx.fillStyle='#17202a';ctx.beginPath();ctx.arc(7,-1.8,1.1,0,Math.PI*2);ctx.fill();
       ctx.strokeStyle=outline;ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(0,.2,11,5,-.05,0,Math.PI*2);ctx.stroke();
     }else{
-      const dir=visual.vx>=0?1:-1;ctx.scale(dir,1);const footWave=Math.sin(phase*.55)*1.2;
+      const dir=snailDir??(visual.vx>=0?1:-1);ctx.scale(dir,1);const footWave=Math.sin(phase*.55)*1.2;
       ctx.fillStyle='#b07c48';ctx.beginPath();ctx.ellipse(3,5,10,3.2,0,0,Math.PI*2);ctx.fill();
       const shell=ctx.createRadialGradient(-2,-1,1,-1,0,8);shell.addColorStop(0,'#f3d98a');shell.addColorStop(.55,'#c48c36');shell.addColorStop(1,'#774f20');ctx.fillStyle=shell;ctx.beginPath();ctx.arc(-2,0,7.5,0,Math.PI*2);ctx.fill();
       ctx.strokeStyle='#60401d';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-2,0,5.1,.2,Math.PI*1.8);ctx.stroke();ctx.beginPath();ctx.arc(-2,0,2.7,.2,Math.PI*1.8);ctx.stroke();
@@ -5877,7 +6353,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   const AUTOSAVE_KEY='ecosphere-lab-autosave-v1';
   let lastAutosaveAt=0,lastAutosaveTime=null,autosaveBlocked=false;
   function buildSave(){
-    return {app:'EcoSphere Lab',appVersion:'3.24',savedAt:new Date().toISOString(),
+    return {app:'EcoSphere Lab',appVersion:'3.30',savedAt:new Date().toISOString(),
       state:E.serializeState(state),history:history.slice(-1400),
       missionIndex,missionComplete,level:$('levelSelect').value,speed};
   }
@@ -5951,25 +6427,30 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   // A food-web / nutrient-cycle diagram drawn from the engine's recorded
   // flows. Arrow width follows the flow rate; node size follows how much of
   // the element each pool holds. The model keeps running underneath.
-  const CYCLE_COLORS={C:'#fb923c',N:'#86efac',P:'#7dd3fc'};
-  const CYCLE_NAMES={C:'Carbon',N:'Nitrogen',P:'Phosphorus'};
+  // 3.26 adds an oxygen layer and five investigation tools: Predict,
+  // Compare (before/after), Tracer atom, Energy pyramid and a balance
+  // sheet for any pool (click a circle). None of them change the model.
+  const CYCLE_COLORS={C:'#fb923c',N:'#86efac',P:'#7dd3fc',O:'#67e8f9'};
+  const CYCLE_NAMES={C:'Carbon',N:'Nitrogen',P:'Phosphorus',O:'Oxygen'};
+  const CYCLE_UNIT={C:'mg C',N:'mg N',P:'mg P',O:'mg O₂'};
   const CYCLE_NOTES={
     C:'Carbon moves from CO₂ into algae and plants by photosynthesis, along the food web, into dead matter, and back to CO₂ through respiration and decomposition. It is the only element here that is exchanged with the air.',
     N:'Nitrogen cycles as ammonium, nitrite and nitrate (all counted as dissolved). Bacteria release ammonium from dead matter; nitrifiers turn it into nitrate, which producers take up again.',
-    P:'Phosphorus has no gas phase, so it never leaves the tank. It cycles between phosphate, organisms and dead matter, and the sediment binds it when bottom water has oxygen and releases it when oxygen runs out.'
+    P:'Phosphorus has no gas phase, so it never leaves the tank. It cycles between phosphate, organisms and dead matter, and the sediment binds it when bottom water has oxygen and releases it when oxygen runs out.',
+    O:'Oxygen (O₂ gas) is made by algae and plants when they photosynthesize and used by everything that respires, by decomposers and by nitrifying bacteria. The air tops the water up toward saturation, or takes O₂ away when the water is supersaturated.'
   };
   const CYCLE_NODES={
-    atmosphere:{label:'Air',sub:'CO₂ exchange',x:90,y:62,color:'#94a3b8',only:'C'},
-    runoff:{label:'Runoff',sub:'fertilizer',x:250,y:48,color:'#fde68a',optional:true},
-    dissolved:{label:'Dissolved',sub:'CO₂ · NH₄⁺/NO₃⁻ · PO₄³⁻',x:125,y:215,color:'#38bdf8'},
+    atmosphere:{label:'Air',sub:'CO₂ exchange',subO:'O₂ exchange',x:90,y:62,color:'#94a3b8',only:'CO'},
+    runoff:{label:'Runoff',sub:'fertilizer',x:250,y:48,color:'#fde68a',optional:true,only:'NP'},
+    dissolved:{label:'Dissolved',sub:'CO₂ · NH₄⁺/NO₃⁻ · PO₄³⁻',subO:'O₂ in the water',x:125,y:215,color:'#38bdf8'},
     sediment:{label:'Sediment',sub:'bound phosphate',x:125,y:368,color:'#a8835a',only:'P'},
     algae:{label:'Algae',sub:'producers',x:370,y:92,color:'#4ade80'},
     plants:{label:'Plants',sub:'producers',x:370,y:340,color:'#22c55e'},
     invertebrates:{label:'Invertebrates',sub:'Daphnia · snails · scuds',x:690,y:92,color:'#f0abfc'},
     fish:{label:'Minnows',sub:'omnivores',x:910,y:92,color:'#cbd5e1'},
-    carcasses:{label:'Carcasses',sub:'dead minnows',x:910,y:310,color:'#d88772'},
-    detritus:{label:'Detritus',sub:'dead matter',x:720,y:340,color:'#c08457'},
-    bacteria:{label:'Bacteria',sub:'decomposers',x:545,y:215,color:'#fbbf24'},
+    carcasses:{label:'Carcasses',sub:'dead minnows',x:910,y:310,color:'#d88772',only:'CNP'},
+    detritus:{label:'Detritus',sub:'dead matter',x:720,y:340,color:'#c08457',only:'CNP'},
+    bacteria:{label:'Bacteria',sub:'decomposers',subO:'decomposers · nitrifiers',x:545,y:215,color:'#fbbf24'},
   };
   const CYCLE_EDGES=[
     ['atmosphere','dissolved','CO₂ dissolving from air','CO₂ moves between air and water toward equilibrium. When the water holds more CO₂ than the air, the arrow reverses and the tank loses carbon.'],
@@ -6001,42 +6482,157 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ['dissolved','sediment','Phosphate binding','Iron in oxygenated sediment binds phosphate.'],
     ['sediment','dissolved','Phosphate release','When bottom water loses oxygen, the sediment releases phosphate (internal loading).'],
   ];
+  // Oxygen layer: [from, to, label, engine process key, sign, description, bend]
+  const CYCLE_O2_EDGES=[
+    ['atmosphere','dissolved','O₂ dissolving from air','gas',1,'The surface layer exchanges O₂ with the air toward saturation (Benson & Krause). Warm water holds less. If photosynthesis supersaturates the water, the arrow reverses.'],
+    ['algae','dissolved','Algal photosynthesis','photoAlgae',1,'Algae release one O₂ for every CO₂ they fix into sugar.'],
+    ['plants','dissolved','Plant photosynthesis','photoPlants',1,'Plants release one O₂ for every CO₂ they fix.'],
+    ['dissolved','algae','Algal respiration','respAlgae',-1,'Algae use O₂ day and night to respire part of what they made.'],
+    ['dissolved','plants','Plant respiration','respPlants',-1,'Plants use O₂ for maintenance respiration, day and night.'],
+    ['dissolved','invertebrates','Invertebrate respiration','respInvert',-1,'Daphnia, snails and scuds use O₂ to respire the food they assimilate.'],
+    ['dissolved','fish','Minnow respiration','respFish',-1,'Minnows use O₂ to respire their food and body reserves.'],
+    ['dissolved','bacteria','Decomposition','decomp',-1,'Decomposer bacteria use O₂ to break down detritus and carcasses. Without O₂ the breakdown continues anaerobically.'],
+    ['dissolved','bacteria','Nitrification','nitrify',-1,'Nitrifying bacteria use 3.43 mg O₂ per mg N to make nitrite and 1.14 mg more to make nitrate. Ammonium from decomposition is an oxygen demand too.',-1],
+  ];
+  const cycleEdgeList=[];
+  for(const [from,to,label,desc] of CYCLE_EDGES)cycleEdgeList.push({key:from+'>'+to,from,to,label,desc,els:'CNP',sign:1,bend:1,
+    reversible:from==='atmosphere',altLabel:'CO₂ escaping to air'});
+  for(const [from,to,label,proc,sign,desc,bend] of CYCLE_O2_EDGES)cycleEdgeList.push({key:'O:'+proc,from,to,label,desc,els:'O',proc,sign,bend:bend||1,
+    reversible:proc==='gas',altLabel:'O₂ escaping to air'});
+  const cycleEdgeByKey=Object.fromEntries(cycleEdgeList.map(e=>[e.key,e]));
+  const ENERGY_J_PER_MG_C=39;   // ≈ energy in organic matter per mg C (glucose: 2803 kJ/mol ÷ 72 g C)
   let cycleElement='N',cycleWindow='day',cycleBuilt=false,cycleHover=null;
+  let cyclePanel=null,cycleSelNode=null,cycleToolState=null;
+  let predict=null,compare=null,tracer=null;
   const cycleEls={};
   const SVGNS='http://www.w3.org/2000/svg';
   function svgEl(tag,attrs,parent){const el=document.createElementNS(SVGNS,tag);for(const k in attrs)el.setAttribute(k,attrs[k]);if(parent)parent.appendChild(el);return el;}
   function fmtMg(v){const a=Math.abs(v);return a>=100?v.toFixed(0):a>=10?v.toFixed(1):a>=1?v.toFixed(2):a>=.01?v.toFixed(3):a>0?v.toExponential(1):'0';}
+  function fmtDur(days){if(!Number.isFinite(days))return '—';const h=days*24;return h<1?`${Math.max(1,Math.round(h*60))} min`:h<48?`${h.toFixed(h<10?1:0)} h`:days<730?`${days.toFixed(days<10?1:0)} days`:`${(days/365).toFixed(1)} years`;}
+  function fmtPct(x){if(!Number.isFinite(x))return 'new';const s=x>=0?'+':'−';const a=Math.abs(x*100);return s+(a>=100?a.toFixed(0):a.toFixed(a>=10?0:1))+'%';}
+  function escapeCycle(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+  // ---- flow data helpers ----
+  function nodeVisible(id,el){
+    const n=CYCLE_NODES[id];if(!n)return false;
+    if(n.only&&!n.only.includes(el))return false;
+    if(id==='runoff'){const r=state.flowRates?.['runoff>dissolved']?.day;return !!r&&(r.N||0)+(r.P||0)>1e-6;}
+    return true;
+  }
+  function edgeInElement(ed,el){return ed.els==='O'?el==='O':el!=='O';}
+  function cyclePools(){
+    const p=E.flowPools(state);
+    p.dissolved={...p.dissolved,O:state.fields.o2.reduce((s,v)=>s+Math.max(0,v),0)};
+    if(state.sealed)p.atmosphere={C:Math.max(0,state.sealed.co2)*12/44,N:0,P:0,O:Math.max(0,state.sealed.o2)};
+    delete p.jarAir;
+    return p;
+  }
+  // Smoothed rate (mg/day), signed in the edge's drawn direction.
+  function emaRate(ed,el,win){
+    if(!edgeInElement(ed,el))return 0;
+    if(ed.els==='O'){const r=state.o2Rates?.[ed.proc];return r?(r[win]||0)*24*ed.sign:0;}
+    return (state.flowRates?.[ed.key]?.[win]?.[el]||0)*24;
+  }
+  function snapNow(){return {t:state.timeHours,f:JSON.parse(JSON.stringify(state.flowTotals||{})),o:{...(state.o2Totals||{})}};}
+  function snapBack(hours){
+    const hist=state._flowHist||[],target=state.timeHours-hours;let pick=null;
+    for(const h of hist)if(h.t<=target+1e-6)pick=h;
+    return pick||hist[0]||null;
+  }
+  function totalOf(snap,ed,el){if(!snap)return 0;if(ed.els==='O')return (snap.o?.[ed.proc]||0)*ed.sign;return snap.f?.[ed.key]?.[el]||0;}
+  function intervalRate(a,b,ed,el){if(!a||!b||!(b.t-a.t>1e-6)||!edgeInElement(ed,el))return 0;return (totalOf(b,ed,el)-totalOf(a,ed,el))/(b.t-a.t)*24;}
+  // Resolve a signed rate into a drawn direction.
+  function resolveEdge(ed,v){
+    if(v<0&&ed.reversible)return {from:ed.to,to:ed.from,v:-v,label:ed.altLabel,rev:true};
+    return {from:ed.from,to:ed.to,v:Math.max(0,v),label:ed.label,rev:false};
+  }
+  function edgeGeom(from,to,radius,bendSign){
+    const A=CYCLE_NODES[from],B=CYCLE_NODES[to];
+    const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+    const px=-uy,py=ux,bend=Math.min(60,len*0.18)*(bendSign||1);
+    const ra=radius[from]||20,rb=radius[to]||20;
+    const sx=A.x+ux*(ra+4),sy=A.y+uy*(ra+4),ex=B.x-ux*(rb+12),ey=B.y-uy*(rb+12);
+    const cx=(sx+ex)/2+px*bend,cy=(sy+ey)/2+py*bend;
+    return {sx,sy,ex,ey,cx,cy,px:px*(bendSign||1),py:py*(bendSign||1),
+      d:`M${sx.toFixed(1)},${sy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`};
+  }
+  // Before/after per-day rates for every edge of an element.
+  function diffRows(el,a0,a1,b0,b1){
+    const rows=[];
+    for(const ed of cycleEdgeList){
+      if(!edgeInElement(ed,el))continue;
+      const before=intervalRate(a0,a1,ed,el),after=intervalRate(b0,b1,ed,el);
+      const rb=resolveEdge(ed,before),ra=resolveEdge(ed,after);
+      const dir=ra.v>1e-9?ra:rb;
+      const flipped=rb.v>1e-9&&ra.v>1e-9&&rb.rev!==ra.rev;
+      const delta=flipped?ra.v+rb.v:ra.v-rb.v;
+      rows.push({ed,el,before:rb.v,after:ra.v,delta,from:dir.from,to:dir.to,label:dir.label,flipped,
+        pct:rb.v>1e-9?(ra.v-rb.v)/rb.v:(ra.v>1e-9?Infinity:0)});
+    }
+    const maxV=Math.max(1e-9,...rows.map(r=>Math.max(r.before,r.after)));
+    return rows.filter(r=>Math.max(r.before,r.after)>maxV*0.002&&nodeVisible(r.from,el)&&nodeVisible(r.to,el));
+  }
+  function cycleResetTools(){predict=null;compare=null;stopTracer();tracer=null;cycleToolState={state,t:state.timeHours};}
+  // Called on every update, even when the view is closed (Predict waits for 24 h).
+  function cycleTick(){
+    if(!cycleToolState||cycleToolState.state!==state||state.timeHours<cycleToolState.t-1e-6){
+      const had=!!cycleToolState;cycleResetTools();
+      if(cyclePanel&&cyclePanel!=='balance'&&cyclePanel!=='energy')cyclePanel=null;
+      if(had&&cycleBuilt)renderCycleSide();
+    }
+    cycleToolState.t=state.timeHours;
+    if(predict&&predict.phase==='run'&&state.timeHours>=predict.lock.t+24-1e-6){
+      predict.after=[predict.lock,snapNow()];predict.phase='reveal';
+      running=false;updateControls();cycleElement=predict.el;cyclePanel='predict';
+      predict.rows=diffRows(predict.el,predict.before[0],predict.before[1],predict.after[0],predict.after[1]);
+      if(!$('cycleView')?.classList.contains('open'))toggleCycleView(true);else renderCycleSide();
+      setPresetMessage('Prediction ready: 24 simulated hours have passed. See how your arrow changed in Cycle view.');
+    }
+  }
+
   function buildCycleView(){
     const wrap=tank.closest('.canvas-wrap');
     const view=document.createElement('div');view.className='cycle-view';view.id='cycleView';
     view.innerHTML=`<div class="cycle-head"><h2>Matter cycle · live</h2>
-      <div class="cycle-seg" id="cycleElSeg">${['C','N','P'].map(e=>`<button data-el="${e}">${CYCLE_NAMES[e]}</button>`).join('')}</div>
+      <div class="cycle-seg" id="cycleElSeg">${['C','N','P','O'].map(e=>`<button data-el="${e}">${e==='O'?'Oxygen (O₂)':CYCLE_NAMES[e]}</button>`).join('')}</div>
       <div class="cycle-seg" id="cycleWinSeg"><button data-win="now">Right now</button><button data-win="day">24-hour average</button></div>
       <span class="small" id="cycleClock" style="margin-left:auto"></span>
       <button class="btn" id="cycleCloseBtn" style="font-size:11px;padding:5px 9px">Back to tank</button></div>
-      <svg class="cycle-svg" id="cycleSvg" viewBox="0 0 1000 430" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Live diagram of matter flowing between pools"></svg>
+      <div class="cycle-tools" id="cycleTools"><span class="cycle-tools-lab">Investigate</span>
+        <button data-tool="predict" title="Hide the arrows, predict which flow a change will alter most, then run 24 h and check">🎯 Predict</button>
+        <button data-tool="compare" title="Snapshot the flows, make a change, then see which arrows grew or shrank">📸 Before / after</button>
+        <button data-tool="tracer" title="Follow one atom as it moves between pools at today's flow rates">⚛️ Tracer atom</button>
+        <button data-tool="energy" title="Energy pyramid and transfer efficiencies from the carbon flows">🔺 Energy pyramid</button>
+        <button data-tool="csv" title="Download every flow and pool as a spreadsheet">⬇ Flows CSV</button>
+        <span class="cycle-tools-hint">Click any circle for its balance sheet</span><button id="cycleExpandBtn" title="Make the diagram bigger (covers the page; Esc to shrink)">⤢ Larger view</button></div>
+      <div class="cycle-body"><svg class="cycle-svg" id="cycleSvg" viewBox="0 0 1000 430" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Live diagram of matter flowing between pools"></svg>
+        <aside class="cycle-side" id="cycleSide"></aside></div>
       <div class="cycle-foot"><div id="cycleInfo"></div><div class="cycle-top" id="cycleTop"></div></div>`;
     wrap.appendChild(view);
     const svg=$('cycleSvg');
     const defs=svgEl('defs',{},svg);
-    for(const e of ['C','N','P']){
+    const markerColors={...CYCLE_COLORS,up:'#4ade80',down:'#f87171',hid:'#94a3b8',pick:'#facc15'};
+    for(const [e,col] of Object.entries(markerColors)){
       const m=svgEl('marker',{id:'cycleArrow'+e,viewBox:'0 0 10 10',refX:'6',refY:'5',markerWidth:'13',markerHeight:'13',orient:'auto-start-reverse',markerUnits:'userSpaceOnUse'},defs);
-      svgEl('path',{d:'M0,0 L10,5 L0,10 z',fill:CYCLE_COLORS[e]},m);
+      svgEl('path',{d:'M0,0 L10,5 L0,10 z',fill:col},m);
     }
-    const edgeLayer=svgEl('g',{},svg),labelLayer=svgEl('g',{},svg),nodeLayer=svgEl('g',{},svg);
+    const edgeLayer=svgEl('g',{},svg),labelLayer=svgEl('g',{},svg),nodeLayer=svgEl('g',{},svg),tracerLayer=svgEl('g',{},svg);
     cycleEls.edges={};
-    for(const [from,to,label,desc] of CYCLE_EDGES){
+    for(const ed of cycleEdgeList){
       const g=svgEl('g',{},edgeLayer);
       const base=svgEl('path',{class:'cycle-edge'},g);
       const dash=svgEl('path',{class:'cycle-dash'},g);
       const hit=svgEl('path',{class:'cycle-edge-hit'},g);
       const title=svgEl('title',{},hit);
       const text=svgEl('text',{class:'cycle-edge-label','text-anchor':'middle'},labelLayer);
-      const key=from+'>'+to;
+      const key=ed.key;
       hit.addEventListener('mouseenter',()=>{cycleHover=key;updateCycleView();});
       hit.addEventListener('mouseleave',()=>{cycleHover=null;updateCycleView();});
-      hit.addEventListener('click',()=>{cycleHover=cycleHover===key?null:key;updateCycleView();});
-      cycleEls.edges[key]={g,base,dash,hit,title,text,from,to,label,desc};
+      hit.addEventListener('click',()=>{
+        if(predict&&predict.phase==='setup'){predict.pick=key;predict.el=cycleElement;renderCycleSide();updateCycleView();return;}
+        cycleHover=cycleHover===key?null:key;updateCycleView();
+      });
+      cycleEls.edges[key]={g,base,dash,hit,title,text,ed};
     }
     cycleEls.nodes={};
     for(const [id,n] of Object.entries(CYCLE_NODES)){
@@ -6046,90 +6642,479 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const name=svgEl('text',{'text-anchor':'middle',y:-2,fill:'#f1f5f9','font-size':11.5,'font-weight':700},g);name.textContent=n.label;
       const amt=svgEl('text',{'text-anchor':'middle',y:11,fill:'#cbd5e1','font-size':10},g);
       const sub=svgEl('text',{'text-anchor':'middle',fill:'#8ea1b7','font-size':9.5},g);sub.textContent=n.sub;
+      const ttl=svgEl('title',{},g);ttl.textContent=`${n.label}: click for its balance sheet`;
+      g.addEventListener('click',()=>{cycleSelNode=id;cyclePanel='balance';renderCycleSide();updateCycleView();});
       cycleEls.nodes[id]={g,halo,c,name,amt,sub,n};
     }
-    view.querySelectorAll('#cycleElSeg button').forEach(b=>b.addEventListener('click',()=>{cycleElement=b.dataset.el;updateCycleView();}));
+    cycleEls.tracer={layer:tracerLayer,
+      trail:svgEl('path',{fill:'none','stroke-width':2,'stroke-dasharray':'2 5','stroke-linecap':'round',opacity:.85},tracerLayer),
+      ring:svgEl('circle',{r:11,fill:'none','stroke-width':2,class:'cycle-tracer-ring'},tracerLayer),
+      dot:svgEl('circle',{r:6.5,stroke:'#fff','stroke-width':2},tracerLayer)};
+    tracerLayer.style.display='none';
+    view.querySelectorAll('#cycleElSeg button').forEach(b=>b.addEventListener('click',()=>{cycleElement=b.dataset.el;if(tracer&&tracer.el!==cycleElement){stopTracer();tracer=null;}renderCycleSide();updateCycleView();}));
     view.querySelectorAll('#cycleWinSeg button').forEach(b=>b.addEventListener('click',()=>{cycleWindow=b.dataset.win;updateCycleView();}));
+    view.querySelectorAll('#cycleTools button[data-tool]').forEach(b=>b.addEventListener('click',()=>cycleTool(b.dataset.tool)));
+    $('cycleSide').addEventListener('click',onCycleSideClick);
+    $('cycleSide').addEventListener('change',e=>{if(e.target.id==='tracerStart'&&tracer){tracer.startPool=e.target.value;}});
     $('cycleCloseBtn').addEventListener('click',()=>toggleCycleView(false));
+    $('cycleExpandBtn').addEventListener('click',()=>setCycleExpanded(!$('cycleView').classList.contains('expanded')));
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('cycleView')?.classList.contains('expanded'))setCycleExpanded(false);});
     cycleBuilt=true;
+  }
+  function setCycleExpanded(on){
+    $('cycleView').classList.toggle('expanded',on);
+    $('cycleExpandBtn').textContent=on?'⤡ Smaller view':'⤢ Larger view';
+    $('cycleExpandBtn').classList.remove('nudge');
+    updateCycleView();
   }
   function toggleCycleView(force){
     if(!cycleBuilt)buildCycleView();
     const open=force==null?!$('cycleView').classList.contains('open'):force;
     $('cycleView').classList.toggle('open',open);
     const b=$('cycleBtn');if(b)b.classList.toggle('focus-on',open);
-    if(open)updateCycleView();
+    if(!open){stopTracerAuto();if($('cycleView').classList.contains('expanded'))setCycleExpanded(false);}
+    if(open){renderCycleSide();updateCycleView();}
   }
+  function cycleTool(tool){
+    if(tool==='csv'){exportCycleCSV();return;}
+    if(cyclePanel===tool&&tool!=='predict'&&tool!=='compare'){cyclePanel=null;}
+    else cyclePanel=tool;
+    if(tool==='predict'&&!predict)startPredict();
+    if(tool==='compare'&&!compare)startCompare();
+    if(tool==='tracer'&&!tracer)tracer={el:cycleElement,startPool:cycleElement==='O'?'dissolved':'dissolved',pool:null,path:[],t:0};
+    if(tool!=='tracer')stopTracerAuto();
+    renderCycleSide();updateCycleView();
+  }
+
+  // ---- 1. Predict ----
+  function startPredict(){
+    const a=snapBack(24),b=snapNow();
+    predict={phase:'setup',el:cycleElement,before:[a,b],pick:null,dir:0,startT:state.timeHours,baseHours:a?b.t-a.t:0};
+  }
+  // ---- 6. Before / after ----
+  function startCompare(){
+    const a=snapBack(24),b=snapNow();
+    compare={a0:a,a1:b,t:state.timeHours,view:'change',baseHours:a?b.t-a.t:0};
+  }
+  function compareAfter(){
+    if(!compare)return null;
+    const now=snapNow(),hrs=now.t-compare.t;
+    if(hrs<1)return null;
+    let start=compare.a1;
+    if(hrs>24){const back=snapBack(24);if(back&&back.t>=compare.t)start=back;}
+    return [start,now];
+  }
+
+  // ---- 5. Tracer atom ----
+  function tracerTable(el){
+    const pools=cyclePools(),out={};
+    for(const ed of cycleEdgeList){
+      if(!edgeInElement(ed,el))continue;
+      const r=resolveEdge(ed,emaRate(ed,el,'day'));
+      if(!(r.v>0)||!nodeVisible(r.from,el)||!nodeVisible(r.to,el))continue;
+      (out[r.from]||(out[r.from]=[])).push({to:r.to,v:r.v,label:r.label});
+    }
+    const stock={};
+    for(const id of Object.keys(CYCLE_NODES))stock[id]=id==='atmosphere'?(state.sealed?(pools.atmosphere?.[el]||0):Infinity):(pools[id]?.[el]||0);
+    return {out,stock};
+  }
+  function tracerDraw(table,pool){
+    const outs=table.out[pool]||[],total=outs.reduce((s,o)=>s+o.v,0),stock=table.stock[pool];
+    if(!(total>0)||!(stock>0)||!Number.isFinite(stock))return null;
+    const mean=stock/total,dwell=-Math.log(1-Math.random())*mean;
+    let r=Math.random()*total,pick=outs[outs.length-1];
+    for(const o of outs){r-=o.v;if(r<=0){pick=o;break;}}
+    return {to:pick.to,label:pick.label,dwell,mean};
+  }
+  function releaseTracer(){
+    stopTracerAuto();
+    const el=cycleElement,start=$('tracerStart')?.value||tracer?.startPool||'dissolved';
+    tracer={el,startPool:start,pool:start,path:[],t:0,table:tracerTable(el),laps:0,done:false,stats:null,anim:null,auto:false};
+    const hop=tracerDraw(tracer.table,start);
+    tracer.next=hop;
+    if(!hop)tracer.done=Number.isFinite(tracer.table.stock[start])?'stuck':'air';
+    renderCycleSide();updateCycleView();
+  }
+  function tracerStep(){
+    if(!tracer||!tracer.next||tracer.anim)return;
+    const hop=tracer.next,from=tracer.pool;
+    tracer.t+=hop.dwell;
+    tracer.path.push({from,to:hop.to,label:hop.label,day:tracer.t,stayed:hop.dwell});
+    if(hop.to===tracer.startPool)tracer.laps++;
+    tracer.anim={from,to:hop.to,start:performance.now(),dur:900};
+    tracer.pool=hop.to;
+    const next=tracerDraw(tracer.table,hop.to);
+    tracer.next=next;
+    if(!next)tracer.done=Number.isFinite(tracer.table.stock[hop.to])?'stuck':'air';
+    animateTracer();renderCycleSide();
+  }
+  function animateTracer(){
+    if(!tracer?.anim)return;
+    const T=cycleEls.tracer,a=tracer.anim,k=Math.min(1,(performance.now()-a.start)/a.dur);
+    const radius=cycleEls.radius||{};
+    const g=edgeGeom(a.from,a.to,radius,1);
+    const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,u=1-e;
+    const x=u*u*g.sx+2*u*e*g.cx+e*e*g.ex,y=u*u*g.sy+2*u*e*g.cy+e*e*g.ey;
+    T.dot.setAttribute('cx',x.toFixed(1));T.dot.setAttribute('cy',y.toFixed(1));
+    T.ring.setAttribute('cx',x.toFixed(1));T.ring.setAttribute('cy',y.toFixed(1));
+    if(k<1)requestAnimationFrame(animateTracer);
+    else{tracer.anim=null;updateCycleView();if(tracer.done&&tracer.auto)stopTracerAuto();}
+  }
+  let tracerTimer=null;
+  function startTracerAuto(){if(!tracer||!tracer.next)return;tracer.auto=true;stopTracerTimer();tracerTimer=setInterval(()=>{if(!tracer||!tracer.next){stopTracerAuto();return;}tracerStep();},1500);renderCycleSide();}
+  function stopTracerTimer(){if(tracerTimer){clearInterval(tracerTimer);tracerTimer=null;}}
+  function stopTracerAuto(){stopTracerTimer();if(tracer){tracer.auto=false;}}
+  function stopTracer(){stopTracerTimer();}
+  // Many atoms for a year: share of time spent in each pool.
+  function tracerMonteCarlo(n=500,days=365){
+    const el=cycleElement,start=$('tracerStart')?.value||'dissolved',table=tracerTable(el);
+    const time={},visits={};let escaped=0,hops=0;
+    for(let k=0;k<n;k++){
+      let pool=start,t=0,guard=0;
+      while(t<days&&guard++<5000){
+        const h=tracerDraw(table,pool);
+        if(!h){time[pool]=(time[pool]||0)+(days-t);if(!Number.isFinite(table.stock[pool]))escaped++;break;}
+        const stay=Math.min(h.dwell,days-t);time[pool]=(time[pool]||0)+stay;t+=h.dwell;
+        if(t<days){pool=h.to;visits[pool]=(visits[pool]||0)+1;hops++;}
+      }
+    }
+    const pools=cyclePools();let stockTotal=0;
+    const ids=Object.keys(CYCLE_NODES).filter(id=>nodeVisible(id,el)&&id!=='runoff'&&!(id==='atmosphere'&&!state.sealed));
+    for(const id of ids)stockTotal+=pools[id]?.[el]||0;
+    const rows=ids.map(id=>({id,time:(time[id]||0)/(n*days),stock:stockTotal>0?(pools[id]?.[el]||0)/stockTotal:0}));
+    if(!state.sealed&&el==='C')rows.push({id:'atmosphere',time:(time.atmosphere||0)/(n*days),stock:null});
+    if(!tracer)tracer={el,startPool:start,path:[],t:0};
+    tracer.stats={n,days,start,el,rows:rows.sort((a,b)=>b.time-a.time),escaped,hops:hops/n};
+    renderCycleSide();
+  }
+
+  // ---- 3. Energy pyramid (from 24-h average carbon flows) ----
+  function energyNumbers(){
+    const r=(f,t)=>Math.max(0,(state.flowRates?.[f+'>'+t]?.day?.C||0)*24);
+    const eg=E.PARAMS.egestion;
+    const gpp=r('dissolved','algae')+r('dissolved','plants'),rp=r('algae','dissolved')+r('plants','dissolved');
+    const iEatProd=r('algae','invertebrates')+r('plants','invertebrates'),iEatDet=r('detritus','invertebrates');
+    const i1=iEatProd+iEatDet,r1=r('invertebrates','dissolved'),a1=i1*(1-eg);
+    const fEatInv=r('invertebrates','fish'),fEatOther=r('algae','fish')+r('detritus','fish');
+    const i2=fEatInv+fEatOther,r2=r('fish','dissolved'),a2=i2*(1-eg);
+    return {gpp,rp,npp:gpp-rp,i1,iEatProd,iEatDet,a1,r1,p1:a1-r1,i2,fEatInv,fEatOther,a2,r2,p2:a2-r2,eg,warm:(state.flowRatesHours||0)<24};
+  }
+
+  // ---- 4. Balance sheet ----
+  function balanceRows(id,el){
+    const ins=[],outs=[];
+    for(const ed of cycleEdgeList){
+      if(!edgeInElement(ed,el))continue;
+      const r=resolveEdge(ed,emaRate(ed,el,cycleWindow));
+      if(!(r.v>1e-9))continue;
+      if(r.to===id)ins.push({label:r.label,other:r.from,v:r.v});
+      if(r.from===id)outs.push({label:r.label,other:r.to,v:r.v});
+    }
+    if(el==='O'&&id==='dissolved'){const b=(state.o2Rates?.bounds?.[cycleWindow]||0)*24;if(Math.abs(b)>1e-6)(b>0?ins:outs).push({label:'Model bounds (kept between 0 and limits)',other:null,v:Math.abs(b)});}
+    ins.sort((a,b)=>b.v-a.v);outs.sort((a,b)=>b.v-a.v);
+    return {ins,outs,tin:ins.reduce((s,x)=>s+x.v,0),tout:outs.reduce((s,x)=>s+x.v,0)};
+  }
+
+  // ---- side panel ----
+  const QUICK_CHANGES=[['runoff','Runoff'],['heat','Heat'],['turbidity','Turbid'],['dieoff','Algal die-off'],['pesticide','Pesticide'],['fishkill','Fish loss']];
+  function quickChangesHTML(log){
+    return `<div class="cycle-h4">Quick changes <span>same as the Disturbances panel</span></div><div class="cycle-quick">${QUICK_CHANGES.map(([id,l])=>`<button data-act="dist-${id}">${l}</button>`).join('')}</div>${log&&log.length?`<div class="small" style="color:#9fb1c5">Changes made: ${log.map(x=>`${x.label} (${formatTime(x.t)})`).join(', ')}</div>`:''}`;
+  }
+  function renderCycleSide(){
+    const side=$('cycleSide');if(!side)return;
+    document.querySelectorAll('#cycleTools button[data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===cyclePanel));
+    $('cycleView').classList.toggle('side-open',!!cyclePanel);
+    const xb=$('cycleExpandBtn');if(xb)xb.classList.toggle('nudge',!!cyclePanel&&!$('cycleView').classList.contains('expanded')&&$('cycleView').clientWidth<1100);
+    if(!cyclePanel){side.innerHTML='';return;}
+    const el=cycleElement,color=CYCLE_COLORS[el],close='<button class="cycle-x" data-act="close" title="Close panel">✕</button>';
+    let h='';
+    if(cyclePanel==='balance'){
+      const n=CYCLE_NODES[cycleSelNode];
+      h=`${close}<h3>Balance sheet</h3><div class="cycle-side-sub"><b style="color:${n?.color}">${n?n.label:''}</b> · ${CYCLE_NAMES[el]} · ${cycleWindow==='now'?'right now':'24-hour average'}</div><div id="cycleSideLive"></div>
+        <p class="cycle-note">In − out = how fast the pool is changing. Turnover time = amount stored ÷ total outflow: how long an average atom stays. Switch elements or the time window above to compare.</p>`;
+    }else if(cyclePanel==='energy'){
+      h=`${close}<h3>🔺 Energy pyramid</h3><div class="cycle-side-sub">Production at each level, from the 24-hour carbon flows (≈${ENERGY_J_PER_MG_C} J per mg C)</div><div id="cycleSideLive"></div>`;
+    }else if(cyclePanel==='predict'){
+      const p=predict;
+      h=`${close}<h3>🎯 Predict</h3>`;
+      if(p.phase==='setup'){
+        const ed=p.pick&&cycleEdgeByKey[p.pick];
+        h+=`<ol class="cycle-steps"><li><b>Make a change now</b>: a disturbance, add or remove organisms, or move a slider.</li>
+          <li><b>Click the arrow</b> you think will change the <b>most</b> (in mg per day) over the next 24 hours. Sizes are hidden.</li>
+          <li>Choose grow or shrink, then lock in. The tank runs 24 h and shows the result.</li></ol>
+          ${p.baseHours<12?`<p class="cycle-warn">Only ${p.baseHours.toFixed(0)} h of history before now, so the baseline is short. Running a day first gives a fairer comparison.</p>`:''}
+          ${quickChangesHTML(p.changes)}
+          <div class="cycle-pick">${ed?`Your arrow: <b>${escapeCycle(ed.label)}</b> <span class="small">(${CYCLE_NAMES[p.el]})</span>`:'<span class="small">No arrow chosen yet.</span>'}</div>
+          <div class="cycle-row"><button class="btn${p.dir>0?' primary':''}" data-act="dir-up">▲ Will grow</button><button class="btn${p.dir<0?' primary':''}" data-act="dir-down">▼ Will shrink</button></div>
+          <div class="cycle-row"><button class="btn primary" data-act="lock" ${ed&&p.dir?'':'disabled'}>Lock in &amp; run 24 h</button><button class="btn" data-act="predict-cancel">Cancel</button></div>`;
+      }else if(p.phase==='run'){
+        h+=`<p>Prediction locked: <b>${escapeCycle(cycleEdgeByKey[p.pick].label)}</b> will <b>${p.dir>0?'grow':'shrink'}</b>.</p><div id="cycleSideLive"></div><p class="cycle-note">You can close Cycle view and watch the tank; the result appears after 24 simulated hours.</p><div class="cycle-row"><button class="btn" data-act="predict-cancel">Cancel</button></div>`;
+      }else{
+        h+=`<div id="cycleSideLive"></div>${p.changes?.length?`<div class="small" style="color:#9fb1c5">Changes made: ${p.changes.map(x=>`${x.label} (${formatTime(x.t)})`).join(', ')}</div>`:''}<div class="cycle-row"><button class="btn primary" data-act="predict-again">Predict again</button><button class="btn" data-act="predict-cancel">Done</button></div>`;
+      }
+    }else if(cyclePanel==='compare'){
+      const c=compare;
+      h=`${close}<h3>📸 Before / after</h3><div class="cycle-side-sub">Snapshot at ${formatTime(c.t)} · “before” = the ${c.baseHours.toFixed(0)} h up to the snapshot</div>
+        <div class="cycle-seg cycle-seg-sm" style="margin:6px 0">${['before','after','change'].map(v=>`<button data-act="cview-${v}" class="${c.view===v?'on':''}">${v==='change'?'Change':v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div>
+        ${c.baseHours<1?'<p class="cycle-warn">No flow history before the snapshot yet, so “before” is empty. Run the tank a day, then take a new snapshot.</p>':''}<div id="cycleSideLive"></div>
+        ${quickChangesHTML(c.changes)}
+        <div class="cycle-row"><button class="btn" data-act="compare-new">New snapshot</button><button class="btn" data-act="csv">⬇ CSV</button></div>
+        <p class="cycle-note">Make your change after the snapshot, then run the tank. Comparing whole days (24 h) cancels out the day/night swing.</p>`;
+    }else if(cyclePanel==='tracer'){
+      const T=tracer;
+      if(el==='O'){h=`${close}<h3>⚛️ Tracer atom</h3><p>The tracer follows a carbon, nitrogen or phosphorus atom. Switch to one of those tabs.</p>`;}
+      else{
+        const opts=Object.keys(CYCLE_NODES).filter(id=>nodeVisible(id,el)&&id!=='runoff'&&id!=='atmosphere').map(id=>`<option value="${id}" ${id===(T?.startPool||'dissolved')?'selected':''}>${CYCLE_NODES[id].label}</option>`).join('');
+        h=`${close}<h3>⚛️ Tracer atom</h3><div class="cycle-side-sub">One ${CYCLE_NAMES[el].toLowerCase()} atom, moving at today's flow rates (24-h average)</div>
+          <div class="cycle-row"><label class="small">Start in <select id="tracerStart" class="select" style="font-size:11px;padding:2px">${opts}</select></label><button class="btn primary" data-act="tr-release">Release</button></div>
+          <div class="cycle-row"><button class="btn" data-act="tr-step" ${T?.next?'':'disabled'}>Next hop</button><button class="btn" data-act="tr-auto" ${T?.next?'':'disabled'}>${T?.auto?'⏸ Pause':'▶ Auto'}</button><button class="btn" data-act="tr-mc" title="Simulate 500 atoms for a year">500 atoms × 1 year</button></div>
+          <div id="cycleSideLive"></div>
+          <p class="cycle-note">Real ecologists add tracer isotopes (³²P, ¹⁵N, ¹³C) to lakes and follow them the same way. How long an atom stays in a pool depends on the amount stored ÷ the flow out.</p>`;
+      }
+    }
+    side.innerHTML=h;updateCycleSideLive();
+  }
+  function rowsTable(rows,unit,color){
+    if(!rows.length)return '<div class="small" style="color:#8ea1b7">none</div>';
+    return `<table class="cycle-tbl">${rows.map(r=>`<tr><td>${escapeCycle(r.label)}${r.other?` <span class="small">· ${CYCLE_NODES[r.other]?.label||''}</span>`:''}</td><td style="color:${color}">${fmtMg(r.v)}</td></tr>`).join('')}</table>`;
+  }
+  function updateCycleSideLive(){
+    const live=$('cycleSideLive');if(!live)return;
+    const el=cycleElement,color=CYCLE_COLORS[el],unit=CYCLE_UNIT[el];
+    let h='';
+    if(cyclePanel==='balance'){
+      const id=cycleSelNode,pools=cyclePools();
+      if(!nodeVisible(id,el)){live.innerHTML=`<p>${CYCLE_NODES[id].label} has no ${CYCLE_NAMES[el].toLowerCase()} flows in this view. Try another element.</p>`;return;}
+      const stock=id==='atmosphere'?(state.sealed?pools.atmosphere?.[el]:null):(pools[id]?.[el]??null);
+      const b=balanceRows(id,el),net=b.tin-b.tout;
+      const turnover=stock!=null&&b.tout>1e-9?stock/b.tout:null;
+      const holdsO2=el!=='O'||id==='dissolved'||id==='atmosphere';
+      h+=`<div class="cycle-kv"><span>Stored</span><b>${stock==null?(id==='atmosphere'?'unlimited (open air)':'—'):(holdsO2?`${fmtMg(stock)} ${unit}`:'does not store O₂')}</b></div>`;
+      const inName=holdsO2?'In':'O₂ used (taken from the water)',outName=holdsO2?'Out':'O₂ released (to the water)';
+      h+=`<div class="cycle-h4">${inName} <span>${unit}/day</span></div>${rowsTable(b.ins,unit,color)}<div class="cycle-kv tot"><span>Total</span><b>${fmtMg(b.tin)}</b></div>`;
+      h+=`<div class="cycle-h4">${outName} <span>${unit}/day</span></div>${rowsTable(b.outs,unit,color)}<div class="cycle-kv tot"><span>Total</span><b>${fmtMg(b.tout)}</b></div>`;
+      if(holdsO2)h+=`<div class="cycle-kv big"><span>Net change</span><b style="color:${net>=0?'#4ade80':'#f87171'}">${net>=0?'+':'−'}${fmtMg(Math.abs(net))} ${unit}/day</b></div>`;
+      else h+=`<div class="cycle-kv big"><span>${net<=0?'Net O₂ made':'Net O₂ used'}</span><b style="color:${net<=0?'#4ade80':'#f87171'}">${fmtMg(Math.abs(net))} ${unit}/day</b></div>`;
+      if(stock>0&&holdsO2)h+=`<div class="small" style="color:#9fb1c5">${net>=0?'Growing':'Shrinking'} by ${(Math.abs(net)/stock*100).toFixed(Math.abs(net)/stock<.01?2:1)}% of its store per day.</div>`;
+      if(turnover!=null&&holdsO2)h+=`<div class="cycle-kv big"><span>Turnover time</span><b>${fmtDur(turnover)}</b></div>`;
+      else if(el==='O'&&!holdsO2)h+=`<p class="small" style="color:#9fb1c5">Organisms don't store O₂: what they make goes straight into the water, and what they use comes from it.</p>`;
+    }else if(cyclePanel==='energy'){
+      const x=energyNumbers(),J=v=>v*ENERGY_J_PER_MG_C,fj=v=>{const a=Math.abs(v);return (v<0?'−':'')+(a>=100?a.toFixed(0):a>=10?a.toFixed(1):a>=1?a.toFixed(2):a.toFixed(3));};
+      const lv=[{n:'Minnows',p:x.p2,c:'#cbd5e1'},{n:'Invertebrates',p:x.p1,c:'#f0abfc'},{n:'Producers',p:x.npp,c:'#4ade80'}];
+      const maxP=Math.max(1e-9,...lv.map(l=>Math.max(0,l.p)));
+      const W=280,L=92,bw=W-L-4,bh=26;
+      let svg=`<svg viewBox="0 0 ${W} ${3*(bh+10)+2}" class="cycle-pyr">`;
+      lv.forEach((l,k)=>{const w=l.p>0?Math.max(3,bw*l.p/maxP):0,y=2+k*(bh+10),x0=L+(bw-w)/2;
+        svg+=`<text x="0" y="${y+11}" fill="#f1f5f9" font-size="11" font-weight="700">${l.n}</text><text x="0" y="${y+24}" fill="#9fb1c5" font-size="10">${l.p>0?`${fj(J(l.p))} J/day`:'losing mass'}</text>${w>0?`<rect x="${x0.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${bh}" rx="4" fill="${l.c}" fill-opacity=".3" stroke="${l.c}"/>`:`<line x1="${L}" x2="${W-4}" y1="${y+bh/2}" y2="${y+bh/2}" stroke="#334155" stroke-dasharray="3 4"/>`}`;});
+      svg+='</svg>';
+      const te1=x.npp>0&&x.p1>0?x.p1/x.npp:null,te2=x.p1>0&&x.p2>0?x.p2/x.p1:null;
+      h+=svg;
+      h+=`<div class="cycle-kv"><span>Producers → invertebrates</span><b>${te1==null?'—':(te1*100).toFixed(1)+'%'}</b></div><div class="cycle-kv"><span>Invertebrates → minnows</span><b>${te2==null?'—':(te2*100).toFixed(1)+'%'}</b></div>`;
+      h+=`<table class="cycle-tbl cycle-tbl3"><tr><th>J per day</th><th>Fixed / eaten</th><th>Heat (respired)</th><th>Production</th></tr>
+        <tr><td>Producers</td><td>${fj(J(x.gpp))}</td><td>${fj(J(x.rp))}</td><td>${fj(J(x.npp))}</td></tr>
+        <tr><td>Invertebrates</td><td>${fj(J(x.i1))}</td><td>${fj(J(x.r1))}</td><td>${fj(J(x.p1))}</td></tr>
+        <tr><td>Minnows</td><td>${fj(J(x.i2))}</td><td>${fj(J(x.r2))}</td><td>${fj(J(x.p2))}</td></tr></table><div class="small" style="color:#8ea1b7;margin-top:2px">Production = what was eaten − ${(x.eg*100).toFixed(0)}% egested as feces − respiration. For producers: fixed by photosynthesis − respiration (net primary production).</div>`;
+      h+=`<p class="cycle-note">Transfer efficiency = production of one level ÷ production of the level below. Field studies usually find 5–20% (Lindeman's “10% rule”). Invertebrates here also eat detritus (${x.i1>0?(x.iEatDet/x.i1*100).toFixed(0):0}% of their food), and minnows eat algae and detritus (${x.i2>0?(x.fEatOther/x.i2*100).toFixed(0):0}%), so this is a web, not a simple chain.</p>`;
+      if(te1!=null&&te1>0.25){const direct=x.i1>0?x.p1*x.iEatProd/x.i1/x.npp:0;h+=`<p class="cycle-warn">${(te1*100).toFixed(0)}% is higher than field values. Two reasons: invertebrates also eat detritus (energy fixed earlier, the “brown” food web), and algae here return ${x.gpp>0?(x.rp/x.gpp*100).toFixed(0):0}% of what they fix straight to the water (the model's algal loss lumps respiration with cells that die and dissolve), which makes net production look small. Counting only food eaten straight from producers gives ${(direct*100).toFixed(1)}%.</p>`;}
+      if(x.warm)h+=`<p class="cycle-warn">Less than 24 h of data so far: run longer for steady values.</p>`;
+    }else if(cyclePanel==='predict'&&predict){
+      const p=predict;
+      if(p.phase==='run'){const left=Math.max(0,p.lock.t+24-state.timeHours);h=`<div class="cycle-kv big"><span>Time left</span><b>${left.toFixed(1)} h</b></div><div class="cycle-bar"><i style="width:${((24-left)/24*100).toFixed(0)}%"></i></div>${running?'':'<p class="cycle-warn">The tank is paused. Press Run to continue.</p>'}`;}
+      else if(p.phase==='reveal'){
+        const rows=p.rows.filter(r=>r.ed.from!=='runoff').sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+        const mine=rows.find(r=>r.ed.key===p.pick),rank=mine?rows.indexOf(mine)+1:null,top=rows[0];
+        const dirOK=mine&&Math.sign(mine.delta)===p.dir;
+        const verdict=rank===1&&dirOK?'🎯 Spot on: the biggest change, in the direction you predicted.':rank&&rank<=3&&dirOK?`Close: ${rank===2?'2nd':'3rd'} biggest change of ${rows.length}, and the direction was right.`:dirOK?`Right direction, but ${rank?`it ranked ${rank} of ${rows.length}`:'it was small'}.`:'Not this time: it went the other way.';
+        h=`<p class="cycle-verdict">${verdict}</p>`;
+        if(mine)h+=`<div class="cycle-kv"><span>Your arrow: ${escapeCycle(mine.label)}</span><b style="color:${mine.delta>=0?'#4ade80':'#f87171'}">${mine.delta>=0?'+':'−'}${fmtMg(Math.abs(mine.delta))} (${fmtPct(mine.pct)})</b></div>`;
+        if(top&&top!==mine)h+=`<div class="cycle-kv"><span>Biggest change: ${escapeCycle(top.label)}</span><b style="color:${top.delta>=0?'#4ade80':'#f87171'}">${top.delta>=0?'+':'−'}${fmtMg(Math.abs(top.delta))} (${fmtPct(top.pct)})</b></div>`;
+        h+=`<div class="cycle-h4">Largest changes <span>${CYCLE_UNIT[p.el]}/day</span></div>`+changeTable(rows.slice(0,6),p.el);
+        if(p.rows.some(r=>r.ed.from==='runoff'))h+=`<div class="small" style="color:#8ea1b7">Runoff itself is your input, so it isn't ranked.</div>`;
+        h+=`<p class="cycle-note"><b>Explain it:</b> which process links your change to the biggest arrow? Was anything surprising? On the diagram, green arrows grew and red ones shrank.</p>`;
+      }
+    }else if(cyclePanel==='compare'&&compare){
+      const after=compareAfter();
+      if(!after){h=`<p>Snapshot taken. Now make your change and run the tank for at least a few hours (24 h is best).</p>`;}
+      else{
+        const hrs=after[1].t-after[0].t;
+        const rows=diffRows(el,compare.a0,compare.a1,after[0],after[1]).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+        h=`<div class="small" style="color:#9fb1c5">“After” = the ${hrs.toFixed(0)} h ${hrs>=24?'up to now':'since the snapshot'}${hrs<24?' (run to 24 h for a fair day/night comparison)':''}.</div>`;
+        h+=`<div class="cycle-h4">Largest changes <span>${unit}/day</span></div>`+changeTable(rows.slice(0,8),el);
+      }
+    }else if(cyclePanel==='tracer'&&tracer&&el!=='O'){
+      const T=tracer;
+      if(T.pool){
+        const cur=CYCLE_NODES[T.pool];
+        h+=`<div class="cycle-kv big"><span>Atom's clock</span><b>day ${T.t.toFixed(1)}</b></div><div class="cycle-kv"><span>Now in</span><b style="color:${cur.color}">${cur.label}</b></div><div class="cycle-kv"><span>Laps back to ${CYCLE_NODES[T.startPool].label}</span><b>${T.laps}</b></div>`;
+        if(T.next)h+=`<div class="small" style="color:#9fb1c5">Expected stay here: ${fmtDur(T.next.mean)}.</div>`;
+        if(T.done==='air')h+=`<p class="cycle-warn">The atom escaped to the air as CO₂. In a real pond it could dissolve back in later, or blow away.</p>`;
+        else if(T.done==='stuck')h+=`<p class="cycle-warn">No flow leaves ${cur.label} right now, so the atom is stuck. Try again after conditions change.</p>`;
+        if(T.path.length)h+=`<div class="cycle-h4">Journey <span>newest first</span></div><table class="cycle-tbl cycle-tbl-left">${T.path.slice(-8).reverse().map(s=>`<tr><td>Day ${s.day.toFixed(1)} · ${CYCLE_NODES[s.from].label} → <b>${CYCLE_NODES[s.to].label}</b><br><span class="small">${escapeCycle(s.label)} · stayed ${fmtDur(s.stayed)}</span></td></tr>`).join('')}</table>`;
+      }else if(!T.stats)h+=`<p class="small">Choose a starting pool and press Release.</p>`;
+      if(T.stats&&T.stats.el===el){
+        const s=T.stats;
+        h+=`<div class="cycle-h4">${s.n} atoms × ${s.days} days <span>from ${CYCLE_NODES[s.start].label}</span></div><table class="cycle-tbl cycle-tbl3"><tr><th>Pool</th><th>Time spent</th><th>Share of store</th></tr>${s.rows.filter(r=>r.time>0.0005||r.stock>0.0005).map(r=>`<tr><td>${CYCLE_NODES[r.id].label}</td><td><span class="cycle-mini" style="width:${Math.max(2,r.time*60).toFixed(0)}px;background:${CYCLE_NODES[r.id].color}"></span>${(r.time*100).toFixed(1)}%</td><td>${r.stock==null?'—':(r.stock*100).toFixed(1)+'%'}</td></tr>`).join('')}</table>
+          <div class="small" style="color:#9fb1c5">${s.hops.toFixed(1)} moves per atom per year${s.escaped?` · ${(s.escaped/s.n*100).toFixed(0)}% escaped to the air`:''}.</div>
+          <p class="cycle-note">In a steady tank, the share of time atoms spend in a pool matches that pool's share of the store. Big, slow pools (like dissolved nitrate) hold atoms for a long time.</p>`;
+      }
+    }
+    live.innerHTML=h;
+  }
+  function changeTable(rows,el){
+    if(!rows.length)return '<div class="small">No flows to compare yet.</div>';
+    return `<table class="cycle-tbl cycle-tbl3"><tr><th>Flow</th><th>Before → after</th><th>Change</th></tr>${rows.map(r=>`<tr><td>${escapeCycle(r.label)}${r.flipped?' <span class="small">(reversed)</span>':''}</td><td>${fmtMg(r.before)} → ${fmtMg(r.after)}</td><td style="color:${r.delta>=0?'#4ade80':'#f87171'}">${fmtPct(r.pct)}</td></tr>`).join('')}</table>`;
+  }
+  function onCycleSideClick(e){
+    const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+    if(a==='close'){cyclePanel=null;stopTracerAuto();}
+    else if(a==='dir-up'&&predict)predict.dir=1;
+    else if(a==='dir-down'&&predict)predict.dir=-1;
+    else if(a==='lock'&&predict&&predict.pick&&predict.dir){predict.lock=snapNow();predict.phase='run';running=true;updateControls();}
+    else if(a==='predict-cancel'){predict=null;cyclePanel=null;}
+    else if(a==='predict-again'){startPredict();}
+    else if(a.startsWith('cview-')&&compare)compare.view=a.slice(6);
+    else if(a==='compare-new')startCompare();
+    else if(a==='csv'){exportCycleCSV();return;}
+    else if(a==='tr-release'){releaseTracer();return;}
+    else if(a==='tr-step'){stopTracerAuto();tracerStep();return;}
+    else if(a==='tr-auto'){if(tracer?.auto)stopTracerAuto();else{tracerStep();startTracerAuto();}renderCycleSide();return;}
+    else if(a==='tr-mc'){tracerMonteCarlo();return;}
+    else if(a.startsWith('dist-')){
+      const id=a.slice(5),label=(QUICK_CHANGES.find(q=>q[0]===id)||[id,id])[1];
+      E.applyDisturbance(state,id);history.push(snapshot());
+      const tgt=cyclePanel==='predict'?predict:cyclePanel==='compare'?compare:null;
+      if(tgt)(tgt.changes||(tgt.changes=[])).push({label,t:state.timeHours});
+      setPresetMessage(`${label} applied from Cycle view.`);
+      updateAll();
+    }
+    renderCycleSide();updateCycleView();
+  }
+  function exportCycleCSV(){
+    const lines=['section,element,flow,from,to,rate_right_now_mg_per_day,rate_24h_avg_mg_per_day,before_mg_per_day,after_mg_per_day'];
+    const after=compareAfter();
+    for(const el of ['C','N','P','O'])for(const ed of cycleEdgeList){
+      if(!edgeInElement(ed,el))continue;
+      const now=emaRate(ed,el,'now'),day=emaRate(ed,el,'day');
+      const bf=compare?intervalRate(compare.a0,compare.a1,ed,el):'',af=compare&&after?intervalRate(after[0],after[1],ed,el):'';
+      if(Math.abs(now)+Math.abs(day)+Math.abs(+bf||0)+Math.abs(+af||0)<1e-9)continue;
+      lines.push(['flow',el,`"${ed.label}"`,ed.from,ed.to,now.toFixed(5),day.toFixed(5),bf===''?'':(+bf).toFixed(5),af===''?'':(+af).toFixed(5)].join(','));
+    }
+    lines.push('');lines.push('section,pool,C_mg,N_mg,P_mg,O2_mg');
+    const pools=cyclePools();
+    for(const [id,v] of Object.entries(pools))lines.push(['pool',id,(v.C||0).toFixed(4),(v.N||0).toFixed(4),(v.P||0).toFixed(5),v.O!=null?v.O.toFixed(3):''].join(','));
+    lines.push('');lines.push(`note,"Signed rates follow the arrow direction (from -> to). Negative air exchange = escaping to air. Time ${formatTime(state.timeHours)}${compare?`; before = ${compare.baseHours.toFixed(0)} h before snapshot at ${formatTime(compare.t)}`:''}"`);
+    const blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ecosphere-flows-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
   function updateCycleView(){
+    cycleTick();
     if(!cycleBuilt||!$('cycleView').classList.contains('open'))return;
-    const el=cycleElement,color=CYCLE_COLORS[el];
+    const el=cycleElement,color=CYCLE_COLORS[el],unit=CYCLE_UNIT[el];
     document.querySelectorAll('#cycleElSeg button').forEach(b=>{const on=b.dataset.el===el;b.classList.toggle('on',on);b.style.background=on?CYCLE_COLORS[b.dataset.el]:'';});
     document.querySelectorAll('#cycleWinSeg button').forEach(b=>{const on=b.dataset.win===cycleWindow;b.classList.toggle('on',on);b.style.background=on?'#67e8f9':'';});
-    const rates=state.flowRates||{};
-    const pools=E.flowPools(state);
+    const pools=cyclePools();
+    // Display mode: normal flows, hidden (predicting), or before/after difference.
+    let mode='flow',diff=null,ivl=null;
+    if(predict&&(predict.phase==='setup'||predict.phase==='run')&&cyclePanel==='predict')mode='hidden';
+    else if(predict&&predict.phase==='reveal'&&cyclePanel==='predict'&&predict.el===el){mode='diff';diff=predict.rows;}
+    else if(compare&&cyclePanel==='compare'){
+      const after=compareAfter();
+      if(compare.view==='change'&&after){mode='diff';diff=diffRows(el,compare.a0,compare.a1,after[0],after[1]);}
+      else if(compare.view==='before')ivl=[compare.a0,compare.a1];
+      else if(compare.view==='after'&&after)ivl=after;
+    }
     // Node sizes: area grows with the amount held (log scale, since dissolved pools are far larger).
     const radius={};
     for(const [id,ne] of Object.entries(cycleEls.nodes)){
-      const n=ne.n;let amount=null;
-      if(id==='atmosphere'||id==='runoff')amount=null;else amount=pools[id]?pools[id][el]:0;
-      const hidden=(n.only&&n.only!==el)||(id==='runoff'&&!((rates['runoff>dissolved']?.day?.N||0)+(rates['runoff>dissolved']?.day?.P||0)>1e-6&&el!=='C'));
+      const n=ne.n,hidden=!nodeVisible(id,el);
+      let amount=id==='runoff'?null:id==='atmosphere'?(state.sealed?pools.atmosphere?.[el]:null):(el==='O'&&id!=='dissolved'?null:(pools[id]?.[el]??0));
       ne.g.style.display=hidden?'none':'';
       const r=amount==null?20:E.clamp(17+6*Math.log10(1+amount/0.05),17,38);
       radius[id]=hidden?0:r;
       ne.c.setAttribute('r',r);ne.halo.setAttribute('r',r+6);
-      ne.amt.textContent=amount==null?'':`${fmtMg(amount)} mg`;
+      ne.c.setAttribute('stroke-width',cyclePanel==='balance'&&cycleSelNode===id?4.5:2.5);
+      ne.amt.textContent=amount==null?(id==='atmosphere'&&!state.sealed?'open':''):`${fmtMg(amount)} mg`;
+      ne.sub.textContent=el==='O'&&n.subO?n.subO:n.sub;
       ne.sub.setAttribute('y',r+13);
     }
+    cycleEls.radius=radius;
     // Edges
-    const list=[];
-    for(const ed of Object.values(cycleEls.edges)){
-      let v=(rates[ed.from+'>'+ed.to]?.[cycleWindow]?.[el]||0)*24;
-      let from=ed.from,to=ed.to,label=ed.label;
-      if(ed.from==='atmosphere'&&v<0){from='dissolved';to='atmosphere';v=-v;label='CO₂ escaping to air';}
-      ed.cur={from,to,v,label};
-      if(radius[ed.from]===0||radius[ed.to]===0)v=0;
-      list.push(ed);
+    const list=[],diffBy=diff?Object.fromEntries(diff.map(r=>[r.ed.key,r])):null;
+    for(const ce of Object.values(cycleEls.edges)){
+      const ed=ce.ed;
+      if(!edgeInElement(ed,el)){ce.cur=null;list.push(ce);continue;}
+      if(diffBy){const r=diffBy[ed.key];ce.cur=r?{from:r.from,to:r.to,v:Math.abs(r.delta),label:r.label,delta:r.delta,row:r}:null;}
+      else{const v=ivl?intervalRate(ivl[0],ivl[1],ed,el):emaRate(ed,el,cycleWindow);ce.cur=resolveEdge(ed,v);}
+      if(ce.cur&&(radius[ce.cur.from]===0||radius[ce.cur.to]===0))ce.cur=null;
+      list.push(ce);
     }
-    const max=Math.max(1e-9,...list.map(e=>e.cur.v));
-    // Numbers are printed on the four largest arrows to keep the picture readable.
-    const labelled=new Set(list.filter(e=>e.cur.v>max*0.002).sort((a,b)=>b.cur.v-a.cur.v).slice(0,4));
-    for(const ed of list){
-      const {from,to,v}=ed.cur;
-      if(!(v>max*0.002)){ed.g.style.display='none';ed.text.textContent='';continue;}
-      ed.g.style.display='';
-      const A=CYCLE_NODES[from],B=CYCLE_NODES[to];
-      const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
-      const px=-uy,py=ux,bend=Math.min(60,len*0.18);
-      const sx=A.x+ux*(radius[from]+4),sy=A.y+uy*(radius[from]+4);
-      const ex=B.x-ux*(radius[to]+12),ey=B.y-uy*(radius[to]+12);
-      const cx=(sx+ex)/2+px*bend,cy=(sy+ey)/2+py*bend;
-      const d=`M${sx.toFixed(1)},${sy.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`;
-      const rel=v/max,w=1.2+11*Math.sqrt(rel);
-      const hovered=cycleHover===ed.from+'>'+ed.to;
-      for(const p of [ed.base,ed.dash,ed.hit])p.setAttribute('d',d);
-      ed.base.setAttribute('stroke',color);ed.base.setAttribute('stroke-width',w.toFixed(2));
-      ed.base.setAttribute('stroke-opacity',hovered?1:cycleHover?0.25:0.55+0.35*Math.sqrt(rel));
-      ed.base.setAttribute('marker-end',`url(#cycleArrow${el})`);
-      ed.dash.setAttribute('stroke','#ffffff');ed.dash.setAttribute('stroke-opacity',cycleHover&&!hovered?0.08:0.55);
-      ed.dash.setAttribute('stroke-width',Math.max(1.2,w*0.35).toFixed(2));
-      ed.dash.style.animationDuration=(1.2/(0.15+Math.sqrt(rel))).toFixed(2)+'s';
-      ed.title.textContent=`${ed.cur.label}: ${fmtMg(v)} mg ${el}/day`;
-      const showLabel=hovered||labelled.has(ed);
-      ed.text.textContent=showLabel?`${fmtMg(v)}`:'';
-      ed.text.setAttribute('x',(0.25*sx+0.5*cx+0.25*ex+px*(w/2+9)).toFixed(1));
-      ed.text.setAttribute('y',(0.25*sy+0.5*cy+0.25*ey+py*(w/2+9)+4).toFixed(1));
-      ed.text.setAttribute('fill',color);
+    const scaleList=mode==='diff'&&list.some(e=>e.cur&&e.ed.from!=='runoff'&&e.cur.v>0)?list.filter(e=>e.ed.from!=='runoff'):list;
+    const max=Math.max(1e-9,...scaleList.map(e=>e.cur?e.cur.v:0));
+    const labelled=new Set(list.filter(e=>e.cur&&e.cur.v>max*0.002).sort((a,b)=>b.cur.v-a.cur.v).slice(0,4));
+    for(const ce of list){
+      const cur=ce.cur;
+      const show=cur&&(mode==='diff'?cur.v>max*0.005||(cur.row&&predict&&predict.pick===ce.ed.key):cur.v>max*0.002);
+      if(!show){ce.g.style.display='none';ce.text.textContent='';continue;}
+      ce.g.style.display='';
+      const g=edgeGeom(cur.from,cur.to,radius,ce.ed.bend);
+      const rel=Math.min(1,cur.v/max);
+      let w=1.2+11*Math.sqrt(rel),stroke=color,marker=el,opacity,dashOp=.55,txt=fmtMg(cur.v),txtCol=color;
+      const hovered=cycleHover===ce.ed.key,picked=predict&&predict.pick===ce.ed.key&&(predict.phase!=='reveal'||mode==='diff');
+      opacity=hovered?1:cycleHover?0.25:0.55+0.35*Math.sqrt(rel);
+      if(mode==='hidden'){w=picked?5:3;stroke=picked?'#facc15':'#94a3b8';marker=picked?'pick':'hid';opacity=picked?1:hovered?.95:.55;dashOp=.25;txt='';}
+      else if(mode==='diff'){
+        const up=cur.delta>=0;stroke=up?'#4ade80':'#f87171';marker=up?'up':'down';
+        w=1.5+11*Math.sqrt(rel);txt=fmtPct(cur.row.pct);txtCol=stroke;opacity=hovered?1:.5+.45*Math.sqrt(rel);
+        if(picked){opacity=1;}
+      }
+      for(const p of [ce.base,ce.dash,ce.hit])p.setAttribute('d',g.d);
+      ce.base.setAttribute('stroke',stroke);ce.base.setAttribute('stroke-width',w.toFixed(2));
+      ce.base.setAttribute('stroke-opacity',opacity);
+      ce.base.setAttribute('marker-end',`url(#cycleArrow${marker})`);
+      ce.base.classList.toggle('cycle-picked',!!picked);
+      ce.dash.setAttribute('stroke','#ffffff');ce.dash.setAttribute('stroke-opacity',cycleHover&&!hovered?0.08:dashOp);
+      ce.dash.setAttribute('stroke-width',Math.max(1.2,w*0.35).toFixed(2));
+      ce.dash.style.animationDuration=(mode==='hidden'?2.5:(1.2/(0.15+Math.sqrt(rel)))).toFixed(2)+'s';
+      ce.title.textContent=mode==='hidden'?`${cur.label} (click to choose)`:mode==='diff'?`${cur.label}: ${fmtMg(cur.row.before)} → ${fmtMg(cur.row.after)} ${unit}/day`:`${cur.label}: ${fmtMg(cur.v)} ${unit}/day`;
+      const showLabel=mode==='hidden'?false:mode==='diff'?(hovered||picked||labelled.has(ce)):(hovered||labelled.has(ce));
+      ce.text.textContent=showLabel?txt:'';
+      ce.text.setAttribute('x',(0.25*g.sx+0.5*g.cx+0.25*g.ex+g.px*(w/2+9)).toFixed(1));
+      ce.text.setAttribute('y',(0.25*g.sy+0.5*g.cy+0.25*g.ey+g.py*(w/2+9)+4).toFixed(1));
+      ce.text.setAttribute('fill',txtCol);
     }
+    // Tracer atom marker
+    const T=cycleEls.tracer;
+    if(cyclePanel==='tracer'&&tracer&&tracer.pool&&tracer.el===el&&radius[tracer.pool]){
+      T.layer.style.display='';
+      T.dot.setAttribute('fill',color);T.ring.setAttribute('stroke',color);
+      if(!tracer.anim){const n=CYCLE_NODES[tracer.pool],r=radius[tracer.pool];const x=n.x+r*.72,y=n.y-r*.72;T.dot.setAttribute('cx',x.toFixed(1));T.dot.setAttribute('cy',y.toFixed(1));T.ring.setAttribute('cx',x.toFixed(1));T.ring.setAttribute('cy',y.toFixed(1));}
+      const pts=tracer.path.slice(-6);
+      T.trail.setAttribute('stroke',color);
+      T.trail.setAttribute('d',pts.map(s=>edgeGeom(s.from,s.to,radius,1).d).join(' '));
+    }else T.layer.style.display='none';
     // Footer: hovered flow or the element note, plus the largest flows.
-    const unit=`mg ${el} per day`;
     const h=cycleHover&&cycleEls.edges[cycleHover];
-    $('cycleInfo').innerHTML=h&&h.cur&&h.cur.v>0
-      ? `<b style="color:${color}">${h.cur.label}</b> · ${CYCLE_NODES[h.cur.from].label} → ${CYCLE_NODES[h.cur.to].label}<br><b>${fmtMg(h.cur.v)}</b> ${unit}. ${h.desc}`
-      : `<b style="color:${color}">${CYCLE_NAMES[el]}</b> · arrow width = flow rate, circle size = amount stored, numbers in ${unit}.<br>${CYCLE_NOTES[el]}`;
-    const top=list.filter(e=>e.cur.v>0&&e.g.style.display!=='none').sort((a,b)=>b.cur.v-a.cur.v).slice(0,5);
-    $('cycleTop').innerHTML=`<b>Largest flows ${cycleWindow==='now'?'right now':'(24-h average)'}</b>`+top.map(e=>`<div><span>${e.cur.label}</span><span style="color:${color}">${fmtMg(e.cur.v)}</span></div>`).join('');
+    let info;
+    if(mode==='hidden')info=`<b style="color:#facc15">Predict mode</b> · arrow sizes are hidden. ${predict.phase==='setup'?'Click the arrow you think will change the most.':'Waiting for 24 simulated hours…'}`;
+    else if(mode==='diff')info=`<b>Before → after</b> · <span style="color:#4ade80">green arrows grew</span>, <span style="color:#f87171">red arrows shrank</span>; width = size of the change, labels = % change. Hover an arrow for its numbers.`;
+    else info=null;
+    if(h&&h.cur&&h.cur.v>0){
+      info=mode==='diff'&&h.cur.row?`<b style="color:${h.cur.delta>=0?'#4ade80':'#f87171'}">${h.cur.label}</b> · ${CYCLE_NODES[h.cur.from].label} → ${CYCLE_NODES[h.cur.to].label}<br>${fmtMg(h.cur.row.before)} → <b>${fmtMg(h.cur.row.after)}</b> ${unit} per day (${fmtPct(h.cur.row.pct)}). ${h.ed.desc}`
+        :mode==='hidden'?`<b>${h.cur.label}</b> · ${CYCLE_NODES[h.cur.from].label} → ${CYCLE_NODES[h.cur.to].label}. ${h.ed.desc}`
+        :`<b style="color:${color}">${h.cur.label}</b> · ${CYCLE_NODES[h.cur.from].label} → ${CYCLE_NODES[h.cur.to].label}<br><b>${fmtMg(h.cur.v)}</b> ${unit} per day. ${h.ed.desc}`;
+    }
+    $('cycleInfo').innerHTML=info||`<b style="color:${color}">${CYCLE_NAMES[el]}</b> · arrow width = flow rate, circle size = amount stored, numbers in ${unit} per day${ivl?` (${compare.view} period)`:''}. <span style="color:#facc15">Click any circle for its balance sheet.</span><br>${CYCLE_NOTES[el]}`;
+    if(mode==='hidden')$('cycleTop').innerHTML='<b>Largest flows</b><div><span>hidden while you predict</span></div>';
+    else if(mode==='diff'){
+      const top=diff.slice().sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta)).slice(0,5);
+      $('cycleTop').innerHTML='<b>Largest changes</b>'+top.map(r=>`<div><span>${r.label}</span><span style="color:${r.delta>=0?'#4ade80':'#f87171'}">${r.delta>=0?'+':'−'}${fmtMg(Math.abs(r.delta))}</span></div>`).join('');
+    }else{
+      const top=list.filter(e=>e.cur&&e.cur.v>0&&e.g.style.display!=='none').sort((a,b)=>b.cur.v-a.cur.v).slice(0,5);
+      $('cycleTop').innerHTML=`<b>Largest flows ${ivl?`(${compare.view} period)`:cycleWindow==='now'?'right now':'(24-h average)'}</b>`+top.map(e=>`<div><span>${e.cur.label}</span><span style="color:${color}">${fmtMg(e.cur.v)}</span></div>`).join('');
+    }
     const warm=(state.flowRatesHours||0)<(cycleWindow==='day'?24:1);
     $('cycleClock').textContent=`${formatTime(state.timeHours)} · ${E.sunFraction(state.timeHours)>0?'daylight':'night'}${warm?' · averaging, run longer for steady values':''}`;
+    updateCycleSideLive();
   }
 
   function exportCSV() {
@@ -6210,7 +7195,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   }
   $('loadPresetBtn').addEventListener('click',()=>loadInvestigationPreset($('presetSelect').value));
 
-  $('runBtn').addEventListener('click', () => { running = !running; updateControls(); });
+  $('runBtn').addEventListener('click', () => { if(activeMode?.docked&&!activeMode.started){activeMode.started=true;hideTourBanner();clearTimeout(activeMode._t);} running = !running; updateControls(); if(activeMode)renderModeHud(); });
   $('stepBtn').addEventListener('click', () => { if(activeMode&&activeMode.ownClock)modeAdvance(1); else advance(1); });
   $('balanceBtn').addEventListener('click', loadLongLifePreset);
   $('resetBtn').addEventListener('click', () => { cancelActiveTrial(); clearOxygenBubbles(); animalTransitions.clear(); carcassTransitions.clear(); selectedAnimalId=null; selectedCarcassId=null; habitatUndoStack=[]; habitatDraw=null; $('presetSelect').value='starter'; setWorkspace('ecosphere'); state = E.createState(84); timeTransition={from:state.timeHours,to:state.timeHours,start:performance.now(),duration:1}; running = false; missionComplete = false; lastProbe = null; liveContextMode='probe'; activityOverlayEnabled = true; activityPanelEnabled = true; actionPopups=[]; seenPopupEvents.clear(); $('activityBtn').textContent='Event Bubbles: On'; $('activityBtn').classList.add('focus-on'); $('activityPanelBtn').textContent='Activity Strip: On'; $('activityPanelBtn').classList.add('focus-on'); resetHistory(); updateAll(); });
@@ -6503,8 +7488,10 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     history.push(snapshot());updateAll();
   });
 
+  tank.addEventListener('pointerleave',()=>{probeHover=null;});
   tank.addEventListener('pointermove',(e)=>{
     const p=canvasToModel(e.clientX,e.clientY);
+    probeHover=activeTool==='probe'&&e.pointerType!=='touch'&&p&&p.x>=0&&p.y>=0&&p.x<E.COLS&&p.y<E.ROWS?p:null;
     if(habitatDraw && e.pointerId===habitatDraw.pointerId){
       if(p)continueHabitatStroke(p);
       return;
@@ -6683,6 +7670,13 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   let hudControlsHtml=null;
   function renderModeHud(){
     const hud=$('modeHud');if(!hud)return;
+    document.body.classList.toggle('tour-active',!!activeMode?.docked);
+    if(activeMode?.docked){
+      let tb=$('tourBar');
+      if(!tb){tb=document.createElement('div');tb.id='tourBar';document.querySelector('.panel.mission').appendChild(tb);}
+      const html=activeMode.bar();if(tb._html!==html){tb.innerHTML=html;tb._html=html;}
+      hud.style.display='none';return;
+    }
     if(!activeMode){hud.style.display='none';hud.dataset.mode='';return;}
     hud.style.display='block';
     if(hud.dataset.mode!==activeMode.name){
@@ -6693,6 +7687,23 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     $('modeHudStats').innerHTML=stats;
     if(controls!==hudControlsHtml){$('modeHudControls').innerHTML=controls;hudControlsHtml=controls;}
     if(activeMode.afterHud)activeMode.afterHud(hud);
+  }
+  function showTourBanner(html,kind='',onClick=null,hideAfter=0){
+    let b=$('tourBanner');
+    if(!b){b=document.createElement('div');b.id='tourBanner';b.className='tour-banner';tank.closest('.canvas-wrap').appendChild(b);b.addEventListener('click',()=>{const f=b._click;hideTourBanner();if(f)f();});}
+    b.innerHTML=html;b.className='tour-banner show'+(kind?' '+kind:'');b._click=onClick;clearTimeout(b._timer);
+    if(hideAfter)b._timer=setTimeout(hideTourBanner,hideAfter);
+  }
+  function hideTourBanner(){const b=$('tourBanner');if(b){b.classList.remove('show');clearTimeout(b._timer);}}
+  // Controls a mode locks are dimmed with a small lock so students can see them.
+  function applyModeLockStyle(on){
+    document.querySelectorAll('.mode-locked-el').forEach(el=>{el.classList.remove('mode-locked-el');});
+    if(!on||!activeMode?.lock)return;
+    for(const sel of activeMode.lock)document.querySelectorAll(sel).forEach(el=>{
+      if((activeMode.allow||[]).some(a=>el.closest(a)))return;
+      el.classList.add('mode-locked-el');el.dataset.lockTitle=el.title||'';
+      el.querySelectorAll?.('button,input,select').forEach(c=>c.classList.add('mode-locked-el'));
+    });
   }
   function showToast(text){
     let t=$('modeToast');
@@ -6724,7 +7735,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     $('modeHud').style.display='block';
     activeMode.start?.();
     document.body.classList.add('in-mode');
-    updateMission();renderModeHud();updateAll();
+    updateMission();renderModeHud();updateAll();applyModeLockStyle(true);
   }
   function exitMode(silent=false){
     if(!activeMode)return;
@@ -6732,7 +7743,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     activeMode=null;running=false;
     if(labBackup){try{applySave(labBackup.save);}catch(err){}missionIndex=labBackup.missionIndex;$('missionSelect').value=String(missionIndex);labBackup=null;}
     setSpeed(1);
-    document.body.classList.remove('in-mode');
+    document.body.classList.remove('in-mode');applyModeLockStyle(false);
     renderModeHud();updateMission();updateControls();updateAll();
     if(!silent)setPresetMessage('Back in the standard lab with the tank you had before.');
   }
@@ -6989,7 +8000,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   function TournamentMode(opts){
     const spec=opts.spec,design=opts.design,team=opts.team||'Team';
     return {
-      name:'Class Tournament',icon:'🏆',ownClock:true,lock:LOCK_BUILD,
+      name:'Class Tournament',icon:'🏆',ownClock:true,lock:LOCK_BUILD,docked:true,
       goal:`Code ${spec.code} · ${T_CHALLENGES[spec.challenge].name} · ${spec.days} days. Every team faces the same tank and the same challenges.`,
       lockNote:'Tournament run in progress: designs are locked so every team is compared fairly. You can still probe and inspect.',
       start(){
@@ -6997,20 +8008,62 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         cancelActiveTrial();clearOxygenBubbles();animalTransitions.clear();carcassTransitions.clear();selectedAnimalId=null;selectedCarcassId=null;lastProbe=null;actionPopups=[];seenPopupEvents.clear();
         state=this.run.state;E.markHabitatChanged(state);habitatCacheDirty=true;waterDetailsDirty=true;
         timeTransition={from:state.timeHours,to:state.timeHours,start:performance.now(),duration:1};resetHistory();
-        setSpeed(8);running=true;updateControls();
+        setSpeed(8);running=false;updateControls();
         setPresetMessage(`🏆 ${team}: your design is in the water. Challenges strike on schedule. Run continues to day ${spec.days}.`);
+        // A clear start: 3-2-1 over the tank, then the run begins.
+        const go=()=>{if(activeMode!==this||this.started)return;this.started=true;hideTourBanner();running=true;updateControls();renderModeHud();};
+        let n=3;
+        const tick=()=>{if(activeMode!==this||this.started)return;
+          if(n>0){showTourBanner(`<div>🏆 <b>${escapeHtml(team)}</b> · ${spec.code}</div><div class="tb-big">Tournament begins!</div><div class="tb-count">${n}</div><div class="tb-small">${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · click to skip</div>`,'',go);n--;this._t=setTimeout(tick,800);}
+          else go();};
+        tick();
       },
-      stepHour(){this.run.stepHour();if(this.run.done)this.finished=true;},
+      cleanup(){clearTimeout(this._t);clearTimeout(this._ff);hideTourBanner();},
+      dayLabel(t){const d=Math.min(spec.days,dayOf(t,this.run.start));return `Day ${d} of ${spec.days}`;},
+      stepHour(){
+        const before=this.run.events.filter(e=>e.done).length;
+        this.run.stepHour();
+        const fired=this.run.events.filter(e=>e.done).slice(before).filter(e=>!['cool','clear'].includes(e.type));
+        for(const ev of fired){const day=dayOf(ev.t+.01,this.run.start);const tt=$('modeToast');if(tt)tt.classList.remove('show');
+          showTourBanner(`<div class="tb-big">⚠ Day ${day}: ${T_EVENT_NAMES[ev.type]}!</div><div class="tb-small">Every team's tank gets the same challenge.</div>`,'warn',null,2600);}
+        const next=this.run.events.find(e=>!e.done&&!['cool','clear'].includes(e.type));
+        if(next&&!next.warned&&next.t-this.run.state.timeHours<=24){next.warned=true;showToast(`Tomorrow: ${T_EVENT_NAMES[next.type]}. Watch how your tank responds.`);}
+        if(this.run.done)this.finished=true;
+      },
+      action(act){
+        if(act==='finishnow'&&!this.finished){
+          this.fast=true;running=false;updateControls();
+          const ff=()=>{if(activeMode!==this||this.finished)return;modeAdvance(24);this._ff=setTimeout(ff,0);};ff();
+        }
+      },
+      bar(){
+        const day=Math.min(spec.days,dayOf(state.timeHours,this.run.start)),sc=this.run.score();
+        const next=this.run.events.find(e=>!e.done&&!['cool','clear'].includes(e.type));
+        const nextTxt=next?`${T_EVENT_NAMES[next.type]} · day ${dayOf(next.t+.01,this.run.start)}`:'none left';
+        const status=this.fast?'FINISHING…':!this.started?'STARTING…':running?'TOURNAMENT IN PROGRESS':'TOURNAMENT PAUSED';
+        return `<span class="tour-live ${running||this.fast?'':'paused'}"><i></i>🏆 ${status}</span>
+          <span><span class="tour-team">${escapeHtml(team)}</span> <span class="small tour-code">${spec.code}</span></span>
+          <span class="tour-day">Day <b>${day}</b> of ${spec.days}${bar(day/spec.days,'#facc15')}</span>
+          <span class="tour-next">Next: <b>${nextTxt}</b></span>
+          <span class="tour-score">Score <b>${sc.total}</b> <span class="small">/150</span></span>
+          <span class="tour-btns"><button class="btn" data-mode-action="finishnow" title="Run the rest instantly. The score is the same as watching it.">⏩ Finish now</button><button class="btn" data-mode-action="exit" title="Leave the tournament and return to your lab tank">✕ Leave</button></span>`;
+      },
       hud(){
         const day=Math.min(spec.days,dayOf(state.timeHours,this.run.start)),sc=this.run.score();
         const next=this.run.events.find(e=>!e.done&&!['cool','clear'].includes(e.type));
         return `<div class="mode-row"><span><b>${escapeHtml(team)}</b></span><span class="small">${spec.code}</span></div>
           <div class="mode-row"><span>Day <b>${day}</b> / ${spec.days}</span><span>${running?'running':'paused'}</span></div>${bar(day/spec.days,'#facc15')}
-          <div class="mode-row"><span>Next challenge</span><b>${next?`${T_EVENT_NAMES[next.type]} · day ${Math.round((next.t-this.run.start)/24)}`:'none left'}</b></div>
+          <div class="mode-row"><span>Next challenge</span><b>${next?`${T_EVENT_NAMES[next.type]} · day ${dayOf(next.t+.01,this.run.start)}`:'none left'}</b></div>
           <div class="mode-row"><span>Score so far</span><b style="color:#facc15">${sc.total}</b></div>
           <div class="mode-row small"><span>populations ${sc.parts.survival.toFixed(1)} · O₂ ${sc.parts.oxygen.toFixed(1)} · clear water ${sc.parts.chemistry.toFixed(1)} · diversity ${sc.parts.biodiversity.toFixed(1)}</span></div>${groupLine()}`;
       },
       finish(){
+        clearTimeout(this._ff);this.fast=false;
+        showTourBanner(`<div class="tb-big">🏁 Tournament complete!</div><div class="tb-small">${escapeHtml(team)} · calculating your score…</div>`,'done',null,1500);
+        setTimeout(()=>{if(activeMode===this)this.showResult();},1300);
+      },
+      showResult(){
+        hideTourBanner();
         const sc=this.run.score(),code=encodeResult(spec,team,design,sc.total);
         this.resultCode=code;
         showModeResult(`🏆 ${team}: ${sc.total} / 150`,`<p>Tournament <b>${spec.code}</b> · ${T_CHALLENGES[spec.challenge].name} · ${spec.days} days.</p>
@@ -7036,13 +8089,15 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         <h3>Design your tank · budget 🪙${T_BUDGET}</h3>
         <div class="t-grid">${Object.keys(T_COSTS).map(field).join('')}<label class="t-field"><span>💡 Light (free) <i>40–100%</i></span><input type="number" min="40" max="100" step="5" value="${d.light}" data-t="light"></label></div>
         <div class="mode-row" style="margin-top:8px"><span id="tBudget"></span><button class="btn primary" id="tStart">Lock in design & run</button></div>
+        <div id="tWhy"></div>
         <p class="small">Score (150): healthy final populations 60 · oxygen ≥ 5 mg/L everywhere 30 · clear water without blooms 30 · biodiversity 30. Plants max 10 in total. Everyone with the same code gets the same water, positions and challenges, so only the design differs.</p>
       </div>
       <div id="tTeacher" style="display:${tab==='teacher'?'block':'none'}">
         <h3>Create a tournament</h3>
         <div class="form-row"><label class="t-field"><span>Length</span><select class="field" id="tDays"><option value="20">20 days</option><option value="30" selected>30 days</option><option value="45">45 days</option></select></label>
         <label class="t-field"><span>Challenge</span><select class="field" id="tChal"><option value="A">Calm waters (no disturbances)</option><option value="B" selected>Classic (heat wave, runoff, fish disease)</option><option value="C">Gauntlet (six disturbances)</option></select></label></div>
-        <div class="mode-row" style="margin-top:6px"><button class="btn" id="tMake">Generate code</button><b id="tMade" style="font-size:16px;letter-spacing:.06em;color:#facc15"></b></div>
+        <div class="mode-row" style="margin-top:6px"><button class="btn" id="tMake">Generate code</button><b id="tMade" style="font-size:16px;letter-spacing:.06em;color:#facc15"></b><button class="btn" id="tCopyInstr" style="display:none">📋 Copy instructions for students</button></div>
+        <textarea class="field textarea" id="tInstr" readonly style="display:none;width:100%;min-height:120px;font-size:10.5px;margin-top:6px"></textarea>
         <h3>Leaderboard</h3>
         <textarea class="field textarea" id="tResults" placeholder="Paste students’ result codes here, one per line" style="width:100%;min-height:90px;font-size:10px"></textarea>
         <div class="mode-row" style="margin-top:6px"><button class="btn" id="tRank">Rank results</button><button class="btn" id="tVerify">Verify scores (re-run each design)</button></div>
@@ -7054,15 +8109,34 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       if(!$('tBudget'))return;
       const dd=readDesign(),cost=designCost(dd),spec=parseTournamentCode($('tCode').value);
       $('tBudget').innerHTML=`Spent <b style="color:${cost>T_BUDGET?'#fb7185':'#86efac'}">🪙${cost}</b> of ${T_BUDGET}`;
-      $('tSpecInfo').textContent=spec?`${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · challenges: ${T_CHALLENGES[spec.challenge].events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} (day ${e[0]})`).join(', ')||'none'}`:($('tCode').value?'That code doesn’t look right (example: ECO-4K2P9-30-B).':'Enter the code your teacher gave you.');
-      $('tStart').disabled=!spec||!designValid(dd)||!$('tTeam').value.trim();
+      $('tSpecInfo').textContent=spec?`${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · challenges: ${T_CHALLENGES[spec.challenge].events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} (day ${e[0]+1})`).join(', ')||'none'}`:($('tCode').value?'That code doesn’t look right (example: ECO-4K2P9-30-B).':'Enter the code your teacher gave you.');
+      // Say exactly what is missing instead of silently disabling the button.
+      const why=[],bad=new Set();
+      if(!$('tCode').value.trim()){why.push('enter the tournament code');bad.add('tCode');}
+      else if(!spec){why.push('check the code (it looks like ECO-XXXX-30-B)');bad.add('tCode');}
+      if(!$('tTeam').value.trim()){why.push('add a team name');bad.add('tTeam');}
+      if(cost>T_BUDGET)why.push(`remove 🪙${cost-T_BUDGET} of organisms (over budget)`);
+      for(const [k,[,max]] of Object.entries(T_COSTS)){const v=dd[k]||0;if(v<0||v>max||!Number.isInteger(v)){why.push(`${T_LABELS[k].replace(/^\S+\s/,'')}: 0–${max}`);bad.add('d-'+k);}}
+      if((dd.ribbon||0)+(dd.stem||0)+(dd.grass||0)>10){why.push('use 10 plants or fewer in total');['ribbon','stem','grass'].forEach(k=>bad.add('d-'+k));}
+      if(!(dd.light>=40&&dd.light<=100)){why.push('set light between 40 and 100%');bad.add('d-light');}
+      $('tStart').disabled=why.length>0||!designValid(dd);
+      $('tWhy').className=why.length?'':'ok';
+      $('tWhy').textContent=why.length?`To start: ${why.join(' · ')}`:'Ready: lock in your design to start the tournament run.';
+      body.querySelectorAll('.t-field').forEach(f=>{const i=f.querySelector('input,select');const key=i?(i.id||('d-'+(i.dataset.t||''))):'';f.classList.toggle('t-bad',bad.has(key));});
     }
     body.addEventListener('input',refresh);refresh();
     if($('tStart'))$('tStart').onclick=()=>{
       const spec=parseTournamentCode($('tCode').value),dd=readDesign();if(!spec||!designValid(dd))return;
       closeModal('tournamentModal');enterMode(TournamentMode,{spec,design:dd,team:$('tTeam').value.trim()});
     };
-    if($('tMake'))$('tMake').onclick=()=>{$('tMade').textContent=makeTournamentCode(+$('tDays').value,$('tChal').value);};
+    if($('tMake'))$('tMake').onclick=()=>{
+      const code=makeTournamentCode(+$('tDays').value,$('tChal').value),spec=parseTournamentCode(code);
+      $('tMade').textContent=code;
+      const ch=T_CHALLENGES[spec.challenge],evs=ch.events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} on day ${e[0]+1}`).join(', ')||'no disturbances';
+      $('tInstr').value=`EcoSphere Lab · Class Tournament\nCode: ${code}\n(${ch.name} · ${spec.days} days · ${evs})\n\n1. Open EcoSphere Lab 3.30. Everyone must use the same version of the file.\n2. Click 🎮 Modes, then Play under Class Tournament.\n3. Type the code above and your team name.\n4. Design your tank within the 🪙${T_BUDGET} budget (10 plants max).\n5. Click "Lock in design & run". A gold TOURNAMENT IN PROGRESS bar appears above the tank.\n6. Watch it run (or press ⏩ Finish now). When it ends, click Copy code and send your result code to me.`;
+      $('tInstr').style.display='block';$('tCopyInstr').style.display='inline-block';
+    };
+    if($('tCopyInstr'))$('tCopyInstr').onclick=()=>{const t=$('tInstr');t.select();(navigator.clipboard?.writeText(t.value)||Promise.reject()).then(()=>setPresetMessage('Student instructions copied. Paste them into your class page or chat.'),()=>{try{document.execCommand('copy');setPresetMessage('Student instructions copied.');}catch(err){}});};
     const board=[];
     function drawBoard(){
       board.sort((a,b)=>b.score-a.score);

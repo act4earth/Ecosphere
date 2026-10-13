@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.30 — Tournament, Snails &amp; Probe</title>
+  <title>EcoSphere Lab 3.31 — Tournament Designer</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -513,6 +513,31 @@ body.tour-active .canvas-wrap{box-shadow:0 0 0 2px #facc15,0 0 22px rgba(250,204
 .mode-card p{margin:0;font-size:11px;line-height:1.45;color:#b9c9da;flex:1}
 .mode-card .tag{font-size:9.5px;color:#facc15}
 .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* 3.31 tournament designer: stepper cards and budget meter */
+.t-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.t-card{background:#0a1524;border:1px solid #26364d;border-radius:12px;padding:8px 10px;gap:4px;transition:border-color .2s,background .2s}
+.t-card.t-has{border-color:#3f7f6a;background:#0b1d22}
+.t-card-head{display:flex;align-items:center;gap:8px}
+.t-card-head b{display:block;font-size:12.5px;color:#f1f5f9}
+.t-card-head i{display:block;font-style:normal;font-size:10px;color:#fde68a}
+.t-emo{font-size:22px;line-height:1}
+.t-note{font-size:10px;color:#8ea1b7;min-height:13px}
+.t-step{display:flex;align-items:center;gap:6px;margin-top:2px}
+.t-btn{width:38px;height:34px;flex:0 0 38px;border-radius:9px;border:1px solid #3a5573;background:#12243a;color:#e2e8f0;font-size:20px;font-weight:800;line-height:1;cursor:pointer}
+.t-btn:hover:not(:disabled){background:#1b3655;border-color:#67e8f9}
+.t-btn:active:not(:disabled){transform:scale(.95)}
+.t-btn[data-step="1"]:not(:disabled),.t-btn[data-step="5"]:not(:disabled){border-color:#2f8f72;color:#86efac}
+.t-btn:disabled{opacity:.3;cursor:not-allowed}
+.t-num{flex:1 1 auto;min-width:0;width:100%;height:34px;text-align:center;font-size:17px!important;font-weight:800;border-radius:9px!important;-moz-appearance:textfield}
+.t-num::-webkit-outer-spin-button,.t-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.t-sub{font-size:10px;color:#9fb1c5;min-height:13px;text-align:right}
+.t-budget{background:#0a1524;border:1px solid #26364d;border-radius:12px;padding:8px 10px;margin:4px 0 8px}
+.t-budget-row{display:flex;align-items:center;gap:14px;font-size:13px}
+.t-budget-row .btn{margin-left:auto;font-size:11px;padding:4px 9px}
+.t-meter{height:9px;border-radius:6px;background:#1c2b40;overflow:hidden;margin-top:6px}
+.t-meter span{display:block;height:100%;width:0;border-radius:6px;transition:width .2s,background .2s}
+@media(max-width:900px){.t-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 .t-field{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#c8d6e4}.t-field i{font-style:normal;color:#8ea1b7;font-size:9.5px}.t-field input,.t-field select{background:#0a1524;color:#e6eef8;border:1px solid #26364d;border-radius:8px;padding:6px}
 body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 .mode-hud.collapsed #modeHudStats,.mode-hud.collapsed #modeHudControls{display:none}
@@ -617,7 +642,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.30</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.31</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -6353,7 +6378,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   const AUTOSAVE_KEY='ecosphere-lab-autosave-v1';
   let lastAutosaveAt=0,lastAutosaveTime=null,autosaveBlocked=false;
   function buildSave(){
-    return {app:'EcoSphere Lab',appVersion:'3.30',savedAt:new Date().toISOString(),
+    return {app:'EcoSphere Lab',appVersion:'3.31',savedAt:new Date().toISOString(),
       state:E.serializeState(state),history:history.slice(-1400),
       missionIndex,missionComplete,level:$('levelSelect').value,speed};
   }
@@ -8079,16 +8104,26 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   }
   function openTournament(tab='join',code='',team='',design=null){
     $('tournamentModal').classList.add('open');$('tournamentModal').setAttribute('aria-hidden','false');
-    const d=design||{daphnia:14,snail:4,scud:3,fish:2,ribbon:2,stem:1,grass:0,rock:1,light:75};
+    const d=design||{daphnia:0,snail:0,scud:0,fish:0,ribbon:0,stem:0,grass:0,rock:0,light:75};
     const body=$('tournamentBody');
-    const field=(k)=>`<label class="t-field"><span>${T_LABELS[k]} <i>🪙${T_COSTS[k][0]} each · max ${T_COSTS[k][1]}</i></span><input type="number" min="0" max="${T_COSTS[k][1]}" step="1" value="${d[k]||0}" data-t="${k}"></label>`;
+    const T_NOTES={daphnia:'grazes algae · fish food',snail:'grazes surfaces & detritus',scud:'eats detritus & plants',fish:'predator · omnivore',ribbon:'tall plant',stem:'leafy plant',grass:'low clump',rock:'shelter for prey'};
+    const field=(k)=>{const [emo,...nm]=T_LABELS[k].split(' ');return `<div class="t-field t-card" data-card="${k}">
+      <div class="t-card-head"><span class="t-emo">${emo}</span><span><b>${nm.join(' ')}</b><i>🪙${T_COSTS[k][0]} each · max ${T_COSTS[k][1]}</i></span></div>
+      <div class="t-note">${T_NOTES[k]||''}</div>
+      <div class="t-step"><button type="button" class="t-btn" data-step="-1" data-k="${k}" aria-label="Remove one ${nm.join(' ')}">−</button><input class="t-num" type="number" inputmode="numeric" min="0" max="${T_COSTS[k][1]}" step="1" value="${d[k]||0}" data-t="${k}" aria-label="${nm.join(' ')}"><button type="button" class="t-btn" data-step="1" data-k="${k}" aria-label="Add one ${nm.join(' ')}">+</button></div>
+      <div class="t-sub" data-sub="${k}"></div></div>`;};
     body.innerHTML=`<div class="tabs"><button class="tab ${tab==='join'?'active':''}" data-ttab="join">Student: join & design</button><button class="tab ${tab==='teacher'?'active':''}" data-ttab="teacher">Teacher: create & leaderboard</button></div>
       <div id="tJoin" style="display:${tab==='join'?'block':'none'}">
         <div class="form-row"><label class="t-field"><span>Tournament code</span><input class="field" id="tCode" placeholder="ECO-XXXXX-30-B" value="${escapeHtml(code)}"></label><label class="t-field"><span>Team name</span><input class="field" id="tTeam" maxlength="40" value="${escapeHtml(team)}" placeholder="e.g. The Daphniacs"></label></div>
         <div id="tSpecInfo" class="small" style="margin:6px 0"></div>
         <h3>Design your tank · budget 🪙${T_BUDGET}</h3>
-        <div class="t-grid">${Object.keys(T_COSTS).map(field).join('')}<label class="t-field"><span>💡 Light (free) <i>40–100%</i></span><input type="number" min="40" max="100" step="5" value="${d.light}" data-t="light"></label></div>
-        <div class="mode-row" style="margin-top:8px"><span id="tBudget"></span><button class="btn primary" id="tStart">Lock in design & run</button></div>
+        <div class="t-budget"><div class="t-budget-row"><span id="tBudget"></span><span id="tLeft"></span><button type="button" class="btn" id="tClear" title="Set everything back to zero">Clear all</button></div><div class="t-meter"><span id="tMeter"></span></div></div>
+        <div class="t-grid">${Object.keys(T_COSTS).map(field).join('')}<div class="t-field t-card t-light" data-card="light">
+          <div class="t-card-head"><span class="t-emo">💡</span><span><b>Light</b><i>free · 40–100%</i></span></div>
+          <div class="t-note">more light: more growth, but blooms</div>
+          <div class="t-step"><button type="button" class="t-btn" data-step="-5" data-k="light" aria-label="Less light">−</button><input class="t-num" type="number" min="40" max="100" step="5" value="${d.light}" data-t="light" aria-label="Light percent"><button type="button" class="t-btn" data-step="5" data-k="light" aria-label="More light">+</button></div>
+          <div class="t-sub">% of full sunlight</div></div></div>
+        <div class="mode-row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" id="tStart">Lock in design & run</button></div>
         <div id="tWhy"></div>
         <p class="small">Score (150): healthy final populations 60 · oxygen ≥ 5 mg/L everywhere 30 · clear water without blooms 30 · biodiversity 30. Plants max 10 in total. Everyone with the same code gets the same water, positions and challenges, so only the design differs.</p>
       </div>
@@ -8108,7 +8143,20 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     function refresh(){
       if(!$('tBudget'))return;
       const dd=readDesign(),cost=designCost(dd),spec=parseTournamentCode($('tCode').value);
-      $('tBudget').innerHTML=`Spent <b style="color:${cost>T_BUDGET?'#fb7185':'#86efac'}">🪙${cost}</b> of ${T_BUDGET}`;
+      const left=T_BUDGET-cost;
+      $('tBudget').innerHTML=`Spent <b style="color:${cost>T_BUDGET?'#fb7185':'#fde68a'}">🪙${cost}</b> of ${T_BUDGET}`;
+      $('tLeft').innerHTML=left>=0?`<b style="color:#86efac">🪙${left}</b> left to spend`:`<b style="color:#fb7185">🪙${-left} over budget</b>`;
+      $('tMeter').style.width=`${Math.min(100,cost/T_BUDGET*100)}%`;$('tMeter').style.background=cost>T_BUDGET?'#fb7185':cost>T_BUDGET*.85?'#facc15':'#4ade80';
+      const plantsUsed=(dd.ribbon||0)+(dd.stem||0)+(dd.grass||0);
+      for(const [k,[c,max]] of Object.entries(T_COSTS)){
+        const v=dd[k]||0,sub=body.querySelector(`[data-sub="${k}"]`);if(sub)sub.textContent=v?`= 🪙${v*c}`:'';
+        const card=body.querySelector(`[data-card="${k}"]`);if(card)card.classList.toggle('t-has',v>0);
+        const plus=body.querySelector(`[data-k="${k}"][data-step="1"]`),minus=body.querySelector(`[data-k="${k}"][data-step="-1"]`);
+        const isPlant=['ribbon','stem','grass'].includes(k);
+        if(plus){plus.disabled=v>=max||left<c||(isPlant&&plantsUsed>=10);plus.title=v>=max?`Maximum ${max}`:left<c?`Not enough coins (needs 🪙${c})`:isPlant&&plantsUsed>=10?'10 plants maximum in total':'';}
+        if(minus)minus.disabled=v<=0;
+      }
+      {const lp=body.querySelector('[data-k="light"][data-step="5"]'),lm=body.querySelector('[data-k="light"][data-step="-5"]');if(lp)lp.disabled=dd.light>=100;if(lm)lm.disabled=dd.light<=40;}
       $('tSpecInfo').textContent=spec?`${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · challenges: ${T_CHALLENGES[spec.challenge].events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} (day ${e[0]+1})`).join(', ')||'none'}`:($('tCode').value?'That code doesn’t look right (example: ECO-4K2P9-30-B).':'Enter the code your teacher gave you.');
       // Say exactly what is missing instead of silently disabling the button.
       const why=[],bad=new Set();
@@ -8117,6 +8165,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       if(!$('tTeam').value.trim()){why.push('add a team name');bad.add('tTeam');}
       if(cost>T_BUDGET)why.push(`remove 🪙${cost-T_BUDGET} of organisms (over budget)`);
       for(const [k,[,max]] of Object.entries(T_COSTS)){const v=dd[k]||0;if(v<0||v>max||!Number.isInteger(v)){why.push(`${T_LABELS[k].replace(/^\S+\s/,'')}: 0–${max}`);bad.add('d-'+k);}}
+      if(cost===0)why.push('add some organisms or plants (you have 🪙100 to spend)');
       if((dd.ribbon||0)+(dd.stem||0)+(dd.grass||0)>10){why.push('use 10 plants or fewer in total');['ribbon','stem','grass'].forEach(k=>bad.add('d-'+k));}
       if(!(dd.light>=40&&dd.light<=100)){why.push('set light between 40 and 100%');bad.add('d-light');}
       $('tStart').disabled=why.length>0||!designValid(dd);
@@ -8124,7 +8173,16 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       $('tWhy').textContent=why.length?`To start: ${why.join(' · ')}`:'Ready: lock in your design to start the tournament run.';
       body.querySelectorAll('.t-field').forEach(f=>{const i=f.querySelector('input,select');const key=i?(i.id||('d-'+(i.dataset.t||''))):'';f.classList.toggle('t-bad',bad.has(key));});
     }
-    body.addEventListener('input',refresh);refresh();
+    body.oninput=refresh;
+    // Stepper buttons (assigned, not added, so reopening the dialog never doubles a click).
+    body.onclick=e=>{
+      const b=e.target.closest('[data-step]');
+      if(b){const inp=body.querySelector(`[data-t="${b.dataset.k}"]`);if(!inp)return;
+        const lo=+inp.min,hi=+inp.max,v=Math.round(Number(inp.value)||0)+Number(b.dataset.step);
+        inp.value=String(Math.max(lo,Math.min(hi,v)));refresh();return;}
+      if(e.target.id==='tClear'){body.querySelectorAll('.t-num').forEach(i=>{if(i.dataset.t!=='light')i.value='0';});refresh();}
+    };
+    refresh();
     if($('tStart'))$('tStart').onclick=()=>{
       const spec=parseTournamentCode($('tCode').value),dd=readDesign();if(!spec||!designValid(dd))return;
       closeModal('tournamentModal');enterMode(TournamentMode,{spec,design:dd,team:$('tTeam').value.trim()});
@@ -8133,7 +8191,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const code=makeTournamentCode(+$('tDays').value,$('tChal').value),spec=parseTournamentCode(code);
       $('tMade').textContent=code;
       const ch=T_CHALLENGES[spec.challenge],evs=ch.events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} on day ${e[0]+1}`).join(', ')||'no disturbances';
-      $('tInstr').value=`EcoSphere Lab · Class Tournament\nCode: ${code}\n(${ch.name} · ${spec.days} days · ${evs})\n\n1. Open EcoSphere Lab 3.30. Everyone must use the same version of the file.\n2. Click 🎮 Modes, then Play under Class Tournament.\n3. Type the code above and your team name.\n4. Design your tank within the 🪙${T_BUDGET} budget (10 plants max).\n5. Click "Lock in design & run". A gold TOURNAMENT IN PROGRESS bar appears above the tank.\n6. Watch it run (or press ⏩ Finish now). When it ends, click Copy code and send your result code to me.`;
+      $('tInstr').value=`EcoSphere Lab · Class Tournament\nCode: ${code}\n(${ch.name} · ${spec.days} days · ${evs})\n\n1. Open EcoSphere Lab 3.31. Everyone must use the same version of the file.\n2. Click 🎮 Modes, then Play under Class Tournament.\n3. Type the code above and your team name.\n4. Design your tank within the 🪙${T_BUDGET} budget (10 plants max).\n5. Click "Lock in design & run". A gold TOURNAMENT IN PROGRESS bar appears above the tank.\n6. Watch it run (or press ⏩ Finish now). When it ends, click Copy code and send your result code to me.`;
       $('tInstr').style.display='block';$('tCopyInstr').style.display='inline-block';
     };
     if($('tCopyInstr'))$('tCopyInstr').onclick=()=>{const t=$('tInstr');t.select();(navigator.clipboard?.writeText(t.value)||Promise.reject()).then(()=>setPresetMessage('Student instructions copied. Paste them into your class page or chat.'),()=>{try{document.execCommand('copy');setPresetMessage('Student instructions copied.');}catch(err){}});};

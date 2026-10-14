@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.31 — Tournament Designer</title>
+  <title>EcoSphere Lab 3.33 — Nitrogen &amp; Decomposition</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -236,6 +236,63 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .sky-badge.day .moon,.sky-badge.night .sun{display:none}
 #skyBadgeLight{color:#fde68a}
 .sky-badge.night #skyBadgeLight{color:#a5b4fc}
+
+
+
+/* 3.33 chemistry (transformations) panel */
+#chemPanel{position:fixed;right:14px;top:96px;width:min(470px,94vw);max-height:calc(100vh - 110px);overflow:auto;z-index:70;background:#0b1828;border:1px solid #3b5878;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.55);padding:10px 12px;display:none}
+#chemPanel.open{display:block}
+#chemPanel .ch-head{display:flex;align-items:center;gap:8px;cursor:move;user-select:none}
+#chemPanel .ch-head h3{margin:0;font-size:14px;color:#f1f5f9;text-transform:none;letter-spacing:0;flex:1}
+#chemPanel .ch-tabs{display:flex;gap:4px;margin:8px 0 6px}
+#chemPanel .ch-tabs button{flex:1;font-size:11px;padding:5px 6px;border-radius:8px;border:1px solid #2f4a68;background:#10233a;color:#cbd5e1;cursor:pointer}
+#chemPanel .ch-tabs button.on{background:#facc15;color:#1f1600;border-color:#facc15;font-weight:800}
+#chemPanel .ch-tabs button[data-chtab="co"].on{background:#67e8f9;border-color:#67e8f9;color:#06202a}
+#chemPanel .ch-tabs button[data-chtab="p"].on{background:#38bdf8;border-color:#38bdf8;color:#04131f}
+#chemPanel svg{width:100%;height:auto;display:block}
+.ch-flow{animation:chflow 1.1s linear infinite}
+@keyframes chflow{to{stroke-dashoffset:-14}}
+@media (prefers-reduced-motion: reduce){.ch-flow{animation:none}}
+.ch-say{background:#0f2134;border-left:3px solid #facc15;border-radius:8px;padding:7px 9px;font-size:11.5px;line-height:1.45;color:#e2e8f0;margin:6px 0}
+.ch-say b{color:#fde68a}
+.ch-spark{display:grid;grid-template-columns:86px 1fr 62px;align-items:center;gap:6px;font-size:10.5px;color:#cbd5e1;margin:2px 0}
+.ch-spark svg{height:30px}
+.ch-spark b{font-size:11.5px}
+.ch-row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.ch-row .btn{font-size:11px;padding:5px 8px}
+.ch-eq{font-size:11px;line-height:1.5;color:#cbd5e1}
+.ch-eq p{margin:5px 0}
+.ch-eq code{font-family:inherit;color:#f8fafc;background:#132a42;border-radius:5px;padding:1px 5px;white-space:nowrap}
+.ch-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.ch-tbl td{padding:5px 4px;border-top:1px solid #1e3550;vertical-align:top;color:#cbd5e1}
+.ch-tbl td.num{text-align:right;white-space:nowrap;color:#f1f5f9;font-weight:700}
+.ch-tbl .eq{font-size:10.5px;color:#94a3b8}
+.ch-note{font-size:10.5px;color:#94a3b8;line-height:1.45;margin-top:6px}
+.ch-win{display:flex;gap:4px;font-size:10px;color:#94a3b8;align-items:center}
+.ch-win button{font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid #2f4a68;background:#10233a;color:#cbd5e1;cursor:pointer}
+.ch-win button.on{background:#334155;color:#fff}
+/* 3.32.1 save & load window */
+.file-sec{background:#091421;border:1px solid #23364d;border-radius:12px;padding:10px 12px;margin-top:10px}
+.file-sec h3{margin:0 0 6px!important}
+.file-row{display:flex;gap:8px;flex-wrap:wrap}
+.file-row .btn{font-size:13px;padding:8px 12px}
+.file-note{font-size:11px;color:#9fb1c5;line-height:1.45;margin-top:6px}
+.file-ok{font-size:14px;font-weight:700;color:#86efac;margin:10px 0 4px}
+.file-warn{font-size:14px;font-weight:700;color:#fde68a;margin:10px 0 4px}
+.file-text{width:100%;height:140px;font:11px ui-monospace,Consolas,monospace;background:#06101b;color:#cfe3f5;border:1px solid #2b4360;border-radius:8px;padding:6px;margin-top:6px;resize:vertical}
+/* 3.32 compact control bar: one slim row so the tank gets the height */
+.bottom-controls.compact{grid-template-columns:1fr!important}
+.ctrl-bar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:6px 10px!important}
+.ctrl-bar .slider-grid{display:flex;gap:10px;flex:1 1 420px;min-width:0}
+.ctrl-bar .slider{display:flex;align-items:center;gap:6px;flex:1 1 0;min-width:0}
+.ctrl-bar .slider label{display:flex;flex-direction:column;align-items:flex-start;gap:0;font-size:9.5px;line-height:1.15;min-width:52px}
+.ctrl-bar .slider label span:last-child{color:#e2e8f0;font-weight:700;font-size:10.5px}
+.ctrl-bar .slider input{flex:1 1 auto;min-width:40px}
+.ctrl-group{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.ctrl-lab{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:#8192a8}
+.ctrl-group .select,.ctrl-group .btn{font-size:11px;padding:5px 8px}
+#disturbSelect{max-width:150px}
+@media(max-width:1250px){.ctrl-bar .slider-grid{flex-basis:100%}}
 /* 3.30 tournament and mode clarity */
 .btn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.5)}
 .btn.primary:disabled{background:#1f3a44;color:#9fb8c2;border-color:#2c4b56}
@@ -642,7 +699,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.31</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.33</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -651,6 +708,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       <button id="resetBtn" class="btn">Starter</button><button id="balanceBtn" class="btn secret-balance-btn" aria-label="Load hidden long-life reference ecosystem">*</button>
       <button id="clearBtn" class="btn">Clear</button>
       <label class="speed-control" title="Simulation speed"><span>Speed</span><select id="speedSelect" class="select"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option><option value="16">16x</option></select></label>
+      <button id="fileBtn" class="btn" title="Save your tank to this computer, load a saved tank, or export data">💾 Save / Load</button>
       <button id="modesBtn" class="btn" title="Game modes: Sealed Jar, Save the Lake, Class Tournament, Be the Minnow, Evolution">🎮 Modes</button>
       <button id="focusBtn" class="btn" title="Hide side panels and maximize the aquarium">Tank Focus</button>
       <details class="top-menu">
@@ -777,24 +835,20 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         <div id="focusExitHint" class="focus-exit-hint" aria-hidden="true">Esc to exit full screen</div>
       </div>
 
-      <div class="bottom-controls">
-        <div class="panel">
-          <h3 style="margin-top:0">Abiotic controls</h3>
+      <div class="bottom-controls compact">
+        <div class="panel ctrl-bar">
           <div class="slider-grid">
             <div class="slider"><label><span>Light</span><span id="lightValue"></span></label><input id="lightRange" type="range" min="0" max="100" value="75" /></div>
             <div class="slider"><label><span>Temp</span><span id="tempValue"></span></label><input id="tempRange" type="range" min="4" max="38" value="22" /></div>
             <div class="slider"><label><span>pH</span><span id="phValue"></span></label><input id="phRange" type="range" min="4.5" max="9.5" step="0.1" value="7.2" /></div>
             <div class="slider"><label><span>Turbidity</span><span id="turbidityValue"></span></label><input id="turbidityRange" type="range" min="0" max="100" value="15" /></div>
           </div>
-        </div>
-        <div class="panel">
-          <h3 style="margin-top:0">Disturbances</h3>
-          <div id="disturbances" class="disturbance-grid"></div>
-        </div>
-        <div class="panel">
-          <h3 style="margin-top:0">Mystery</h3>
-          <button id="mysteryBtn" class="btn">Trigger mystery</button>
-          <button id="revealBtn" class="btn">Reveal</button>
+          <div class="ctrl-group" title="How realistically animals and dead fish use oxygen. Gentle: model-sized animals (forgiving). Realistic: real-sized breathing and decay in a well-mixed tank. Strict: the same in still, warm water.">
+            <span class="ctrl-lab">O₂ realism</span>
+            <select id="o2RealismSelect" class="select"><option value="gentle">Gentle</option><option value="realistic">Realistic</option><option value="strict">Strict</option></select>
+          </div>
+          <div class="ctrl-group" id="disturbances"></div>
+          <div class="ctrl-group"><button id="mysteryBtn" class="btn" title="Trigger a hidden disturbance to diagnose">🕵 Mystery</button><button id="revealBtn" class="btn" title="Reveal the mystery">Reveal</button></div>
         </div>
       </div>
     </section>
@@ -970,6 +1024,17 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     </div>
   </div>
 </div>
+<div id="chemPanel" role="dialog" aria-label="Chemical transformations">
+  <div class="ch-head" id="chemHead"><span style="font-size:18px">⚗️</span><h3>Chemical transformations</h3><button class="btn" id="chemClose" style="font-size:11px;padding:3px 9px">Close</button></div>
+  <div class="ch-tabs"><button data-chtab="n" class="on">Nitrogen</button><button data-chtab="co">Carbon &amp; oxygen</button><button data-chtab="p">Phosphorus</button></div>
+  <div id="chemBody"></div>
+</div>
+<div id="fileModal" class="modal-back" aria-hidden="true">
+  <div class="modal-card" style="width:min(660px,96vw)">
+    <div class="modal-head"><div><h2>💾 Save &amp; load</h2><div class="small">Everything stays on this computer. No internet needed.</div></div><button class="btn" data-close-modal>Close</button></div>
+    <div id="fileModalBody"></div>
+  </div>
+</div>
 <div id="modeResultModal" class="modal-back" aria-hidden="true">
   <div class="modal-card" style="width:min(640px,96vw)">
     <div class="modal-head"><h2 id="modeResultTitle">Result</h2><button class="btn" data-close-modal>Close</button></div>
@@ -1009,6 +1074,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       <div class="assumption-box"><b>Food webs & reproduction</b><br>Minnows capture prey following a Holling type II functional response (intake = aN / (1 + ahN)), so feeding saturates when prey are plentiful. A few prey per compartment are protected in refuges. Minnows also graze algae and detritus. Grazers feed at a rate that saturates with food concentration. Eaten food is egested (30%), stored as body reserves, or respired. Offspring are built from stored reserves, so births depend on food; juveniles grow from reserves before they reach adult size. Hungry prey accept more predation risk to keep feeding. Starvation is a rising risk in poor condition rather than a sudden threshold, and minnows have a small background mortality.</div>
       <div class="assumption-box"><b>Plant dynamics</b><br>Macrophytes photosynthesize by day, respire continuously, and shed about 1% of their tissue per day as detritus. They take N and P from the root zone. Shade, turbidity or heat above 30 °C can push a plant below its die-back threshold; after 4 days there it dies and all its tissue becomes detritus that bacteria must decompose. Healthy plants spread by runners (grass, ribbon) or rooting fragments (stem plants), with the daughter’s tissue coming from the parent.</div>
       <div class="assumption-box"><b>Cycle view (3.19)</b><br>The 🔄 Cycle view draws every recorded transfer of carbon, nitrogen or phosphorus between pools while the model runs. Arrow width follows the flow rate and circle size the amount stored (log scale, because the dissolved pools are much larger). “Right now” averages roughly the last hour, so it shows day/night changes; “24-hour average” smooths them. The flows add up exactly to each pool’s change, so the picture is a complete account of where matter went.</div>
+      <div class="assumption-box"><b>Dead bodies & the nitrogen cycle (3.33)</b><br>Dead Daphnia, snails and scuds now sink as visible bodies and decay over about 5 days at 20 °C (faster when warm, slower with little oxygen or few bacteria). Before 3.33 their tissue became detritus instantly where they died. Decay releases ammonium (yellow specks), CO₂ and phosphate where the body lies, and part of the body becomes detritus and bacteria. The ⚗️ Chemistry panel shows each nitrogen transformation as it happens, from the model's own ledger: ammonification, nitrification step 1 (NH₄⁺ → NO₂⁻) and step 2 (NO₂⁻ → NO₃⁻), uptake of ammonium and nitrate, and excretion. Denitrification and nitrogen fixation are not modeled.</div>
+      <div class="assumption-box"><b>Oxygen realism (3.32)</b><br>The model's animals are small in biomass so that a tank's algae can feed the food web, which also means their food-based respiration uses far less oxygen than real animals (about 0.015 mg O₂ a day for a model minnow, against roughly 12 mg for a real 2 g minnow). <b>Gentle</b> keeps that forgiving scale. <b>Realistic</b> adds each animal's routine respiration at real rates for its size (minnow 0.5, snail 0.02, scud 0.006, Daphnia 0.0008 mg O₂ per hour at 20 °C, Q10 = 2), drawn from the water around it, and the real oxygen demand of a decaying fish (about 400 mg O₂ for a 2 g minnow). Water mixes within hours, as in a real tank. <b>Strict</b> is still, warm water: slower mixing, half the surface gas exchange and a quarter more demand. Pond snails at the surface film breathe air. The extra oxygen use is O₂ only; carbon, nitrogen and phosphorus stay exactly conserved. Tested: a minnow sealed in a 4-litre glass box suffocates in about 1½ days at Realistic and survives indefinitely at Gentle.</div>
+      <div class="assumption-box"><b>Glass walls (3.32)</b><br>The glass tool draws straight walls 2 terrain squares thick by default (snapping level or upright onto the 1-litre chemistry grid, because water chemistry is uniform within each litre; Shift for freehand). Animals that touch glass slide along it and, if their target is out of reach, detour around it; animals caught inside newly drawn glass are moved to the nearest open water.</div>
       <div class="assumption-box"><b>Snails (3.30)</b><br>Pond snails crawl; they do not swim. Each snail is always on a surface (the bottom, a rock, a plant, the tank glass or a glass wall, or the underside of the surface film) and climbs only where there is something to climb. Snails make regular grazing trips up plants and the glass to scrape periphyton (the algae film on surfaces), and graze algae and detritus on the bottom. A snail that lets go sinks back down. In low oxygen they crawl to the surface to breathe air, because pond snails such as Physa and Lymnaea are pulmonates with a lung. Click a snail with Inspect to see what it is doing.</div>
       <div class="assumption-box"><b>Day and night (3.27–3.29)</b><br>The sun is above the horizon exactly when the model has daylight (06:00–18:00), following the same half-sine the model uses for photosynthesis. The “light” figure in the day/night badge above the tank is the sunlight reaching the water surface after the Light slider and turbidity. Dawn and dusk colours appear in the hour or so either side of sunrise and sunset, when the model's light is zero or very low. The moon is decorative and does not light the model.</div>
       <div class="assumption-box"><b>Cycle view investigations (3.26)</b><br>An <b>Oxygen</b> tab shows O₂ made by photosynthesis and used by respiration, decomposition and nitrification, plus exchange with the air; these add up exactly to the change in dissolved O₂. <b>Predict</b> hides the arrow sizes so students choose which flow a change will alter most, then compares the 24 h before with the 24 h after. <b>Before / after</b> does the same comparison for any change. Both use exact running totals of every flow, so the numbers are precise rather than smoothed. <b>Tracer atom</b> moves one atom between pools at random, with each pool's stay drawn from an exponential distribution whose mean is the amount stored ÷ the outflow, and exits chosen in proportion to the flows (a simple Markov model of real isotope-tracer studies). The <b>Energy pyramid</b> converts the 24-h carbon flows to energy at ≈39 J per mg C and computes production as assimilation (70% of food eaten) minus respiration. Clicking a circle opens its <b>balance sheet</b>: inflows, outflows, net change and turnover time. None of these tools change the model.</div>
@@ -1233,6 +1301,37 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   // Cycle view's oxygen layer. Keys: photoAlgae, photoPlants, respAlgae,
   // respPlants, respInvert, respFish, decomp, nitrify, gas (+ = into water), bounds.
   const O2_RESP_KEY = { algae: 'respAlgae', plants: 'respPlants', invertebrates: 'respInvert', fish: 'respFish', detritus: 'decomp', carcasses: 'decomp' };
+  // Oxygen realism (3.32). Model animals are small in biomass so a tank's
+  // algae can feed the food web; their food-based respiration therefore uses
+  // far less O2 than real animals (a real 2 g minnow uses ~0.5 mg O2 per
+  // hour). "Realistic" adds each animal's maintenance (routine) respiration
+  // at real rates for its size, and a real carcass's oxygen demand as it
+  // decays, and real tank mixing (water turns over within hours). "Strict"
+  // is still water: a quarter of that mixing, half the surface gas exchange,
+  // and a quarter more oxygen demand (warm, active animals). The extra oxygen use is O2 only: carbon,
+  // nitrogen and phosphorus stay exactly conserved.
+  const O2_REALISM = {
+    // mix = extra whole-tank mixing passes per hour (convection, swimming):
+    // real small tanks turn over within hours; the base model mixes slowly.
+    gentle:    { maint: 0, carcass: 0, gas: 1,  mix: 0, label: 'Gentle' },
+    realistic: { maint: 1, carcass: 1, gas: 1,  mix: 8, label: 'Realistic' },
+    strict:    { maint: 1.25, carcass: 1.25, gas: .5, mix: 2, label: 'Strict' },
+  };
+  // mg O2 per hour at 20 °C for an adult (scaled by body size and Q10 = 2).
+  // Minnow ~2 g at ~0.25 mg/g/h; pond snail ~0.1 g; amphipod ~15 mg; Daphnia ~0.1 mg dry.
+  const MAINTENANCE_O2 = { fish: 0.5, snail: 0.02, scud: 0.006, daphnia: 0.0008 };
+  // mg O2 needed to decay one model unit of carcass (an adult minnow ≈ 1.25
+  // units ≈ 400 mg O2, i.e. a 2 g fish with its bones left undecayed).
+  const CARCASS_O2_PER_OM = 320;
+  function o2Level(state){ return O2_REALISM[state.settings?.o2Realism] || O2_REALISM.gentle; }
+  // Nitrogen transformations (3.33), mg N: min:<source> (ammonium released
+  // from organic matter), upNH:<to> / upNO:<to> (ammonium / nitrate taken up),
+  // nitritation (NH4+ -> NO2-), nitratation (NO2- -> NO3-).
+  function recordN(state, key, mg) {
+    if (!(mg > 0)) return;
+    const acc = state._nStep || (state._nStep = {});
+    acc[key] = (acc[key] || 0) + mg;
+  }
   function recordO2(state, key, mg) {
     if (!mg) return;
     const acc = state._o2Step || (state._o2Step = {});
@@ -1271,6 +1370,15 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       r.day += (perHour - r.day) * aDay;
       o2Totals[k] = (o2Totals[k] || 0) + v;
     }
+    const nStep = state._nStep || {};
+    const nRates = state.nRates || (state.nRates = {});
+    for (const k of new Set([...Object.keys(nRates), ...Object.keys(nStep)])) {
+      const r = nRates[k] || (nRates[k] = { now: 0, day: 0 });
+      const perHour = (nStep[k] || 0) / dt;
+      r.now += (perHour - r.now) * aNow;
+      r.day += (perHour - r.day) * aDay;
+    }
+    state._nStep = {};
     state._flowStep = {};
     state._o2Step = {};
     // Hourly snapshots of the totals (last 50 h; not saved with the tank).
@@ -1296,6 +1404,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     recordO2(state, O2_RESP_KEY[from] || 'decomp', -used);
     f.co2[i] += om * PARAMS.omCO2;
     f.nh3[i] += om * PARAMS.omN;
+    recordN(state, 'min:' + from, om * PARAMS.omN);
     f.po4[i] += om * omP();
   }
   // Build `om` units of organic matter from dissolved CO2, DIN (ammonium
@@ -1316,6 +1425,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const fromNH = Math.min(Math.max(0, f.nh3[i]), n);
     f.nh3[i] -= fromNH; n -= fromNH;
     f.no3[i] -= n;
+    recordN(state, 'upNH:' + to, fromNH); recordN(state, 'upNO:' + to, n);
     f.po4[i] -= actual * omP();
     recordFlow(state, 'dissolved', to, actual);
     if (photosynthetic) {
@@ -1657,6 +1767,41 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     return fry;
   }
 
+  // Dead Daphnia, snails and scuds (3.33): small bodies that sink and decay
+  // over a few days, releasing ammonium where they lie. Before 3.33 their
+  // tissue went straight into detritus where they died.
+  const BODY_SINK = { daphnia: 0.10, scud: 0.22, snail: 0.40 };
+  function makeBody(state, kind, x, y, mass, reason) {
+    if (!state.carcasses) state.carcasses = [];
+    const c = {
+      id: `carcass-${Math.floor(state.rng() * 1e9)}`, kind,
+      x, y, vx: (state.rng() - 0.5) * 0.02, vy: BODY_SINK[kind] * 0.4,
+      age: 0, mass, mass0: mass, settled: false, phase: state.rng() * Math.PI * 2, reason
+    };
+    state.carcasses.push(c);
+    return c;
+  }
+  function createCarcass(state, animal, reason = 'mortality', announce = true) {
+    if (animal.kind === 'fish') return createMinnowCarcass(state, animal, reason, announce);
+    const mass = (animal.bodyOM ?? BODY_OM[animal.kind]) + (animal.store || 0);
+    recordFlow(state, animalNode(animal), 'carcasses', mass);
+    return makeBody(state, animal.kind, animal.x, animal.y, mass, reason);
+  }
+  // A dead animal placed by the user (Chemistry panel experiments). The
+  // added matter is counted as a user addition in the mass balance.
+  function dropCarcass(state, kind, x, y) {
+    if (!BODY_OM[kind]) return null;
+    x = clamp(x, 0.3, COLS - 0.3); y = clamp(y, 0.2, ROWS - 0.5);
+    if (kind === 'fish') {
+      const a = createAnimal('fish', x, y, state.rng);
+      const c = createMinnowCarcass(state, { ...a, store: 0 }, 'added by you', false);
+      // undo the recorded flow: this fish never lived in the tank
+      const e = state._flowStep?.['fish>carcasses'];
+      if (e) { const m = c.mass; e.C -= m * PARAMS.omCO2 * 12 / 44; e.N -= m * PARAMS.omN; e.P -= m * PARAMS.omN / PARAMS.omNP; }
+      return c;
+    }
+    return makeBody(state, kind, x, y, BODY_OM[kind], 'added by you');
+  }
   function createMinnowCarcass(state, animal, reason = 'mortality', announce = true) {
     if (!state.carcasses) state.carcasses = [];
     recordFlow(state, 'fish', 'carcasses', (animal.bodyOM ?? BODY_OM.fish) + (animal.store || 0));
@@ -1690,21 +1835,22 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     for (const c of state.carcasses) {
       c.age += dt;
 
+      const small = !!c.kind && c.kind !== 'fish';
       if (!c.settled) {
         const priorY=c.y;
-        c.vy = Math.min(0.62, (c.vy || 0.12) + 0.055 * dt);
+        c.vy = Math.min(small ? BODY_SINK[c.kind] : 0.62, (c.vy || 0.12) + 0.055 * dt);
         const driftX = clamp(c.x + (c.vx || 0) * dt + Math.sin(c.age * 0.22 + c.phase) * 0.004 * dt, 0.3, COLS - 0.3);
       if (animalPathOpen(state,c.x,priorY,driftX,priorY)) c.x=driftX;
       else c.vx=-(c.vx || 0)*.45;
         const targetY=priorY+c.vy*dt;
         const support=carcassSupportBelow(state,c.x,priorY+.02);
-        const restY=support.y-.13;
+        const restY=support.y-(small?.05:.13);
         if(targetY>=restY){
           c.y=Math.max(priorY,restY);
           c.vy=0;
           c.settled=true;
           c.settledOn=support.source;
-          addEvent(state, `A minnow carcass settled on ${support.source}.`, 'info', {
+          if(!small)addEvent(state, `A minnow carcass settled on ${support.source}.`, 'info', {
             x:c.x,y:c.y,popup:`Carcass settled on ${support.source}`
           });
         }else c.y=targetY;
@@ -1718,10 +1864,19 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 
       // Gradual carcass breakdown. Most chemical change is mediated through
       // bacterial growth, detrital production, ammonification, and respiration.
+      // Small bodies decay in proportion to what is left (about 5 days at
+      // 20 °C with normal bacteria and oxygen); a minnow decays at a steady rate.
       const decay = Math.min(
         c.mass,
-        0.0060 * tempFactor * bacteriaActivity * (0.45 + 0.55 * oxygenFactor) * settlingFactor * dt
+        (small ? c.mass * 0.022 : 0.0060) * tempFactor * bacteriaActivity * (0.45 + 0.55 * oxygenFactor) * settlingFactor * dt
       );
+      {
+        const lvl = o2Level(state);
+        if (lvl.carcass > 0 && decay > 0) {
+          const used = Math.min(Math.max(0, f.o2[i]), decay * CARCASS_O2_PER_OM * lvl.carcass);
+          if (used > 0) { f.o2[i] -= used; recordOxygen(state, i, 'decomposition', -used); recordO2(state, 'decomp', -used); }
+        }
+      }
       c.mass = Math.max(0, c.mass - decay);
 
       // Carcass tissue is split conservatively: about half fragments into
@@ -1739,7 +1894,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       // Carcasses are local sources. Several carcasses in the same region can
       // create a decomposition hotspot rather than only changing tank averages.
       const hotspot = f.o2[i] < 4 || f.nh3[i] > 0.70 || f.co2[i] > 18;
-      if(c.settled && hotspot && (c.lastHotspotWarning==null || c.age-c.lastHotspotWarning>=48)){
+      if(!small && c.settled && hotspot && (c.lastHotspotWarning==null || c.age-c.lastHotspotWarning>=48)){
         c.lastHotspotWarning=c.age;
         addEvent(state,
           `A carcass decomposition hotspot developed: local O₂ ${f.o2[i].toFixed(1)} mg/L, CO₂ ${f.co2[i].toFixed(1)} mg/L, NH₃-N ${f.nh3[i].toFixed(2)} mg/L.`,
@@ -1747,12 +1902,12 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         );
       }
 
-      if (c.mass > 0.035) {
+      if (small ? c.mass > c.mass0 * 0.06 : c.mass > 0.035) {
         survivors.push(c);
       } else {
         f.detritus[i] += c.mass;
         recordFlow(state, 'carcasses', 'detritus', c.mass);
-        addEvent(state, 'A minnow carcass was largely decomposed into detrital material.', 'info', {
+        if (!small) addEvent(state, 'A minnow carcass was largely decomposed into detrital material.', 'info', {
           x: c.x, y: c.y, popup: 'Carcass decomposed'
         });
       }
@@ -1760,7 +1915,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 
     state.carcasses = survivors;
 
-    if (state.carcasses.length >= 3 &&
+    if (state.carcasses.filter(c => !c.kind || c.kind === 'fish').length >= 3 &&
         (!state._lastCarcassWarning || state.timeHours - state._lastCarcassWarning >= 72)) {
       state._lastCarcassWarning = state.timeHours;
       addEvent(state, 'Multiple minnow carcasses are increasing decomposer activity and oxygen demand.', 'warning');
@@ -1941,6 +2096,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         f.nh3[i] -= nitrify1;
         f.no2[i] += nitrify1 - nitrify2;
         f.no3[i] += nitrify2;
+        recordN(state, 'nitritation', nitrify1); recordN(state, 'nitratation', nitrify2);
         // Nitrifiers are chemoautotrophs: their growth fixes CO2 and takes up N and P.
         const nitrifierGrowth = assimilate(state, i, (nitrify1 + nitrify2) * 0.040);
         const bacterialLoss = f.bacteria[i] * P.bacterialLoss * metabolic * dt;
@@ -1968,12 +2124,13 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
           const jar = state.sealed;
           const o2Target = jar ? saturation * Math.max(0, jar.o2) / jar.o2Init : saturation;
           const co2Target = jar ? 2.5 * Math.max(0, jar.co2) / jar.co2Init : 2.5;
-          let exchange = (o2Target - f.o2[i]) * state.settings.gasExchange * dt;
+          const gasK = state.settings.gasExchange * o2Level(state).gas;
+          let exchange = (o2Target - f.o2[i]) * gasK * dt;
           if (jar && exchange > jar.o2) exchange = Math.max(0, jar.o2);
           f.o2[i] += exchange;
           recordOxygen(state,i,'gasExchange',exchange);
           recordO2(state,'gas',exchange);
-          let co2Exchange = (co2Target - f.co2[i]) * state.settings.gasExchange * 0.35 * dt;
+          let co2Exchange = (co2Target - f.co2[i]) * gasK * 0.35 * dt;
           if (jar && co2Exchange > jar.co2) co2Exchange = Math.max(0, jar.co2);
           f.co2[i] += co2Exchange;
           if (jar) { jar.o2 -= exchange; jar.co2 -= co2Exchange; }
@@ -2030,6 +2187,18 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     f.nh3 = diffuse(state, f.nh3, 0.06 * dt);
     f.no2 = diffuse(state, f.no2, 0.06 * dt);
     f.no3 = diffuse(state, f.no3, 0.045 * dt);
+    {
+      const passes = Math.round(o2Level(state).mix * dt);
+      if (passes > 0) {
+        const before = f.o2.slice();
+        for (let k = 0; k < passes; k++) {
+          f.o2 = diffuse(state, f.o2, 1); f.co2 = diffuse(state, f.co2, 1);
+          f.nh3 = diffuse(state, f.nh3, 1); f.no2 = diffuse(state, f.no2, 1);
+          f.no3 = diffuse(state, f.no3, 1); if (f.po4) f.po4 = diffuse(state, f.po4, 1);
+        }
+        for (let z = 0; z < ZONE_COUNT; z++) recordOxygen(state, z, 'mixing', f.o2[z] - before[z]);
+      }
+    }
     f.po4 = diffuse(state, f.po4, 0.06 * dt);
   }
 
@@ -2524,6 +2693,14 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     return true;
   }
 
+  function insideGlass(state,x,y){const {tx,ty}=modelToTerrain(x,y);return terrainCell(state,tx,ty)===TERRAIN_GLASS;}
+  // True when a movement segment touches a glass cell (sandbox glass walls).
+  function pathHitsGlass(state,x0,y0,x1,y1){
+    if(!state.terrain)return false;
+    const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/.045));
+    for(let k=1;k<=n;k++){const {tx,ty}=modelToTerrain(x0+(x1-x0)*k/n,y0+(y1-y0)*k/n);if(terrainCell(state,tx,ty)===TERRAIN_GLASS)return true;}
+    return false;
+  }
   function carcassSupportBelow(state,x,fromY=0){
     let best={y:ROWS-.04,source:'tank floor'};
 
@@ -2578,6 +2755,17 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if(glassChanged)state.terrain.glassVersion=(state.terrain.glassVersion||0)+1;
   }
 
+  function paintGlassBlock(state,x,y,size=2){
+    if(!state.terrain)return;
+    const x0=Math.round(x/COLS*TERRAIN_COLS)-Math.floor(size/2),y0=Math.round(y/ROWS*TERRAIN_ROWS)-Math.floor(size/2);
+    let changed=false;
+    for(let ty=y0;ty<y0+size;ty++)for(let tx=x0;tx<x0+size;tx++){
+      if(tx<1||ty<1||tx>=TERRAIN_COLS-1||ty>=TERRAIN_ROWS-1)continue;
+      const i=terrainIdx(tx,ty);if(state.terrain.cells[i]===TERRAIN_GLASS)continue;
+      state.terrain.cells[i]=TERRAIN_GLASS;changed=true;
+    }
+    if(changed){state.terrain.version=(state.terrain.version||0)+1;state.terrain.glassVersion=(state.terrain.glassVersion||0)+1;}
+  }
   function eraseTerrain(state,x,y,radiusModel=.35) {
     if(!state.terrain)return;
     const c=modelToTerrain(x,y);
@@ -3040,6 +3228,14 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     for (const animal of state.animals) {
       if (dead.has(animal.id) || eaten.has(animal.id)) continue;
       if (animal.bodyOM == null) animal.bodyOM = BODY_OM[animal.kind];
+      if (state.terrain && insideGlass(state, animal.x, animal.y)) {
+        let best = null;
+        for (let rad = .12; rad <= 1.6 && !best; rad += .12) for (let k = 0; k < 16; k++) {
+          const ang = k / 16 * Math.PI * 2, x = clamp(animal.x + Math.cos(ang) * rad, .2, COLS - .2), y = clamp(animal.y + Math.sin(ang) * rad, .2, ROWS - .2);
+          if (!terrainSolidAt(state, x, y)) { best = { x, y }; break; }
+        }
+        if (best) { animal.x = best.x; animal.y = best.y; animal.vx = 0; animal.vy = 0; }
+      }
       if (animal.store == null) animal.store = BODY_OM[animal.kind] * 0.25;
       animal.age += dt;
       animal.lastAte += dt;
@@ -3048,6 +3244,32 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const stress = animalStress(state, animal);
       const i = zoneAt(animal.x, animal.y);
       const compartment=ecology.labels[i];
+      {
+        const lvl = o2Level(state);
+        // Snails at the surface film breathe air, not water.
+        if (lvl.maint > 0 && !(animal.kind === 'snail' && animal.attach === 'film')) {
+          const tf = clamp(Math.pow(2, (state.settings.temperatureC - 20) / 10), 0.35, 2.4);
+          const size = clamp((animal.bodyOM ?? BODY_OM[animal.kind]) / BODY_OM[animal.kind], 0.2, 1.5);
+          const need = (MAINTENANCE_O2[animal.kind] || 0) * lvl.maint * tf * size * dt;
+          // An animal ventilates the water around it as it moves, so draw
+          // the oxygen from its own zone and the neighbouring ones it shares.
+          const zx = i % COLS, zy = Math.floor(i / COLS), near = [];
+          for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+            const nx = zx + ox, ny = zy + oy;
+            if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+            const j = idx(nx, ny);
+            if (ecology.labels[j] === compartment) near.push(j);
+          }
+          for (const j of near) {
+            const used = Math.min(Math.max(0, state.fields.o2[j]), need / near.length);
+            if (used > 0) {
+              state.fields.o2[j] -= used;
+              recordOxygen(state, j, 'animalRespiration', -used);
+              recordO2(state, O2_RESP_KEY[animalNode(animal)], -used);
+            }
+          }
+        }
+      }
       const crowd=ecology.groups[compartment];
       const countsAtStart=crowd.counts, daphCap=crowd.daphCap;
 
@@ -3280,16 +3502,43 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const noise=animal.kind==='fish'?0.012:0.03;
       animal.vx += (rng() - 0.5) * noise;
       animal.vy += (rng() - 0.5) * noise;
+      if (animal.detour) {
+        if (state.timeHours > animal.detour.until) animal.detour = null;
+        else { animal.vx = animal.vx * .3 + animal.detour.vx; animal.vy = animal.vy * .3 + animal.detour.vy; }
+      }
       const speed = (animal.kind === 'fish' ? 0.32 : animal.kind === 'daphnia' ? 0.22 : animal.kind === 'scud' ? 0.16 : 0.10) * (animal.kind === 'fish' ? trait(animal, 'speed') : 1);
       animal.vx = clamp(animal.vx, -speed, speed);
       animal.vy = clamp(animal.vy, -speed, speed);
       const oldX=animal.x, oldY=animal.y;
       let nx = animal.x + animal.vx * dt;
       let ny = animal.y + animal.vy * dt;
-      if (!animalPathOpen(state,oldX,oldY,nx,ny)) {
+      if (!animalPathOpen(state,oldX,oldY,nx,ny) && !pathHitsGlass(state,oldX,oldY,nx,ny)) {
         nx=oldX;ny=oldY;
         animal.vx*=-0.45;animal.vy*=-0.45;
-      }
+      } else if (!animalPathOpen(state,oldX,oldY,nx,ny)) {
+        // Glass: walk around it. Keep one sideways direction for a few hours
+        // so the animal follows the wall to its end instead of jiggling.
+        if (!animal.slide || state.timeHours > animal.slide.until) animal.slide = { dir: rng() < .5 ? -1 : 1, until: state.timeHours + 3 };
+        const sd = animal.slide.dir, step = .09 * dt;
+        const blockedX = !animalPathOpen(state,oldX,oldY,nx,oldY), blockedY = !animalPathOpen(state,oldX,oldY,oldX,ny);
+        let tx = oldX, ty = oldY;
+        if (blockedX && !blockedY) { tx = oldX; ty = Math.abs(ny-oldY) > step*.5 ? ny : oldY + sd*step; }
+        else if (blockedY && !blockedX) { ty = oldY; tx = Math.abs(nx-oldX) > step*.5 ? nx : oldX + sd*step; }
+        else { tx = oldX + sd*step*(blockedX?0:1); ty = oldY + sd*step*(blockedY?0:1); }
+        if (animalPathOpen(state,oldX,oldY,tx,ty)) { nx = tx; ny = ty; }
+        else { nx = oldX; ny = oldY; animal.slide.dir = -sd; }
+        // Still pressing on the glass after a while: the target is out of
+        // reach, so give up on it and detour along and away from the wall.
+        animal.glassBlock = (animal.glassBlock || 0) + dt;
+        if (animal.glassBlock > 1.5) {
+          const px = blockedX ? -Math.sign(animal.vx || 1) : 0, py = blockedY ? -Math.sign(animal.vy || 1) : 0;
+          const ang = Math.atan2(py * .7 + (blockedX ? sd : 0), px * .7 + (blockedY ? sd : 0));
+          animal.detour = { until: state.timeHours + 4 + rng() * 3, vx: Math.cos(ang) * .11, vy: Math.sin(ang) * .11 };
+          animal.glassBlock = 0;
+        }
+        if (blockedX) animal.vx *= -0.3;
+        if (blockedY) animal.vy *= -0.3;
+      } else if (animal.glassBlock) animal.glassBlock = Math.max(0, animal.glassBlock - dt);
       // Reflect and damp velocity at the tank boundaries instead of simply
       // clamping position while leaving velocity pointed into the wall.
       if (nx < 0.2) { nx = 0.2; animal.vx = Math.abs(animal.vx) * 0.55; }
@@ -3329,11 +3578,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         if (animal.kind === 'fish') {
           createMinnowCarcass(state, animal, deathReason, true);
         } else {
-          const zi = zoneAt(animal.x, animal.y);
-          state.fields.detritus[zi] += animal.bodyOM + (animal.store || 0);
-          recordFlow(state, animalNode(animal), 'detritus', animal.bodyOM + (animal.store || 0));
+          createCarcass(state, animal, deathReason, false);
           const deathName = animal.kind === 'daphnia' ? 'Daphnia' : animal.kind === 'scud' ? 'Scud' : 'Snail';
-          addEvent(state, `${deathName} died: ${deathReason}.`, 'warning', {
+          addEvent(state, `${deathName} died: ${deathReason}. Its body sinks and decomposes.`, 'warning', {
             x: animal.x, y: animal.y, popup: `${deathName} died`
           });
         }
@@ -3477,7 +3724,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       daphnia: c.daphnia,
       snail: c.snail,
       scud: c.scud,
-      carcasses: (state.carcasses || []).length,
+      carcasses: (state.carcasses || []).filter(c => !c.kind || c.kind === 'fish').length,
+      deadBodies: (state.carcasses || []).filter(c => c.kind && c.kind !== 'fish').length,
       plants: state.plants.length,
       plantBiomass: state.plants.reduce((sum,p)=>sum+p.biomass,0),
       biodiversity: biodiversityScore(c, state),
@@ -3871,7 +4119,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if (type === 'pesticide') {
       state.animals = state.animals.filter(a => {
         const survives = a.kind === 'daphnia' ? rng() > 0.55 : a.kind === 'snail' ? rng() > 0.25 : true;
-        if (!survives) { state.fields.detritus[zoneAt(a.x, a.y)] += (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0); recordFlow(state, animalNode(a), 'detritus', (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0)); }
+        if (!survives) { createCarcass(state, a, 'pesticide', false); } if (false) { state.fields.detritus[zoneAt(a.x, a.y)] += (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0); recordFlow(state, animalNode(a), 'detritus', (a.bodyOM ?? BODY_OM[a.kind]) + (a.store || 0)); }
         return survives;
       });
       if (!hidden) addEvent(state, 'Pesticide pulse reduced sensitive invertebrates.', 'disturbance');
@@ -4026,6 +4274,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   global.EcoEngine = {
     COLS, ROWS, LIMITS, PLANT_TYPES, PARAMS, PARAM_INFO, BODY_OM, LIFE_HISTORY,
     deriveParams, serializeState, deserializeState, flowPools, sealJar, enableEvolution, playerEat, playerSpawn, addEvent, TRAIT_RANGES, biodiversityScore, lightResponse, nutrientLimitation, limitingNutrient, unionizedFraction, massPools, massBalanceSummary, resetLedger,
+    O2_REALISM, MAINTENANCE_O2, CARCASS_O2_PER_OM,
+    paintGlassBlock, dropCarcass,
     createState, step, summaries, oxygenBudgetSummary, waterChemistryScore, sunFraction, effectiveSurfaceLight, lightAtDepth, localLightAt, computeHabitatLightFactor, ensureHabitatLightGrid, oxygenSaturation,
     addOrganism, addPlant, addPatch, applyDisturbance, triggerMystery, revealMystery, probe,
     coachPrompt, scenarioPrompt, mulberry32, diffuse, mean, idx, clamp, shelterScoreAt, nearestShelter, habitatStructureAt, paintTerrain, eraseTerrain, stepSand, stepGranular, terrainSolidAt, markHabitatChanged, findPlantSupportY, findOpenCavityTop, syncPlantRoots, stepPlants, stepAnimals, nearestFoodZone, nearestPlantTissue, bestOxygenZone, bestSurfaceOxygenZone, stepCarcasses, carcassSupportBelow, particulateBarrierBelow, fishPositionOpen, shelteredFishTarget, chemistryBarrierBetween, chemistryCompartments, chemistryCompartmentAt, compartmentSummaries, createMinnowCarcass,
@@ -4366,7 +4616,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       : `Brush width ${placementLevel}/5. Click and drag to paint gravel refuge; scuds receive especially strong refuge from gravel.`;
     else if (activeTool === 'habitatErase') $('brushHelp').textContent = `Eraser width ${placementLevel}/5. Drag across any drawn habitat.`;
     else if (activeTool === 'sand') $('brushHelp').textContent = `Sand brush ${placementLevel}/5. Larger settings release a broader stream of falling sand.`;
-    else if (activeTool === 'glass') $('brushHelp').textContent = `Glass brush ${placementLevel}/5. Draw solid transparent walls and compartments.`;
+    else if (activeTool === 'glass') $('brushHelp').textContent = `Glass wall ${glassThickness()} squares thick (amount 1–3 = 2, 4 = 3, 5 = 4). Drag to draw a straight wall: level and upright walls snap to the 1-litre chemistry grid so they divide the water exactly where drawn. Hold Shift for freehand. Animals caught inside new glass are moved to open water.`;
     else if (['algae','bacteria','detritus'].includes(activeTool)) $('brushHelp').textContent = `Patch amount = ${p.patch.toFixed(2)} relative biomass per click.`;
     else if (activeTool === 'plantRemove') $('brushHelp').textContent = `Harvest brush ${placementLevel}/5. Click or drag across foliage to remove whole plants; use Undo to restore them.`;
     else if (activeTool.startsWith('plant')) $('brushHelp').textContent = `New plants begin at approximately ${Math.round(p.plant*100)}% relative biomass.`;
@@ -4478,14 +4728,46 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     } else if(kind==='fallingGravel'){
       E.paintTerrain(state,3,p.x,p.y,0.085+placementLevel*.060);terrainSettling=true;habitatCacheDirty=true;
     } else if(kind==='glass'){
-      E.paintTerrain(state,2,p.x,p.y,0.07+placementLevel*.045);habitatCacheDirty=true;
+      // Straight walls by default: the line is previewed while dragging and
+      // painted on release. Hold Shift to draw freehand.
+      if(glassShift){paintGlassSegment(p.x,p.y,p.x,p.y);habitatDraw.freehand=true;}
+      else {habitatDraw.line={x0:p.x,y0:p.y,x1:p.x,y1:p.y};}
     } else habitatStamp(kind, p);
     updateHabitatActions();
     updateAll();
   }
 
+  let glassShift=false;
+  // Wall thickness in terrain squares: levels 1-3 = 2 (default), 4 = 3, 5 = 4.
+  function glassThickness(){return Math.max(2,Math.round(placementLevel)-1);}
+  function paintGlassSegment(x0,y0,x1,y1){
+    const t=glassThickness(),n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/.03));
+    for(let k=0;k<=n;k++)E.paintGlassBlock(state,x0+(x1-x0)*k/n,y0+(y1-y0)*k/n,t);
+    habitatCacheDirty=true;
+  }
+  // Level and upright walls sit on the 1-litre chemistry grid, so a wall
+  // always separates the water exactly where it is drawn.
+  function snappedGlassLine(l){
+    if(l.snap==='vertical'){const x=E.clamp(Math.round(l.x0),1,E.COLS-1);return {x0:x,x1:x,y0:E.clamp(Math.round(l.y0),0,E.ROWS),y1:E.clamp(Math.round(l.y1),0,E.ROWS),snap:l.snap};}
+    if(l.snap==='horizontal'){const y=E.clamp(Math.round(l.y0),1,E.ROWS-1);return {y0:y,y1:y,x0:E.clamp(Math.round(l.x0),0,E.COLS),x1:E.clamp(Math.round(l.x1),0,E.COLS),snap:l.snap};}
+    return l;
+  }
+  // Straight glass: snap to horizontal/vertical within 8 degrees.
+  function glassLineEnd(l,p){
+    const dx=p.x-l.x0,dy=p.y-l.y0,ang=Math.abs(Math.atan2(dy,dx)*180/Math.PI);
+    if(ang<8||ang>172)return {x:p.x,y:l.y0,snap:'horizontal'};
+    if(Math.abs(ang-90)<8)return {x:l.x0,y:p.y,snap:'vertical'};
+    return {x:p.x,y:p.y,snap:''};
+  }
+  function paintGlassLine(line){
+    const l=snappedGlassLine(line);
+    paintGlassSegment(l.x0,l.y0,l.x1,l.y1);
+    E.markHabitatChanged(state);habitatCacheDirty=true;
+  }
   function continueHabitatStroke(p) {
     if (!habitatDraw) return;
+    if (habitatDraw.line) { const e=glassLineEnd(habitatDraw.line,p);habitatDraw.line.x1=e.x;habitatDraw.line.y1=e.y;habitatDraw.line.snap=e.snap;return; }
+    if (habitatDraw.kind==='glass') { paintGlassSegment(habitatDraw.lastX,habitatDraw.lastY,p.x,p.y);habitatDraw.lastX=p.x;habitatDraw.lastY=p.y;updateHabitatActions();drawTank();return; }
     const spacing = habitatDraw.kind === 'erase'
       ? 0.16 + placementLevel * 0.04
       : 0.18 + placementLevel * 0.045;
@@ -4514,6 +4796,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 
   function finishHabitatStroke(e) {
     if (!habitatDraw || e.pointerId !== habitatDraw.pointerId) return false;
+    if (habitatDraw.line) paintGlassLine(habitatDraw.line);
     habitatDraw=null;
     history.push(snapshot());
     updateAll();
@@ -4621,9 +4904,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         selectedCarcassId=null;
       } else {
         const zi=E.idx(Math.max(0,Math.min(E.COLS-1,Math.floor(c.x))),Math.max(0,Math.min(E.ROWS-1,Math.floor(c.y))));
-        const remaining=Math.round(E.clamp(c.mass,0,1)*100);
+        const remaining=Math.round(E.clamp(c.kind?c.mass/(c.mass0||c.mass):c.mass,0,1)*100);
         const stage=c.settled?`settled on ${c.settledOn||'substrate'}`:'sinking';
-        $('organismCard').innerHTML=`<b>Dead minnow</b> · <span class="carcass">${stage}</span><br>Remaining carcass mass: <b>${remaining}%</b> · Time since death: ${(c.age/24).toFixed(1)} d<br>Local O₂: ${state.fields.o2[zi].toFixed(2)} mg/L · CO₂: ${state.fields.co2[zi].toFixed(2)} mg/L<br>Bacteria: ${state.fields.bacteria[zi].toFixed(2)} · NH₃-N: ${state.fields.nh3[zi].toFixed(3)} mg/L as N<br><span class="small">As bacteria colonize and decompose the carcass, modeled respiration consumes O₂ while CO₂, ammonia, detritus, and bacterial biomass can increase.</span>`;
+        $('organismCard').innerHTML=`<b>${({fish:'Dead minnow',daphnia:'Dead Daphnia',snail:'Dead snail',scud:'Dead scud'})[c.kind||'fish']}</b> · <span class="carcass">${stage}</span><br>Remaining body mass: <b>${remaining}%</b> · Time since death: ${(c.age/24).toFixed(1)} d<br>Local O₂: ${state.fields.o2[zi].toFixed(2)} mg/L · CO₂: ${state.fields.co2[zi].toFixed(2)} mg/L<br>Bacteria: ${state.fields.bacteria[zi].toFixed(2)} · NH₃-N: ${state.fields.nh3[zi].toFixed(3)} mg/L as N<br><span class="small">Bacteria and fungi break the body down. Its proteins become ammonium (NH₄⁺, the yellow specks), which nitrifying bacteria later turn into nitrite and then nitrate. Decomposition uses O₂ and releases CO₂ and phosphate.</span>`;
         return;
       }
     }
@@ -4727,23 +5010,24 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     }
   }
 
+  // Disturbances as a compact dropdown plus Apply (3.32) to give the tank more room.
   function buildDisturbances() {
     const root = $('disturbances');
-    root.innerHTML = '';
-    [
-      ['runoff', 'Runoff'], ['heat', 'Heat'], ['turbidity', 'Turbid'], ['dieoff', 'Algal die-off'], ['pesticide', 'Pesticide'], ['fishkill', 'Fish loss']
-    ].forEach(([id, label]) => {
-      const b = document.createElement('button');
-      b.className = 'btn';
-      b.textContent = label;
-      b.addEventListener('click', () => {
-        E.applyDisturbance(state, id);
-        history.push(snapshot());
-        updateAll();
-      });
-      root.appendChild(b);
+    const list = [['runoff', '🌧 Runoff (nutrients)'], ['heat', '🔥 Heat wave'], ['turbidity', '🟫 Turbid water'], ['dieoff', '🥀 Algal die-off'], ['pesticide', '☠ Pesticide'], ['fishkill', '🐟 Fish loss']];
+    root.innerHTML = `<span class="ctrl-lab">Disturb</span><select id="disturbSelect" class="select" aria-label="Disturbance">${list.map(([id,l])=>`<option value="${id}">${l}</option>`).join('')}</select><button class="btn" id="disturbApply">Apply</button>`;
+    $('disturbApply').addEventListener('click', () => {
+      const id = $('disturbSelect').value, label = list.find(x=>x[0]===id)[1];
+      E.applyDisturbance(state, id);
+      history.push(snapshot());
+      setPresetMessage(`${label} applied. Watch how the tank responds.`);
+      updateAll();
     });
   }
+  function syncO2Realism(){const s=$('o2RealismSelect');if(s&&document.activeElement!==s)s.value=state.settings.o2Realism||'gentle';}
+  const O2_REALISM_NOTES={
+    gentle:'Gentle oxygen: animals use oxygen at the model\'s small scale, so tanks are forgiving.',
+    realistic:'Realistic oxygen: animals breathe like real-sized minnows, snails and scuds, and a dead fish takes hundreds of mg of O₂ to decay. Crowded or sealed spaces now run out of oxygen.',
+    strict:'Strict oxygen: real-sized breathing in still, warm water (slow mixing, half the surface gas exchange). Plan for fewer animals and more plants.'};
 
   function setGraphMetric(key) {
     if (!SERIES.some(s => s.key === key) || !levelConfig().allowedSeries.includes(key)) return;
@@ -4943,7 +5227,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         const c=(state.carcasses||[]).find(x=>x.id===selectedCarcassId);
         if(c){
           const zi=E.idx(Math.max(0,Math.min(E.COLS-1,Math.floor(c.x))),Math.max(0,Math.min(E.ROWS-1,Math.floor(c.y))));
-          return {title:`Dead minnow · ${c.settled?`on ${c.settledOn||'substrate'}`:'sinking'}`,line:`Mass ${Math.round(E.clamp(c.mass,0,1)*100)}% · O₂ ${state.fields.o2[zi].toFixed(2)} mg/L · CO₂ ${state.fields.co2[zi].toFixed(2)} mg/L · bacteria ${state.fields.bacteria[zi].toFixed(2)}`};
+          return {title:`${({fish:'Dead minnow',daphnia:'Dead Daphnia',snail:'Dead snail',scud:'Dead scud'})[c.kind||'fish']} · ${c.settled?`on ${c.settledOn||'substrate'}`:'sinking'}`,line:`Mass ${Math.round(E.clamp(c.kind?c.mass/(c.mass0||c.mass):c.mass,0,1)*100)}% · O₂ ${state.fields.o2[zi].toFixed(2)} mg/L · CO₂ ${state.fields.co2[zi].toFixed(2)} mg/L · bacteria ${state.fields.bacteria[zi].toFixed(2)}`};
         }
       }
       if(selectedAnimalId){
@@ -4991,6 +5275,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 
   function updateAll() {
     waterDetailsDirty=true;
+    syncO2Realism();
+    if(typeof renderChem==='function')renderChem();
     E.syncPlantRoots(state);
     if (lastProbe && Number.isFinite(lastProbe.x) && Number.isFinite(lastProbe.y)) {
       lastProbe = E.probe(state, lastProbe.x, lastProbe.y);
@@ -5813,6 +6099,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     drawHabitatLayer();
     drawRays(now,daylight,turb);
     drawDiscoBackdrop();
+    drawDepthCues();
     drawNight(skyNow);
     state.plants.forEach(p => drawPlant(p));
     drawOxygenBubbles();
@@ -5826,6 +6113,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     (state.carcasses || []).forEach(c => drawCarcass(c));
     state.animals.forEach(a => drawAnimal(a));
     drawProbeOverlay();
+    drawGlassPreview();
+    drawJarSeal();
     if (selectedAnimalId) {
       const a=state.animals.find(x=>x.id===selectedAnimalId);
       if(a){const p=modelToCanvas(a.x,a.y);ctx.save();ctx.strokeStyle='#67e8f9';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(p.x,p.y,a.kind==='fish'?24:16,0,Math.PI*2);ctx.stroke();ctx.restore();}
@@ -6009,7 +6298,44 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ctx.restore();
   }
 
+  // Yellow specks drifting up from a decaying body = ammonium being released.
+  function drawAmmoniumSpecks(c,p,n,spread){
+    const t=performance.now()/1000;
+    for(let k=0;k<n;k++){
+      const ph=((t*.22+k/n+c.phase*.13)%1);
+      const x=p.x+Math.sin(k*2.1+c.phase)*spread+Math.sin(t*1.3+k)*1.5,y=p.y-4-ph*22;
+      ctx.fillStyle=`rgba(250,204,21,${(1-ph)*.75})`;ctx.beginPath();ctx.arc(x,y,1.3,0,Math.PI*2);ctx.fill();
+    }
+  }
+  function drawDeadBody(c){
+    const visual=visualCarcassState(c),p=modelToCanvas(visual.x,visual.y);
+    const rem=E.clamp(c.mass/(c.mass0||c.mass||1),0,1),s=.55+.45*rem;
+    ctx.save();ctx.translate(p.x,p.y);
+    // bacterial and fungal fuzz grows as the body breaks down
+    const dots=Math.round(3+(1-rem)*9);
+    for(let k=0;k<dots;k++){const a=k*2.399+c.phase,r=5+(k%4)*1.8;ctx.fillStyle=`rgba(226,240,214,${.18+.25*(1-rem)})`;ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r*.6,.9+(k%3)*.3,0,Math.PI*2);ctx.fill();}
+    ctx.globalAlpha=.4+.55*rem;ctx.scale(s*1.3,s*1.3);
+    if(c.kind==='daphnia'){
+      ctx.rotate(c.settled?1.35:Math.sin(c.age*.4+c.phase)*.4+1.1);
+      ctx.fillStyle='rgba(203,213,216,.85)';ctx.beginPath();ctx.ellipse(0,0,5,3.4,0,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(120,113,108,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-3,0);ctx.quadraticCurveTo(0,1.5,3,0);ctx.stroke();
+      ctx.strokeStyle='rgba(203,213,216,.7)';ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(-7,-5);ctx.moveTo(-4,-2);ctx.lineTo(-6.5,-1);ctx.stroke();
+    } else if(c.kind==='scud'){
+      ctx.rotate(c.settled?.2:c.phase);
+      ctx.strokeStyle='rgba(222,190,170,.9)';ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,4.5,Math.PI*.15,Math.PI*1.25);ctx.stroke();
+      ctx.strokeStyle='rgba(140,110,95,.8)';ctx.lineWidth=.8;for(let k=0;k<4;k++){const a=Math.PI*(.3+k*.25);ctx.beginPath();ctx.moveTo(Math.cos(a)*3,Math.sin(a)*3);ctx.lineTo(Math.cos(a)*6,Math.sin(a)*6);ctx.stroke();}
+    } else {
+      // snail: empty-looking shell tipped on its side, body shrunk inside
+      ctx.rotate(c.settled?2.2:c.age*.5);
+      ctx.fillStyle='rgba(176,160,135,.9)';ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(110,98,82,.95)';ctx.lineWidth=1.1;ctx.beginPath();for(let a=0;a<Math.PI*4;a+=.2){const r=.6+a*.4;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.stroke();
+      ctx.fillStyle='rgba(150,140,125,.8)';ctx.beginPath();ctx.ellipse(5.2,3.5,2.2*rem+.4,1.4*rem+.3,.5,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+    if(c.settled||c.age>2)drawAmmoniumSpecks(c,p,rem>.08?3:1,4);
+  }
   function drawCarcass(c) {
+    if(c.kind&&c.kind!=='fish')return drawDeadBody(c);
     const visual=visualCarcassState(c);
     const p=modelToCanvas(visual.x,visual.y);
     const remaining=E.clamp(c.mass,0,1);
@@ -6045,9 +6371,59 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ctx.fillStyle='#3a3f42';ctx.beginPath();ctx.arc(9.7,-1.7,.9,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='rgba(218,171,151,.85)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(0,0,15.8,6.2,0,0,Math.PI*2);ctx.stroke();
     ctx.restore();
+    if(c.settled)drawAmmoniumSpecks(c,p,6,12);
   }
 
   let fishBodyGrad=null,waterGrad=null,waterGradKey='';
+  function drawGlassPreview(){
+    if(!habitatDraw?.line)return;const l=snappedGlassLine(habitatDraw.line);
+    const a=modelToCanvas(l.x0,l.y0),b=modelToCanvas(l.x1,l.y1),wr=waterRect(),thick=glassThickness()*wr.w/160;
+    ctx.save();ctx.lineCap='round';
+    ctx.strokeStyle='rgba(186,230,253,.35)';ctx.lineWidth=Math.max(4,thick);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    ctx.strokeStyle='rgba(224,242,254,.95)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+    if(l.snap){ctx.font='600 10.5px system-ui';ctx.fillStyle='#e0f2fe';ctx.fillText((l.snap==='horizontal'?'— level':'| upright')+' · on the 1-L grid',b.x+8,b.y-8);}
+    ctx.restore();
+  }
+  // Sealed jar: a glass outline around the water and the trapped air pocket,
+  // with a lid, so it is obvious that no matter can get in or out.
+  function drawJarSeal(){
+    const j=state.sealed;if(!j)return;
+    const wr=waterRect(),head=Math.min(70,wr.y-14),x=wr.x-10,y=wr.y-head,w=wr.w+20,h=wr.h+head+10,r=22;
+    ctx.save();
+    // trapped air pocket
+    ctx.fillStyle='rgba(186,230,253,.10)';ctx.fillRect(wr.x,y+8,wr.w,head-8);
+    // glass walls
+    ctx.lineWidth=5;ctx.strokeStyle='rgba(165,243,252,.85)';
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+h-r);ctx.quadraticCurveTo(x,y+h,x+r,y+h);ctx.lineTo(x+w-r,y+h);ctx.quadraticCurveTo(x+w,y+h,x+w,y+h-r);ctx.lineTo(x+w,y);ctx.stroke();
+    ctx.lineWidth=1.5;ctx.strokeStyle='rgba(255,255,255,.45)';ctx.beginPath();ctx.moveTo(x+6,y+10);ctx.lineTo(x+6,y+h-r);ctx.stroke();
+    // lid
+    ctx.fillStyle='#334155';ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.5;ctx.beginPath();ctx.rect(x-8,y-12,w+16,14);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#475569';for(let k=0;k<w+16;k+=14)ctx.fillRect(x-8+k,y-12,6,14);
+    // label
+    const air=`Trapped air: O₂ ${(j.o2/j.o2Init*100).toFixed(0)}% · CO₂ ${(j.co2/j.co2Init*100).toFixed(0)}% of start`;
+    const lbl='🔒 SEALED: no matter can enter or leave';
+    ctx.font='700 12px system-ui';const tw=ctx.measureText(lbl).width;ctx.font='11px system-ui';const tw2=ctx.measureText(air).width;
+    const bw=Math.max(tw,tw2)+20,bx=x+w/2-bw/2,by=y+6;
+    ctx.fillStyle='rgba(8,47,73,.88)';ctx.strokeStyle='#67e8f9';ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect?ctx.roundRect(bx,by,bw,36,8):ctx.rect(bx,by,bw,36);ctx.fill();ctx.stroke();
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 12px system-ui';ctx.fillStyle='#e0f2fe';ctx.fillText(lbl,x+w/2,by+12);
+    ctx.font='11px system-ui';ctx.fillStyle='#a5f3fc';ctx.fillText(air,x+w/2,by+26);
+    ctx.restore();
+  }
+  // Depth cues: a darker, hazier bottom and a faint back panel so the tank
+  // reads as a volume rather than a flat strip.
+  let depthGrad=null,depthKey='';
+  function drawDepthCues(){
+    const wr=waterRect(),key=wr.y+'|'+wr.h+'|'+wr.w;
+    if(key!==depthKey){depthGrad=ctx.createLinearGradient(0,wr.y,0,wr.y+wr.h);depthGrad.addColorStop(0,'rgba(0,10,25,0)');depthGrad.addColorStop(.55,'rgba(0,10,25,.10)');depthGrad.addColorStop(1,'rgba(0,8,20,.34)');depthKey=key;}
+    ctx.save();ctx.fillStyle=depthGrad;ctx.fillRect(wr.x,wr.y,wr.w,wr.h);
+    const ix=Math.min(34,wr.w*.04),iy=Math.min(18,wr.h*.05);
+    ctx.strokeStyle='rgba(180,220,245,.10)';ctx.lineWidth=1;
+    ctx.strokeRect(wr.x+ix,wr.y+iy,wr.w-2*ix,wr.h-2*iy);
+    ctx.beginPath();for(const [ax,ay,bx,by] of [[wr.x,wr.y,wr.x+ix,wr.y+iy],[wr.x+wr.w,wr.y,wr.x+wr.w-ix,wr.y+iy],[wr.x,wr.y+wr.h,wr.x+ix,wr.y+wr.h-iy],[wr.x+wr.w,wr.y+wr.h,wr.x+wr.w-ix,wr.y+wr.h-iy]]){ctx.moveTo(ax,ay);ctx.lineTo(bx,by);}ctx.stroke();
+    const side=ctx.createLinearGradient(wr.x,0,wr.x+wr.w,0);side.addColorStop(0,'rgba(0,8,20,.22)');side.addColorStop(.08,'rgba(0,8,20,0)');side.addColorStop(.92,'rgba(0,8,20,0)');side.addColorStop(1,'rgba(0,8,20,.22)');
+    ctx.fillStyle=side;ctx.fillRect(wr.x,wr.y,wr.w,wr.h);
+    ctx.restore();
+  }
   // Probe mode: outline the 1-litre chemistry zone under the cursor with a
   // live O2 reading, and pin the last probed point.
   function drawProbeOverlay(){
@@ -6378,7 +6754,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   const AUTOSAVE_KEY='ecosphere-lab-autosave-v1';
   let lastAutosaveAt=0,lastAutosaveTime=null,autosaveBlocked=false;
   function buildSave(){
-    return {app:'EcoSphere Lab',appVersion:'3.31',savedAt:new Date().toISOString(),
+    return {app:'EcoSphere Lab',appVersion:'3.33',savedAt:new Date().toISOString(),
       state:E.serializeState(state),history:history.slice(-1400),
       missionIndex,missionComplete,level:$('levelSelect').value,speed};
   }
@@ -6415,19 +6791,260 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     lastAutosaveTime=state.timeHours;
     updateAll();
   }
-  function saveToFile(){
-    const blob=new Blob([JSON.stringify(buildSave())],{type:'application/json'});
-    const url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download=`ecosphere-tank-${formatTime(state.timeHours).replace(/[^A-Za-z0-9]+/g,'-')}.json`;a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    setSaveStatus(`Saved to file · ${formatTime(state.timeHours)}`);
+
+  // ---- ⚗️ Chemical transformations panel (3.33) -------------------------
+  // Live overview of the chemistry behind the graphs, nitrogen first:
+  // dead matter -> ammonium -> nitrite -> nitrate -> producers. Rates come
+  // from the model's own transformation ledger (mg N per day, whole tank).
+  let chemOpen=false,chemTab='n',chemWin='day',chemLast=0,chemMark=null;
+  const TANK_L=E.COLS*E.ROWS;
+  function chemFmt(v){const a=Math.abs(v);return a>=100?v.toFixed(0):a>=10?v.toFixed(1):a>=1?v.toFixed(2):a>=.01?v.toFixed(3):a>0?v.toExponential(1):'0';}
+  function nRate(k){return (state.nRates?.[k]?.[chemWin]||0)*24;}
+  function nRateP(p){return Object.keys(state.nRates||{}).filter(k=>k.startsWith(p)).reduce((s,k)=>s+nRate(k),0);}
+  function fRate(a,b,el){return (state.flowRates?.[a+'>'+b]?.[chemWin]?.[el]||0)*24;}
+  function oRate(k){return (state.o2Rates?.[k]?.[chemWin]||0)*24;}
+  function fieldSum(f){let s=0;for(const v of state.fields[f])s+=v;return s;}
+  function nitrogenData(){
+    const living=['algae','plants','invertebrates','fish','bacteria'],dead=['detritus','carcasses'];
+    let waste=0,eaten=0;for(const a of living)for(const d of dead){waste+=fRate(a,d,'N');eaten+=fRate(d,a,'N');}
+    const d={waste,eaten,ammon:nRate('min:detritus')+nRate('min:carcasses'),excr:nRate('min:invertebrates')+nRate('min:fish')+nRate('min:algae')+nRate('min:plants'),
+      upNH:nRateP('upNH:'),upNO:nRateP('upNO:'),n1:nRate('nitritation'),n2:nRate('nitratation'),runoff:fRate('runoff','dissolved','N')};
+    const mp=E.massPools(state).pools;
+    d.livingN=mp.algae.N+mp.plants.N+mp.animals.N+mp.bacteria.N;d.deadN=mp.detritus.N+mp.carcasses.N;
+    d.nh=fieldSum('nh3');d.no2=fieldSum('no2');d.no3=fieldSum('no3');
+    d.net={living:d.upNH+d.upNO+d.eaten-d.waste-d.excr,dead:d.waste-d.ammon-d.eaten,nh:d.ammon+d.excr-d.upNH-d.n1,no2:d.n1-d.n2,no3:d.n2-d.upNO+d.runoff};
+    const s=E.summaries(state);d.bodies=s.deadBodies||0;d.fishCarc=s.carcasses||0;
+    let lo=99;for(let x=0;x<E.COLS;x++)lo=Math.min(lo,state.fields.o2[E.idx(x,E.ROWS-1)]);d.bottomO2=lo;
+    d.unionized=E.unionizedFraction(state.settings.temperatureC,state.settings.pH);
+    return d;
+  }
+  function chemArrow(x1,y1,x2,y2,bend,rate,max,color,label,tip,lx,ly,anchor='middle'){
+    const on=rate>max*.002&&rate>1e-6,w=on?1.4+6*Math.sqrt(rate/max):1.2;
+    const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1,cx=mx-dy/len*bend,cy=my+dx/len*bend;
+    const id='chm'+color.slice(1);
+    return `<g><title>${tip}</title><path d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="${color}" stroke-opacity="${on?.85:.22}" stroke-width="${w.toFixed(1)}" ${on?'stroke-dasharray="8 6" class="ch-flow"':''} marker-end="url(#${id})"/>
+      <text x="${lx}" y="${ly}" text-anchor="${anchor}" font-size="9.5" fill="#e2e8f0"><tspan font-weight="700">${label}</tspan><tspan x="${lx}" dy="11" fill="${on?color:'#64748b'}">${on?chemFmt(rate)+' mg N/day':'not now'}</tspan></text></g>`;
+  }
+  function chemBox(x,y,w,h,color,title,formula,val,net,tip){
+    const tr=Math.abs(net)<Math.max(.002,Math.abs(val)*.01)?'→ steady':net>0?`▲ +${chemFmt(net)}/day`:`▼ ${chemFmt(net)}/day`;
+    return `<g><title>${tip}</title><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="10" fill="#0f2236" stroke="${color}" stroke-width="1.6"/>
+      <text x="${x}" y="${y-h/2+14}" text-anchor="middle" font-size="11" font-weight="800" fill="${color}">${title}</text>
+      <text x="${x}" y="${y-h/2+27}" text-anchor="middle" font-size="9.5" fill="#cbd5e1">${formula}</text>
+      <text x="${x}" y="${y-h/2+40}" text-anchor="middle" font-size="9.5" fill="#f8fafc"><tspan font-weight="700">${chemFmt(val)} mg N</tspan><tspan fill="${net>0?'#fca5a5':net<0?'#93c5fd':'#94a3b8'}"> ${tr}</tspan></text></g>`;
+  }
+  function chemMarkers(){return ['facc15','c084fc','bef264','4ade80','a8a29e','67e8f9','38bdf8','fb923c'].map(c=>`<marker id="chm${c}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#${c}"/></marker>`).join('');}
+  function chemSpark(key,label,color){
+    const now=state.timeHours,rows=history.filter(r=>r.t>=now-chemSpan()&&Number.isFinite(r[key]));
+    if(rows.length<2)return `<div class="ch-spark"><span style="color:${color}">${label}</span><span class="small">collecting…</span><b></b></div>`;
+    let lo=Infinity,hi=-Infinity;for(const r of rows){lo=Math.min(lo,r[key]);hi=Math.max(hi,r[key]);}
+    const pad=(hi-lo)*.1||Math.max(1e-4,hi*.1),t0=rows[0].t,span=Math.max(1,now-t0),W=280,H=30;
+    const X=t=>(t-t0)/span*W,Y=v=>H-2-(v-(lo-pad))/((hi+pad)-(lo-pad))*(H-4);
+    let path='';rows.forEach((r,k)=>{path+=(k?'L':'M')+X(r.t).toFixed(1)+','+Y(r[key]).toFixed(1);});
+    const mk=chemMark&&chemMark.t>=t0?`<line x1="${X(chemMark.t)}" x2="${X(chemMark.t)}" y1="0" y2="${H}" stroke="#f87171" stroke-dasharray="2 2"/>`:'';
+    const last=rows[rows.length-1][key];
+    return `<div class="ch-spark"><span style="color:${color}">${label}</span><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${mk}<path d="${path}" fill="none" stroke="${color}" stroke-width="1.8"/></svg><b>${last.toFixed(last<.1?3:2)}</b></div>`;
+  }
+  function chemSpan(){return chemMark&&chemMark.t<=state.timeHours?Math.min(960,Math.max(240,state.timeHours-chemMark.t+24)):240;}
+  function nitrogenSay(d){
+    const out=[],src=d.ammon+d.excr;
+    if(d.bodies||d.fishCarc)out.push(`<b>${d.bodies+d.fishCarc} dead bod${d.bodies+d.fishCarc===1?'y is':'ies are'}</b> decomposing. Bacteria turn their protein into ammonium right where they lie (the yellow specks).`);
+    const said=out.length;
+    if(d.net.nh>Math.max(.02,.1*src))out.push(`<b>Ammonium is building up.</b> ${chemFmt(src)} mg N/day is released, but nitrifiers convert only ${chemFmt(d.n1)} and producers take up ${chemFmt(d.upNH)}. Expect nitrite to rise next.`);
+    else if(d.net.nh<-Math.max(.02,.1*d.n1))out.push(`<b>Ammonium is being used up.</b> Nitrifiers oxidize ${chemFmt(d.n1)} mg N/day to nitrite and producers take up ${chemFmt(d.upNH)}, while only ${chemFmt(src)} is released.`);
+    if(d.net.no2>Math.max(.005,.1*d.n1))out.push(`<b>Nitrite is building up.</b> The first step (NH₄⁺ → NO₂⁻, ${chemFmt(d.n1)}/day) is ahead of the second (NO₂⁻ → NO₃⁻, ${chemFmt(d.n2)}/day). Nitrite is toxic to fish; it peaks after ammonium.`);
+    else if(d.net.no2<-Math.max(.005,.1*d.n2))out.push(`<b>Nitrite is being cleared.</b> The second nitrifiers are now faster than the first (${chemFmt(d.n2)} vs ${chemFmt(d.n1)} mg N/day).`);
+    if(d.net.no3>Math.max(.05,.15*d.n2))out.push(`<b>Nitrate is accumulating.</b> It is the end product of nitrification (${chemFmt(d.n2)} mg N/day made) and only algae and plants remove it (${chemFmt(d.upNO)} taken up).`);
+    else if(d.net.no3<-Math.max(.05,.15*d.upNO))out.push(`<b>Producers are drawing nitrate down</b> (${chemFmt(d.upNO)} mg N/day taken up, ${chemFmt(d.n2)} made).`);
+    if(out.length===said)out.push(`<b>Nitrogen is cycling roughly in balance:</b> ammonium is converted about as fast as decomposers and animals release it (${chemFmt(src)} mg N/day), and producers take up about as much as nitrifiers make.`);
+    if(d.bottomO2<5)out.push(`<b>Low oxygen slows nitrification.</b> Nitrifying bacteria need O₂, and the bottom water is down to ${d.bottomO2.toFixed(1)} mg/L.`);
+    if(d.runoff>.01)out.push(`<b>Runoff</b> is adding ${chemFmt(d.runoff)} mg N/day, mostly as nitrate.`);
+    return out.map(s=>`<div class="ch-say">${s}</div>`).join('');
+  }
+  function renderNitrogen(){
+    const d=nitrogenData(),max=Math.max(.01,d.waste,d.ammon,d.excr,d.upNH,d.upNO,d.n1,d.n2,d.runoff,d.eaten);
+    const C={liv:'#4ade80',dead:'#a8a29e',nh:'#facc15',no2:'#c084fc',no3:'#bef264'};
+    const svg=`<svg viewBox="0 0 470 392" role="img" aria-label="Nitrogen cycle with live rates"><defs>${chemMarkers()}</defs>
+      ${chemArrow(300,58,360,124,-22,d.waste,max,C.dead,'death &amp; waste','Dead organisms, feces and shed tissue become dead organic matter.',372,64,'start')}
+      ${chemArrow(344,126,286,62,-10,d.eaten,max,C.liv,'eaten / reused','Snails, scuds and minnows eat dead matter; decomposer bacteria build their own cells from it.',392,96,'start')}
+      ${chemArrow(372,176,350,280,-12,d.ammon,max,C.nh,'ammonification','Decomposer bacteria and fungi break proteins down and release ammonium (NH₄⁺).',386,222,'start')}
+      ${chemArrow(266,312,178,312,-16,d.n1,max,C.no2,'nitrification 1','Ammonia-oxidizing bacteria (e.g. Nitrosomonas) turn NH₄⁺ into nitrite. Needs O₂: 3.43 mg O₂ per mg N.',222,350)}
+      ${chemArrow(92,282,72,176,-12,d.n2,max,C.no3,'nitrification 2','Nitrite-oxidizing bacteria (e.g. Nitrobacter, Nitrospira) turn NO₂⁻ into nitrate. Needs O₂: 1.14 mg O₂ per mg N.',100,228,'start')}
+      ${chemArrow(88,126,160,48,-24,d.upNO,max,C.no3,'NO₃⁻ uptake','Algae and plants absorb nitrate to build proteins and DNA.',14,70,'start')}
+      ${chemArrow(220,60,316,282,0,d.excr,max,C.nh,'excretion &amp;','Animals excrete ammonium; all organisms release some as they respire their tissue.',256,150,'end')}
+      <text x="256" y="172" text-anchor="end" font-size="9.5" font-weight="700" fill="#e2e8f0">respiration</text>
+      ${chemArrow(342,282,246,60,0,d.upNH,max,C.liv,'NH₄⁺ uptake','Producers and bacteria take up ammonium directly (they prefer it to nitrate).',312,196,'start')}
+      ${d.runoff>.001?chemArrow(8,112,24,126,0,d.runoff,max,'#38bdf8','runoff','Fertilizer runoff adds nitrate (and a little ammonium) from outside.',4,100,'start'):''}
+      ${chemBox(230,36,156,48,C.liv,'🌿 Living things','organic N: proteins, DNA',d.livingN,d.net.living,'Algae, plants, animals and bacteria. Nitrogen here is in proteins and nucleic acids.')}
+      ${chemBox(380,150,132,48,C.dead,'💀 Dead matter','detritus, feces, dead bodies',d.deadN,d.net.dead,'Dead organic matter waiting to be decomposed.')}
+      ${chemBox(330,306,124,48,C.nh,'NH₄⁺ / NH₃','ammonium · ammonia',d.nh,d.net.nh,`Total ammonia nitrogen. ${(d.unionized*100).toFixed(1)}% is toxic un-ionized NH₃ at pH ${state.settings.pH.toFixed(1)} and ${state.settings.temperatureC.toFixed(0)} °C.`)}
+      ${chemBox(120,306,112,48,C.no2,'NO₂⁻','nitrite',d.no2,d.net.no2,'Nitrite: the short-lived middle step of nitrification. Toxic to fish.')}
+      ${chemBox(74,150,112,48,C.no3,'NO₃⁻','nitrate',d.no3,d.net.no3,'Nitrate: the end product of nitrification. Little toxicity, but fuels algal blooms.')}
+      <text x="235" y="386" text-anchor="middle" font-size="9" fill="#94a3b8">Whole tank (${TANK_L} L). Arrow width = rate. Hover a box or arrow for details.</text></svg>`;
+    return `<div class="ch-win"><span>Rates:</span><button data-chwin="day" class="${chemWin==='day'?'on':''}">24-h average</button><button data-chwin="now" class="${chemWin==='now'?'on':''}">last hour</button></div>
+      ${svg}${nitrogenSay(d)}
+      <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-top:6px">Last ${Math.round(chemSpan()/24)} days · mean mg/L as N${chemMark?' · <span style="color:#f87171">┆ = your experiment</span>':''}</div>
+      ${chemSpark('nh3','NH₄⁺ ammonium','#facc15')}${chemSpark('no2','NO₂⁻ nitrite','#c084fc')}${chemSpark('no3','NO₃⁻ nitrate','#bef264')}
+      <div class="ch-row"><span class="small" style="align-self:center">Try it:</span><button class="btn" data-drop="fish">💀 Drop a dead minnow</button><button class="btn" data-drop="daphnia">💀 Drop 10 dead Daphnia</button><button class="btn" data-drop="ammonia">🧪 Ammonia spike (+0.5 mg/L)</button></div>
+      <p class="ch-note">Why does one dead minnow barely move the whole-tank lines? The model's animals are small in chemical terms: a model minnow holds about 0.4 mg N, a real 2 g minnow about 50 mg. Its ammonium shows up locally (turn the 🔬 Lens to NH₃). The <b>ammonia spike</b> adds 90 mg N, like a large die-off or overfeeding, and shows the classic sequence over about ten days: ammonium falls, nitrite rises and peaks, then nitrate climbs. Watch oxygen too: nitrifiers need 4.57 mg O₂ for every mg N, so dissolved O₂ dips for weeks.</p>
+      <details class="ch-eq"><summary style="cursor:pointer;color:#fde68a">Show the chemistry</summary>
+        <p><b>Ammonification</b> (decomposer bacteria &amp; fungi): <code>organic N (–NH₂ in proteins) → NH₄⁺</code>, with CO₂ released as they respire.</p>
+        <p><b>Ammonium ⇌ ammonia:</b> <code>NH₄⁺ ⇌ NH₃ + H⁺</code>. Right now ${(d.unionized*100).toFixed(1)}% is toxic NH₃. Higher pH or warmer water shifts more to NH₃.</p>
+        <p><b>Nitrification 1</b> (Nitrosomonas-type): <code>NH₄⁺ + 1½ O₂ → NO₂⁻ + 2 H⁺ + H₂O</code></p>
+        <p><b>Nitrification 2</b> (Nitrobacter / Nitrospira): <code>NO₂⁻ + ½ O₂ → NO₃⁻</code>. Together they use 4.57 mg O₂ per mg N, and the H⁺ they release makes water more acidic.</p>
+        <p><b>Assimilation</b> (algae, plants): <code>NO₃⁻ or NH₄⁺ + CO₂ + PO₄³⁻ + light → proteins, DNA</code></p>
+        <p class="ch-note">Not in this model: <b>denitrification</b> (<code>NO₃⁻ → N₂</code> gas, by bacteria in oxygen-free mud) and <b>nitrogen fixation</b> (<code>N₂ → NH₄⁺</code>, by some cyanobacteria). So nitrogen stays in the tank unless runoff adds more. The pH slider is fixed and does not respond to the H⁺ from nitrification.</p>
+      </details>`;
+  }
+  function renderCarbonOxygen(){
+    const ph=oRate('photoAlgae')+oRate('photoPlants'),resp=-(oRate('respAlgae')+oRate('respPlants')+oRate('respInvert')+oRate('respFish')),dec=-oRate('decomp'),nit=-oRate('nitrify'),gas=oRate('gas');
+    const fixC=fRate('dissolved','algae','C')+fRate('dissolved','plants','C'),respC=['algae','plants','invertebrates','fish'].reduce((s,a)=>s+fRate(a,'dissolved','C'),0),decC=fRate('detritus','dissolved','C')+fRate('carcasses','dissolved','C'),gasC=fRate('atmosphere','dissolved','C');
+    const s=E.summaries(state),sat=E.oxygenSaturation(state.settings.temperatureC),made=ph+Math.max(0,gas),used=resp+dec+nit+Math.max(0,-gas);
+    const row=(name,eq,o,c,tip)=>`<tr title="${tip}"><td><b>${name}</b><div class="eq">${eq}</div></td><td class="num">${o}</td><td class="num">${c}</td></tr>`;
+    return `<div class="ch-win"><span>Rates:</span><button data-chwin="day" class="${chemWin==='day'?'on':''}">24-h average</button><button data-chwin="now" class="${chemWin==='now'?'on':''}">last hour</button></div>
+      <div class="ch-say">Dissolved O₂ is <b>${s.o2.toFixed(1)} mg/L</b> (${(s.o2/sat*100).toFixed(0)}% of saturation at ${state.settings.temperatureC.toFixed(0)} °C). CO₂ is <b>${s.co2.toFixed(1)} mg/L</b>. ${made>used*1.05?'More O₂ is being made than used, so it is rising.':used>made*1.05?'More O₂ is being used than made, so it is falling.':'O₂ made and used are about equal.'}</div>
+      <table class="ch-tbl"><tr><td></td><td class="num" style="color:#67e8f9">O₂ mg/day</td><td class="num" style="color:#fb923c">C mg/day</td></tr>
+      ${row('Photosynthesis','6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂',`+${chemFmt(ph)}`,`${chemFmt(fixC)} fixed`,'Algae and plants fix CO₂ into sugar and release O₂. Only in light.')}
+      ${row('Aerobic respiration','C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energy',`−${chemFmt(resp)}`,`${chemFmt(respC)} released`,'Algae, plants and animals, day and night.')}
+      ${row('Decomposition','dead matter + O₂ → CO₂ + NH₄⁺ + PO₄³⁻',`−${chemFmt(dec)}`,`${chemFmt(decC)} released`,'Bacteria respire dead organic matter, including dead bodies.')}
+      ${row('Nitrification','NH₄⁺ + 2O₂ → NO₃⁻ + 2H⁺ + H₂O',`−${chemFmt(nit)}`,'—','Nitrifying bacteria use O₂ to oxidize ammonium (see the Nitrogen tab).')}
+      ${row('Gas exchange at the surface','O₂ and CO₂ move toward equilibrium with air',`${gas>=0?'+':'−'}${chemFmt(Math.abs(gas))}`,`${gasC>=0?'+':'−'}${chemFmt(Math.abs(gasC))}`,'Positive = into the water. Supersaturated water loses O₂ to the air.')}
+      </table>
+      <p class="ch-note">Photosynthesis and respiration are the same equation run in opposite directions: every mg of C fixed releases O₂, and every mg respired uses it. Decomposers are respirers too, which is why a die-off pulls O₂ down.</p>`;
+  }
+  function renderPhosphorus(){
+    const min=['detritus','carcasses','algae','plants','invertebrates','fish'].reduce((s,a)=>s+fRate(a,'dissolved','P'),0),up=['algae','plants','bacteria'].reduce((s,a)=>s+fRate('dissolved',a,'P'),0);
+    const bind=fRate('dissolved','sediment','P'),rel=fRate('sediment','dissolved','P'),run=fRate('runoff','dissolved','P');
+    const mp=E.massPools(state).pools,s=E.summaries(state);
+    const row=(name,eq,v,tip)=>`<tr title="${tip}"><td><b>${name}</b><div class="eq">${eq}</div></td><td class="num">${v}</td></tr>`;
+    return `<div class="ch-win"><span>Rates:</span><button data-chwin="day" class="${chemWin==='day'?'on':''}">24-h average</button><button data-chwin="now" class="${chemWin==='now'?'on':''}">last hour</button></div>
+      <div class="ch-say">Phosphate is <b>${s.po4.toFixed(3)} mg/L as P</b>. The sediment holds <b>${chemFmt(mp.sediment.P)} mg P</b>, living things ${chemFmt(mp.algae.P+mp.plants.P+mp.animals.P+mp.bacteria.P)} mg, dead matter ${chemFmt(mp.detritus.P+mp.carcasses.P)} mg. ${rel>bind*1.2&&rel>1e-4?'<b>The sediment is releasing phosphate</b>: bottom water is low in O₂ (internal loading).':''}</div>
+      <table class="ch-tbl"><tr><td></td><td class="num" style="color:#38bdf8">mg P/day</td></tr>
+      ${row('Mineralization','organic P (DNA, ATP) → PO₄³⁻',chemFmt(min),'Decomposers and respiring organisms release phosphate.')}
+      ${row('Uptake','PO₄³⁻ → DNA, ATP, membranes',chemFmt(up),'Algae, plants and bacteria take up phosphate.')}
+      ${row('Binding to sediment','Fe³⁺ + PO₄³⁻ → FePO₄ (oxygenated mud)',chemFmt(bind),'Iron in oxygenated sediment locks phosphate away.')}
+      ${row('Release from sediment','low O₂: Fe³⁺ → Fe²⁺ frees PO₄³⁻',chemFmt(rel),'When bottom water loses O₂, iron is reduced and phosphate escapes (internal loading).')}
+      ${run>1e-4?row('Runoff','fertilizer PO₄³⁻ from outside',chemFmt(run),'External input.'):''}
+      </table>
+      <p class="ch-note">Phosphorus has no gas form, so unlike carbon and nitrogen it cycles only between water, organisms and sediment. That is why it is often the nutrient that limits algae in lakes.</p>`;
+  }
+  function renderChem(force=false){
+    if(!chemOpen)return;const t=performance.now();if(!force&&t-chemLast<700)return;chemLast=t;
+    const open=$('chemBody').querySelector('details')?.open;
+    $('chemBody').innerHTML=chemTab==='n'?renderNitrogen():chemTab==='co'?renderCarbonOxygen():renderPhosphorus();
+    if(open){const d=$('chemBody').querySelector('details');if(d)d.open=true;}
+  }
+  function setChemOpen(on){chemOpen=on;$('chemPanel').classList.toggle('open',on);const b=$('chemBtn');if(b)b.classList.toggle('active',on);if(on)renderChem(true);}
+  $('chemClose').addEventListener('click',()=>setChemOpen(false));
+  $('chemPanel').querySelector('.ch-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-chtab]');if(!b)return;chemTab=b.dataset.chtab;$('chemPanel').querySelectorAll('[data-chtab]').forEach(x=>x.classList.toggle('on',x===b));renderChem(true);});
+  $('chemBody').addEventListener('click',e=>{
+    const w=e.target.closest('[data-chwin]');if(w){chemWin=w.dataset.chwin;renderChem(true);return;}
+    const b=e.target.closest('[data-drop]');if(!b)return;
+    if(activeMode&&activeMode.lock){showToast(activeMode.lockNote||'That is locked in this mode.');return;}
+    const kind=b.dataset.drop,n=kind==='fish'?1:10;
+    if(kind==='ammonia'){const lim=E.LIMITS.nh3[1];for(let i=0;i<state.fields.nh3.length;i++)state.fields.nh3[i]=Math.min(lim,state.fields.nh3[i]+.5);chemMark={t:state.timeHours};history.push(snapshot());
+      setPresetMessage('🧪 Ammonium raised by 0.5 mg/L everywhere. Press Run at 8× and watch the sparklines over the next two weeks: ammonium falls, nitrite peaks, then nitrate rises. Check the oxygen too: nitrifiers use it.');updateAll();renderChem(true);return;}
+    for(let k=0;k<n;k++)E.dropCarcass(state,kind,E.COLS*(.3+.4*state.rng()),1+state.rng()*2);
+    chemMark={t:state.timeHours};history.push(snapshot());
+    setPresetMessage(kind==='fish'?'💀 A dead minnow is sinking. Press Run and click it with Inspect to follow its decay; turn the 🔬 Lens to NH₃ to see the ammonium it releases.':'💀 Ten dead Daphnia are sinking. Run at 8× and watch the yellow ammonium specks and the sparklines.');
+    updateAll();renderChem(true);
+  });
+  // drag the panel by its header
+  (()=>{const h=$('chemHead'),p=$('chemPanel');let d=null;
+    h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=p.getBoundingClientRect();d={dx:e.clientX-r.left,dy:e.clientY-r.top};h.setPointerCapture(e.pointerId);});
+    h.addEventListener('pointermove',e=>{if(!d)return;p.style.left=Math.max(0,Math.min(innerWidth-80,e.clientX-d.dx))+'px';p.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-d.dy))+'px';p.style.right='auto';});
+    h.addEventListener('pointerup',()=>{d=null;});})();
+  (()=>{const bar=$('tankControls'),cb=$('cycleBtn');const nb=document.createElement('button');nb.className='btn';nb.id='chemBtn';nb.textContent='⚗️ Chemistry';nb.title='Chemical transformations: the nitrogen cycle step by step, plus carbon, oxygen and phosphorus (shortcut: N)';
+    nb.addEventListener('click',()=>setChemOpen(!chemOpen));
+    if(cb)cb.after(nb);else if(bar)bar.appendChild(nb);
+    window.addEventListener('keydown',e=>{if((e.key==='n'||e.key==='N')&&!e.ctrlKey&&!e.metaKey&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||''))setChemOpen(!chemOpen);});})();
+
+  // ---- saving files (3.32.1) ----------------------------------------
+  // 1) a "Save as" window where the browser offers one (Chrome, Edge),
+  // 2) otherwise an ordinary download,
+  // 3) and always a copy-as-text fallback, because some viewers (preview
+  //    panes, locked-down school browsers) silently block downloads.
+  async function saveTextFile(name,text,mime,desc){
+    let framed=false;try{framed=window.top!==window;}catch(err){framed=true;}
+    // Inside a viewer's frame the picker is usually blocked (or never opens),
+    // so go straight to a download plus the copy fallback.
+    if(window.showSaveFilePicker&&!framed){
+      try{
+        const ext=name.slice(name.lastIndexOf('.'));
+        const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:desc,accept:{[mime]:[ext]}}]});
+        const w=await h.createWritable();await w.write(text);await w.close();return {how:'saved',name:h.name||name};
+      }catch(err){if(err&&err.name==='AbortError')return {how:'cancelled'};}
+    }
+    try{
+      const url=URL.createObjectURL(new Blob([text],{type:mime})),a=document.createElement('a');
+      a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),5000);return {how:'downloaded',name};
+    }catch(err){return {how:'failed',name,err:err.message};}
+  }
+  async function copyText(text){
+    try{await navigator.clipboard.writeText(text);return true;}catch(err){}
+    try{const t=document.createElement('textarea');t.value=text;t.style.cssText='position:fixed;left:-9999px;opacity:0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();return ok;}catch(err){return false;}
+  }
+  function openFileModal(){document.querySelector('.top-menu').open=false;$('fileModal').classList.add('open');$('fileModal').setAttribute('aria-hidden','false');}
+  function tankFileName(){return `ecosphere-tank-${formatTime(state.timeHours).replace(/[^A-Za-z0-9]+/g,'-')}.json`;}
+  function csvFileName(){return `ecosphere-lab-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`;}
+  function renderFileHome(msg=''){
+    $('fileModalBody').innerHTML=`${msg}
+      <div class="file-sec"><h3>Save this tank</h3>
+        <div class="file-row"><button class="btn primary" id="fmSave">⬇ Save tank to a file</button><button class="btn" id="fmCopy">📋 Copy tank as text</button></div>
+        <div class="file-note">Saves the tank, its graph history and mission (${formatTime(state.timeHours)}). Your browser also autosaves the tank: <span id="fmAuto">${escapeHtml($('saveStatus')?.textContent||'')}</span></div></div>
+      <div class="file-sec"><h3>Load a saved tank</h3>
+        <div class="file-row"><button class="btn" id="fmOpen">📂 Open a saved file</button><button class="btn" id="fmPaste">📥 Paste saved text</button></div></div>
+      <div class="file-sec"><h3>Export data for a spreadsheet</h3>
+        <div class="file-row"><button class="btn" id="fmCsv">⬇ Graph data (CSV)</button><button class="btn" id="fmCsvCopy">📋 Copy graph data</button></div>
+        <div class="file-note">Opens in Excel or Google Sheets. Copied data can be pasted straight into a spreadsheet.</div></div>
+      <div class="file-note" style="margin-top:10px">💡 If nothing downloads, this page is probably open inside a viewer that blocks downloads (for example a preview window or the Claude app). Open the .html file itself in Chrome or Edge (double-click it in File Explorer), or use the 📋 Copy buttons and paste into Notepad.</div>`;
+    $('fmSave').onclick=()=>saveTankNow();
+    $('fmCopy').onclick=async()=>{const ok=await copyText(JSON.stringify(buildSave()));renderFileHome(ok?`<div class="file-ok">📋 Tank copied. Paste it into Notepad and save it as ${tankFileName()} (or keep it in a document). Load it later with “Paste saved text”.</div>`:`<div class="file-warn">Copying was blocked here. Use the text box below instead.</div><div id="fmSlot"></div>`);if(!ok)showTextBox(JSON.stringify(buildSave()),tankFileName());};
+    $('fmOpen').onclick=()=>$('openFileInput').click();
+    $('fmPaste').onclick=()=>showPasteBox();
+    $('fmCsv').onclick=()=>exportCSV();
+    $('fmCsvCopy').onclick=async()=>{const csv=csvText();const ok=await copyText(csv.replace(/,/g,'\t'));renderFileHome(ok?`<div class="file-ok">📋 Graph data copied. Click cell A1 in a spreadsheet and paste.</div>`:`<div class="file-warn">Copying was blocked here. Use the text box below instead.</div><div id="fmSlot"></div>`);if(!ok)showTextBox(csv,csvFileName());};
+  }
+  function showTextBox(text,name){
+    const box=document.createElement('div');box.className='file-sec';
+    box.innerHTML=`<h3>Copy by hand</h3><div class="file-note">Click in the box, press Ctrl+A then Ctrl+C, paste into Notepad, and save it as <b>${escapeHtml(name)}</b>.</div><textarea class="file-text" readonly></textarea>`;
+    box.querySelector('textarea').value=text;
+    const slot=$('fmSlot');if(slot)slot.replaceWith(box);else $('fileModalBody').prepend(box);
+  }
+  function showPasteBox(){
+    $('fileModalBody').innerHTML=`<div class="file-sec"><h3>Paste a saved tank</h3>
+      <div class="file-note">Paste the text of a saved tank (the contents of an ecosphere-tank .json file, or text you copied with “Copy tank as text”).</div>
+      <textarea class="file-text" id="fmPasteText" placeholder='{"app":"EcoSphere Lab", ...}'></textarea>
+      <div class="file-row" style="margin-top:8px"><button class="btn primary" id="fmPasteLoad">Load this tank</button><button class="btn" id="fmBack">← Back</button></div><div class="file-note" id="fmPasteMsg"></div></div>`;
+    $('fmBack').onclick=()=>renderFileHome();
+    $('fmPasteLoad').onclick=()=>{
+      const txt=$('fmPasteText').value.trim();if(!txt){$('fmPasteMsg').textContent='Paste the saved text first.';return;}
+      try{applySave(JSON.parse(txt));autosave(true);setPresetMessage(`Saved tank loaded: ${formatTime(state.timeHours)}. Press Run to continue.`);closeModal('fileModal');}
+      catch(err){$('fmPasteMsg').textContent=`That text could not be loaded (${err.message}). Make sure you pasted all of it.`;}
+    };
+  }
+  async function offerFile(name,text,mime,desc,label){
+    const r=await saveTextFile(name,text,mime,desc);
+    if(r.how==='cancelled')return r;
+    if(r.how==='saved'){setPresetMessage(`✅ ${label} saved as ${r.name}.`);return r;}
+    openFileModal();
+    if(r.how==='downloaded')renderFileHome(`<div class="file-ok">⬇ ${escapeHtml(label)} sent to your Downloads folder as <b>${escapeHtml(name)}</b>.</div><div class="file-note">Don't see it? This window may block downloads. Copy the text below instead, or open the .html file directly in Chrome or Edge.</div><div id="fmSlot"></div>`);
+    else renderFileHome(`<div class="file-warn">⚠ This window can't download files (${escapeHtml(r.err||'blocked')}). Copy the text below instead.</div><div id="fmSlot"></div>`);
+    showTextBox(text,name);
+    return r;
+  }
+  async function saveTankNow(){
+    const r=await offerFile(tankFileName(),JSON.stringify(buildSave()),'application/json','EcoSphere tank','Tank');
+    if(r.how!=='cancelled')setSaveStatus(`Saved to file · ${formatTime(state.timeHours)}`);
+  }
+  function saveToFile(){saveTankNow();}
+  function loadSaveText(text,source){
+    try{applySave(JSON.parse(text));setPresetMessage(`Saved tank loaded: ${formatTime(state.timeHours)}. Press Run to continue.`);autosave(true);closeModal('fileModal');}
+    catch(err){setPresetMessage(`Could not open ${source}: ${err.message}`);}
   }
   function openSaveFile(file){
     const reader=new FileReader();
-    reader.onload=()=>{
-      try{applySave(JSON.parse(reader.result));setPresetMessage(`Saved tank loaded: ${formatTime(state.timeHours)}. Press Run to continue.`);autosave(true);}
-      catch(err){setPresetMessage(`Could not open that file: ${err.message}`);}
-    };
+    reader.onload=()=>loadSaveText(reader.result,'that file');
     reader.readAsText(file);
   }
   function showResumeCard(save){
@@ -6473,7 +7090,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     plants:{label:'Plants',sub:'producers',x:370,y:340,color:'#22c55e'},
     invertebrates:{label:'Invertebrates',sub:'Daphnia · snails · scuds',x:690,y:92,color:'#f0abfc'},
     fish:{label:'Minnows',sub:'omnivores',x:910,y:92,color:'#cbd5e1'},
-    carcasses:{label:'Carcasses',sub:'dead minnows',x:910,y:310,color:'#d88772',only:'CNP'},
+    carcasses:{label:'Dead bodies',sub:'minnows & invertebrates',x:910,y:310,color:'#d88772',only:'CNP'},
     detritus:{label:'Detritus',sub:'dead matter',x:720,y:340,color:'#c08457',only:'CNP'},
     bacteria:{label:'Bacteria',sub:'decomposers',subO:'decomposers · nitrifiers',x:545,y:215,color:'#fbbf24'},
   };
@@ -6493,7 +7110,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     ['invertebrates','fish','Predation','Minnows catch Daphnia and scuds (Holling type II).'],
     ['invertebrates','dissolved','Invertebrate respiration & excretion','Animals respire food to CO₂ and excrete ammonium and phosphate.'],
     ['fish','dissolved','Minnow respiration & excretion','Minnows respire food to CO₂ and excrete ammonium and phosphate.'],
-    ['invertebrates','detritus','Feces & dead invertebrates','Undigested food and bodies of dead invertebrates become detritus.'],
+    ['invertebrates','detritus','Invertebrate feces','Undigested food becomes detritus.'],
+    ['invertebrates','carcasses','Invertebrate deaths','Dead Daphnia, snails and scuds sink and decompose over a few days.'],
     ['fish','detritus','Minnow feces','About 30% of what minnows eat is egested as feces.'],
     ['fish','carcasses','Minnow deaths','Dead minnows sink and become carcasses.'],
     ['algae','detritus','Dead algae','Dying algal cells become detritus.'],
@@ -7028,7 +7646,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const pools=cyclePools();
     for(const [id,v] of Object.entries(pools))lines.push(['pool',id,(v.C||0).toFixed(4),(v.N||0).toFixed(4),(v.P||0).toFixed(5),v.O!=null?v.O.toFixed(3):''].join(','));
     lines.push('');lines.push(`note,"Signed rates follow the arrow direction (from -> to). Negative air exchange = escaping to air. Time ${formatTime(state.timeHours)}${compare?`; before = ${compare.baseHours.toFixed(0)} h before snapshot at ${formatTime(compare.t)}`:''}"`);
-    const blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ecosphere-flows-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    offerFile(`ecosphere-flows-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`,lines.join('\n'),'text/csv','CSV data','Flow data');
   }
 
   function updateCycleView(){
@@ -7142,11 +7760,12 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     updateCycleSideLive();
   }
 
-  function exportCSV() {
+  function csvText() {
     const columns=['t','o2','co2','nh3','no2','no3','po4','nh3u','algae','detritus','daphnia','snail','scud','fish','carcasses','plants','plantBiomass'];
     const lines=[columns.join(',')];for(const row of history)lines.push(columns.map(k=>Number.isFinite(row[k])?row[k]:'').join(','));
-    const blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ecosphere-lab-${formatTime(state.timeHours).replace(/ /g,'-')}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    return lines.join('\n');
   }
+  function exportCSV(){offerFile(csvFileName(),csvText(),'text/csv','CSV data','Graph data');}
 
   function bindSlider(id, key, transform) {
     $(id).addEventListener('input', (e) => { state.settings[key] = transform ? transform(e.target.value) : Number(e.target.value); updateAll(); });
@@ -7235,7 +7854,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   });
   document.addEventListener('visibilitychange',()=>{if(performanceEnabled)resetPerformanceStats();if(document.visibilityState==='hidden')autosave(true);});
   window.addEventListener('pagehide',()=>{autosave(true);stopDiscoMusic();});
-  $('saveFileBtn').addEventListener('click',()=>{document.querySelector('.top-menu').open=false;saveToFile();});
+  $('saveFileBtn').addEventListener('click',()=>{document.querySelector('.top-menu').open=false;saveTankNow();});
+  $('fileBtn').addEventListener('click',()=>{openFileModal();renderFileHome();});
   $('openFileBtn').addEventListener('click',()=>$('openFileInput').click());
   $('openFileInput').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(file){document.querySelector('.top-menu').open=false;openSaveFile(file);}e.target.value='';});
   $('oxygenBudgetBtn').addEventListener('click', () => {
@@ -7473,6 +8093,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   $('graphCompareSelect').addEventListener('change', e => { compareGraphKey=e.target.value; if(compareGraphKey===activeGraphKey) compareGraphKey='none'; $('graphCompareSelect').value=compareGraphKey; drawGraph(); });
   $('graphWindowSelect').addEventListener('change', e => { graphWindowHours = Number(e.target.value); drawGraph(); });
   $('graphScaleSelect').addEventListener('change', e => { graphScaleMode = e.target.value; drawGraph(); });
+  $('o2RealismSelect').addEventListener('change',e=>{state.settings.o2Realism=e.target.value;setPresetMessage(O2_REALISM_NOTES[e.target.value]);updateAll();});
   bindSlider('lightRange', 'lightPercent'); bindSlider('tempRange', 'temperatureC'); bindSlider('phRange', 'pH'); bindSlider('turbidityRange', 'turbidityPercent');
 
   $('mysteryBtn').addEventListener('click', () => { E.triggerMystery(state); history.push(snapshot()); updateAll(); });
@@ -7492,7 +8113,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if(activeTool==='plantRemove'){startHabitatStroke('plantRemoval',p,e.pointerId);return;}
     if(activeTool==='habitatErase'){startHabitatStroke('erase',p,e.pointerId);return;}
     if(activeTool==='sand'){startHabitatStroke('sand',p,e.pointerId);return;}
-    if(activeTool==='glass'){startHabitatStroke('glass',p,e.pointerId);return;}
+    if(activeTool==='glass'){glassShift=!!e.shiftKey;startHabitatStroke('glass',p,e.pointerId);return;}
     if(activeTool==='probe'){liveContextMode='probe';lastProbe=E.probe(state,p.x,p.y);updateProbeCard();updateCoach();updateMessage();return;}
     if(activeTool==='inspect'){
       liveContextMode='inspect';
@@ -7505,8 +8126,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     }
     const pr=placementProfile();
     if(['fish','daphnia','snail','scud'].includes(activeTool))addOrganismBatch(activeTool,p);
-    if(activeTool==='plantGrass')E.addPlant(state,p.x,p.y,pr.plant,'grass');
-    if(activeTool==='plantStem')E.addPlant(state,p.x,p.y,pr.plant,'stem');
+    if(activeTool==='plantGrass'){E.addPlant(state,p.x,p.y,pr.plant,'grass');asCutting(state.plants[state.plants.length-1]);}
+    if(activeTool==='plantStem'){E.addPlant(state,p.x,p.y,pr.plant,'stem');asCutting(state.plants[state.plants.length-1]);}
     if(activeTool==='algae')E.addPatch(state,'algae',p.x,p.y,pr.patch);
     if(activeTool==='bacteria')E.addPatch(state,'bacteria',p.x,p.y,pr.patch);
     if(activeTool==='detritus')E.addPatch(state,'detritus',p.x,p.y,pr.patch);
@@ -7525,11 +8146,16 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if(!p)return;plantDrag.currentY=p.y;plantDrag.moved=true;drawTank();
   });
 
+  // New plants start as short cuttings and grow taller as their biomass builds.
+  function asCutting(pl){if(!pl)return;const pr=E.PLANT_TYPES[pl.type];if(!pr)return;pl.heightCells=pr.minHeight*.8;pl.desiredHeightCells=pl.heightCells;pl.customHeight=false;}
   function finishRibbonPlant(e){
     if(!plantDrag||e.pointerId!==plantDrag.pointerId)return;
     const p=canvasToModel(e.clientX,e.clientY);const rootY=plantDrag.rootY??(E.ROWS-1.15);let height=E.PLANT_TYPES.ribbon.height;
     if(p&&plantDrag.moved)height=E.clamp(rootY-p.y,E.PLANT_TYPES.ribbon.minHeight,E.PLANT_TYPES.ribbon.maxHeight);
-    E.addPlant(state,plantDrag.x,rootY,placementProfile().plant,'ribbon',height);plantDrag=null;history.push(snapshot());updateAll();
+    // A click plants a young cutting that grows; a drag sets a fixed height.
+    if(p&&plantDrag.moved)E.addPlant(state,plantDrag.x,rootY,placementProfile().plant,'ribbon',height);
+    else {E.addPlant(state,plantDrag.x,rootY,placementProfile().plant,'ribbon');asCutting(state.plants[state.plants.length-1]);}
+    plantDrag=null;history.push(snapshot());updateAll();
   }
   tank.addEventListener('pointerup',e=>{if(finishHabitatStroke(e))return;finishRibbonPlant(e);});
   tank.addEventListener('pointercancel',e=>{
@@ -7649,7 +8275,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   // score the outcome. Leaving a mode restores the lab tank you had before.
   // =====================================================================
   {const hudEl=document.createElement('div');hudEl.id='modeHud';hudEl.className='mode-hud';hudEl.style.display='none';tank.closest('.canvas-wrap').appendChild(hudEl);}
-  const LOCK_BUILD=['#toolGroups .tool','#disturbances','#resetBtn','#balanceBtn','#clearBtn','#loadPresetBtn','#presetSelect','#mysteryBtn','#revealBtn','#openFileBtn','.slider-grid input'];
+  const LOCK_BUILD=['#toolGroups .tool','#chemBody [data-drop]','#disturbances','#o2RealismSelect','#resetBtn','#balanceBtn','#clearBtn','#loadPresetBtn','#presetSelect','#mysteryBtn','#revealBtn','#openFileBtn','.slider-grid input'];
   const GROUPS=[['fish','Minnows','🐟'],['daphnia','Daphnia','🦐'],['snail','Snails','🐌'],['scud','Scuds','🪲'],['plants','Plants','🌿']];
   function groupCounts(st=state){const c={fish:0,daphnia:0,snail:0,scud:0,plants:st.plants.length};for(const a of st.animals)if(c[a.kind]!=null)c[a.kind]++;return c;}
   function dayOf(t,start){return Math.floor((t-start)/24)+1;}
@@ -7804,7 +8430,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         if(a==='starter'){freshState(84);setPresetMessage('Starter tank loaded. Adjust it, then seal the jar.');}
         if(a==='empty'){freshState(84);state.animals=[];state.plants=[];state.rocks=[];state.carcasses=[];state.fields.algae.fill(.05);state.fields.detritus.fill(.02);E.markHabitatChanged(state);habitatCacheDirty=true;waterDetailsDirty=true;E.resetLedger(state);setPresetMessage('Empty jar: add plants, algae and animals with the build tools, then seal it. Balance producers against consumers.');}
         if(a==='seal'){
-          E.sealJar(state,.3);this.phase='sealed';this.ownClock=true;this.lock=LOCK_BUILD;this.allow=['#lightRange'];
+          E.sealJar(state,.3);this.phase='sealed';this.ownClock=true;this.lock=LOCK_BUILD;this.allow=['#lightRange'];applyModeLockStyle(true);
           this.t0=state.timeHours;this.minO2=E.summaries(state).o2;this.startCounts=groupCounts();this.extinct={};
           setSpeed(8);running=true;updateControls();
           setPresetMessage('🔒 Sealed. The jar now only has the air trapped inside it. Watch the jar-air gauges: producers must make enough O₂ for every consumer and decomposer.');
@@ -7931,8 +8557,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   // =====================================================================
   // 3. CLASS TOURNAMENT
   // =====================================================================
-  const T_COSTS={daphnia:[2,40],snail:[3,15],scud:[3,15],fish:[12,6],ribbon:[8,10],stem:[8,10],grass:[6,10],rock:[2,10]};
-  const T_LABELS={daphnia:'🦐 Daphnia',snail:'🐌 Snails',scud:'🪲 Scuds',fish:'🐟 Minnows',ribbon:'🌿 Ribbon plants',stem:'🌱 Stem plants',grass:'🌾 Grass clumps',rock:'🪨 Rocks'};
+  const T_COSTS={daphnia:[2,40],snail:[3,15],scud:[3,15],fish:[12,6],ribbon:[8,10],stem:[8,10],grass:[6,10],rock:[2,10],algae:[4,5]};
+  const T_LABELS={algae:'🟢 Algae starter',daphnia:'🦐 Daphnia',snail:'🐌 Snails',scud:'🪲 Scuds',fish:'🐟 Minnows',ribbon:'🌿 Ribbon plants',stem:'🌱 Stem plants',grass:'🌾 Grass clumps',rock:'🪨 Rocks'};
   const T_BUDGET=100;
   // Healthy final populations earn full points (12 each).
   const T_TARGETS={fish:4,daphnia:20,snail:10,scud:8,plants:8};
@@ -7940,21 +8566,36 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     A:{name:'Calm waters',events:[]},
     B:{name:'Classic',events:[[8,'heatwave'],[15,'runoff',1.5],[22,'fishkill']]},
     C:{name:'Gauntlet',events:[[5,'runoff',1],[10,'heatwave'],[12,'runoff',1.5],[18,'dieoff'],[24,'pesticide'],[27,'turbid']]},
+    D:{name:'Nutrient storm',events:[[4,'runoff',1.2],[9,'runoff',1.2],[14,'runoff',1.4],[19,'runoff',1.4],[24,'runoff',1.6],[29,'runoff',1.6],[36,'runoff',1.6],[42,'runoff',1.6]]},
+    E:{name:'Hot summer',events:[[5,'heatwave'],[13,'heatwave'],[17,'turbid'],[21,'heatwave'],[29,'heatwave'],[37,'heatwave']]},
+    F:{name:'Surprise',hidden:true,events:[]},
   };
+  // Challenge list for a code. "Surprise" picks 4 events from the code's seed,
+  // so every team gets the same surprises but nobody knows them in advance.
+  function challengeEvents(spec){
+    const ch=T_CHALLENGES[spec.challenge];
+    if(spec.challenge!=='F')return ch.events.filter(e=>e[0]<spec.days);
+    const r=E.mulberry32(spec.seed^0x2f6b),pool=['heatwave','runoff','fishkill','dieoff','pesticide','turbid'],out=[];
+    const gap=Math.max(3,Math.floor((spec.days-4)/4));
+    for(let k=0;k<4;k++){const day=3+k*gap+Math.floor(r()*Math.max(1,gap-2));if(day<spec.days)out.push([day,pool[Math.floor(r()*pool.length)],1+r()*.6]);}
+    return out;
+  }
+  const T_O2={'':'gentle',R:'realistic',S:'strict'};
+  const O2_NAMES={gentle:'Gentle',realistic:'Realistic',strict:'Strict'};
   const T_EVENT_NAMES={heatwave:'Heat wave (+6 °C for 4 days)',runoff:'Runoff pulse',fishkill:'Fish disease outbreak',dieoff:'Algal die-off',pesticide:'Pesticide pulse',turbid:'Muddy water (5 days)',cool:'Heat wave ends',clear:'Water clears'};
   function parseTournamentCode(code){
-    const m=String(code||'').trim().toUpperCase().match(/^ECO-([0-9A-Z]{4,7})-(\d{1,2})-([ABC])$/);
+    const m=String(code||'').trim().toUpperCase().match(/^ECO-([0-9A-Z]{4,7})-(\d{1,2})-([A-F])(?:-([RS]))?$/);
     if(!m)return null;
     const days=+m[2];if(days<5||days>60)return null;
-    return {code:m[0],seed:parseInt(m[1],36),days,challenge:m[3]};
+    return {code:m[0],seed:parseInt(m[1],36),days,challenge:m[3],o2:T_O2[m[4]||'']};
   }
-  function makeTournamentCode(days,challenge){const seed=10000+Math.floor(Math.random()*1.6e6);return `ECO-${seed.toString(36).toUpperCase()}-${days}-${challenge}`;}
+  function makeTournamentCode(days,challenge,o2='gentle'){const seed=10000+Math.floor(Math.random()*1.6e6);return `ECO-${seed.toString(36).toUpperCase()}-${days}-${challenge}${o2==='realistic'?'-R':o2==='strict'?'-S':''}`;}
   function designCost(d){return Object.entries(T_COSTS).reduce((s,[k,[c]])=>s+(d[k]||0)*c,0);}
   function designValid(d){if(designCost(d)>T_BUDGET)return false;for(const [k,[,max]] of Object.entries(T_COSTS))if((d[k]||0)<0||(d[k]||0)>max||!Number.isInteger(d[k]||0))return false;if((d.ribbon||0)+(d.stem||0)+(d.grass||0)>10)return false;return d.light>=40&&d.light<=100;}
   function buildTournamentTank(spec,d){
     const st=E.createState(spec.seed);
     st.animals=[];st.plants=[];st.rocks=[];
-    st.settings.lightPercent=d.light;
+    st.settings.lightPercent=d.light;st.settings.o2Realism=spec.o2||'gentle';
     const r=E.mulberry32(spec.seed^0x5bd1e995);
     const plants=[...Array(d.ribbon||0).fill('ribbon'),...Array(d.stem||0).fill('stem'),...Array(d.grass||0).fill('grass')];
     plants.forEach((t,k)=>E.addPlant(st,1+(k+.5)*(16/Math.max(1,plants.length))+(r()-.5)*.6,E.ROWS-1.15,.85,t));
@@ -7963,13 +8604,14 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     for(let k=0;k<(d.snail||0);k++)E.addOrganism(st,'snail',1+r()*16,E.ROWS-1.25);
     for(let k=0;k<(d.scud||0);k++)E.addOrganism(st,'scud',1+r()*16,E.ROWS-1.8-r());
     for(let k=0;k<(d.fish||0);k++)E.addOrganism(st,'fish',2+r()*14,2+r()*4);
+    if(d.algae){const ra=E.mulberry32(spec.seed^0x1a6e);for(let k=0;k<d.algae;k++)E.addPatch(st,'algae',1.5+(k+.5)*(15/d.algae)+(ra()-.5),1.5+ra()*4,.35);}
     E.markHabitatChanged(st);E.syncPlantRoots(st);E.resetLedger(st);
     return st;
   }
   function createTournamentRun(spec,d){
     const st=buildTournamentTank(spec,d),start=st.timeHours,end=start+spec.days*24;
     const events=[];
-    for(const [day,type,strength] of T_CHALLENGES[spec.challenge].events){
+    for(const [day,type,strength] of challengeEvents(spec)){
       if(day>=spec.days)continue;
       events.push({t:start+day*24,type,strength:strength||1});
       if(type==='heatwave')events.push({t:start+(day+4)*24,type:'cool'});
@@ -8008,7 +8650,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   }
   function fnv(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(36);}
   function encodeResult(spec,team,d,total){
-    const payload={c:spec.code,t:team.slice(0,40),d:[d.daphnia,d.snail,d.scud,d.fish,d.ribbon,d.stem,d.grass,d.rock,d.light],s:total};
+    const payload={c:spec.code,t:team.slice(0,40),d:[d.daphnia,d.snail,d.scud,d.fish,d.ribbon,d.stem,d.grass,d.rock,d.light,...(d.algae?[d.algae]:[])],s:total};
     payload.h=fnv(JSON.stringify(payload));
     return 'ECOR1.'+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
@@ -8018,7 +8660,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const p=JSON.parse(decodeURIComponent(escape(atob(b+'==='.slice((b.length+3)%4)))));
       const {h,...rest}=p;if(fnv(JSON.stringify(rest))!==h)return {error:'checksum mismatch'};
       const spec=parseTournamentCode(p.c);if(!spec)return {error:'bad tournament code'};
-      const k=['daphnia','snail','scud','fish','ribbon','stem','grass','rock','light'],d={};k.forEach((n,i)=>d[n]=p.d[i]);
+      const k=['daphnia','snail','scud','fish','ribbon','stem','grass','rock','light','algae'],d={};k.forEach((n,i)=>d[n]=p.d[i]||0);
       return {spec,team:p.t,design:d,score:p.s};
     }catch(err){return {error:'unreadable code'};}
   }
@@ -8026,7 +8668,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const spec=opts.spec,design=opts.design,team=opts.team||'Team';
     return {
       name:'Class Tournament',icon:'🏆',ownClock:true,lock:LOCK_BUILD,docked:true,
-      goal:`Code ${spec.code} · ${T_CHALLENGES[spec.challenge].name} · ${spec.days} days. Every team faces the same tank and the same challenges.`,
+      goal:`Code ${spec.code} · ${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · oxygen ${O2_NAMES[spec.o2]}. Every team faces the same tank and the same challenges.`,
       lockNote:'Tournament run in progress: designs are locked so every team is compared fairly. You can still probe and inspect.',
       start(){
         this.run=createTournamentRun(spec,design);
@@ -8052,7 +8694,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         for(const ev of fired){const day=dayOf(ev.t+.01,this.run.start);const tt=$('modeToast');if(tt)tt.classList.remove('show');
           showTourBanner(`<div class="tb-big">⚠ Day ${day}: ${T_EVENT_NAMES[ev.type]}!</div><div class="tb-small">Every team's tank gets the same challenge.</div>`,'warn',null,2600);}
         const next=this.run.events.find(e=>!e.done&&!['cool','clear'].includes(e.type));
-        if(next&&!next.warned&&next.t-this.run.state.timeHours<=24){next.warned=true;showToast(`Tomorrow: ${T_EVENT_NAMES[next.type]}. Watch how your tank responds.`);}
+        if(next&&!next.warned&&next.t-this.run.state.timeHours<=24&&!T_CHALLENGES[spec.challenge].hidden){next.warned=true;showToast(`Tomorrow: ${T_EVENT_NAMES[next.type]}. Watch how your tank responds.`);}
         if(this.run.done)this.finished=true;
       },
       action(act){
@@ -8064,7 +8706,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       bar(){
         const day=Math.min(spec.days,dayOf(state.timeHours,this.run.start)),sc=this.run.score();
         const next=this.run.events.find(e=>!e.done&&!['cool','clear'].includes(e.type));
-        const nextTxt=next?`${T_EVENT_NAMES[next.type]} · day ${dayOf(next.t+.01,this.run.start)}`:'none left';
+        const nextTxt=next?(T_CHALLENGES[spec.challenge].hidden?`a surprise…`:`${T_EVENT_NAMES[next.type]} · day ${dayOf(next.t+.01,this.run.start)}`):'none left';
         const status=this.fast?'FINISHING…':!this.started?'STARTING…':running?'TOURNAMENT IN PROGRESS':'TOURNAMENT PAUSED';
         return `<span class="tour-live ${running||this.fast?'':'paused'}"><i></i>🏆 ${status}</span>
           <span><span class="tour-team">${escapeHtml(team)}</span> <span class="small tour-code">${spec.code}</span></span>
@@ -8104,9 +8746,9 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
   }
   function openTournament(tab='join',code='',team='',design=null){
     $('tournamentModal').classList.add('open');$('tournamentModal').setAttribute('aria-hidden','false');
-    const d=design||{daphnia:0,snail:0,scud:0,fish:0,ribbon:0,stem:0,grass:0,rock:0,light:75};
+    const d=design||{algae:0,daphnia:0,snail:0,scud:0,fish:0,ribbon:0,stem:0,grass:0,rock:0,light:75};
     const body=$('tournamentBody');
-    const T_NOTES={daphnia:'grazes algae · fish food',snail:'grazes surfaces & detritus',scud:'eats detritus & plants',fish:'predator · omnivore',ribbon:'tall plant',stem:'leafy plant',grass:'low clump',rock:'shelter for prey'};
+    const T_NOTES={algae:'a dose of algae: food and O₂, but can bloom',daphnia:'grazes algae · fish food',snail:'grazes surfaces & detritus',scud:'eats detritus & plants',fish:'predator · omnivore',ribbon:'tall plant',stem:'leafy plant',grass:'low clump',rock:'shelter for prey'};
     const field=(k)=>{const [emo,...nm]=T_LABELS[k].split(' ');return `<div class="t-field t-card" data-card="${k}">
       <div class="t-card-head"><span class="t-emo">${emo}</span><span><b>${nm.join(' ')}</b><i>🪙${T_COSTS[k][0]} each · max ${T_COSTS[k][1]}</i></span></div>
       <div class="t-note">${T_NOTES[k]||''}</div>
@@ -8130,7 +8772,8 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       <div id="tTeacher" style="display:${tab==='teacher'?'block':'none'}">
         <h3>Create a tournament</h3>
         <div class="form-row"><label class="t-field"><span>Length</span><select class="field" id="tDays"><option value="20">20 days</option><option value="30" selected>30 days</option><option value="45">45 days</option></select></label>
-        <label class="t-field"><span>Challenge</span><select class="field" id="tChal"><option value="A">Calm waters (no disturbances)</option><option value="B" selected>Classic (heat wave, runoff, fish disease)</option><option value="C">Gauntlet (six disturbances)</option></select></label></div>
+        <label class="t-field"><span>Challenge</span><select class="field" id="tChal"><option value="A">Calm waters (no disturbances)</option><option value="B" selected>Classic (heat wave, runoff, fish disease)</option><option value="C">Gauntlet (six disturbances)</option><option value="D">Nutrient storm (repeated runoff)</option><option value="E">Hot summer (repeated heat waves)</option><option value="F">Surprise (4 hidden challenges)</option></select></label>
+        <label class="t-field"><span>Oxygen realism</span><select class="field" id="tO2"><option value="gentle">Gentle (forgiving)</option><option value="realistic">Realistic</option><option value="strict">Strict (still water)</option></select></label></div>
         <div class="mode-row" style="margin-top:6px"><button class="btn" id="tMake">Generate code</button><b id="tMade" style="font-size:16px;letter-spacing:.06em;color:#facc15"></b><button class="btn" id="tCopyInstr" style="display:none">📋 Copy instructions for students</button></div>
         <textarea class="field textarea" id="tInstr" readonly style="display:none;width:100%;min-height:120px;font-size:10.5px;margin-top:6px"></textarea>
         <h3>Leaderboard</h3>
@@ -8157,7 +8800,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
         if(minus)minus.disabled=v<=0;
       }
       {const lp=body.querySelector('[data-k="light"][data-step="5"]'),lm=body.querySelector('[data-k="light"][data-step="-5"]');if(lp)lp.disabled=dd.light>=100;if(lm)lm.disabled=dd.light<=40;}
-      $('tSpecInfo').textContent=spec?`${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · challenges: ${T_CHALLENGES[spec.challenge].events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} (day ${e[0]+1})`).join(', ')||'none'}`:($('tCode').value?'That code doesn’t look right (example: ECO-4K2P9-30-B).':'Enter the code your teacher gave you.');
+      $('tSpecInfo').textContent=spec?`${T_CHALLENGES[spec.challenge].name} · ${spec.days} days · oxygen: ${O2_NAMES[spec.o2]} · challenges: ${T_CHALLENGES[spec.challenge].hidden?'4 surprises (revealed as they happen)':challengeEvents(spec).map(e=>`${T_EVENT_NAMES[e[1]]} (day ${e[0]+1})`).join(', ')||'none'}`:($('tCode').value?'That code doesn’t look right (example: ECO-4K2P9-30-B).':'Enter the code your teacher gave you.');
       // Say exactly what is missing instead of silently disabling the button.
       const why=[],bad=new Set();
       if(!$('tCode').value.trim()){why.push('enter the tournament code');bad.add('tCode');}
@@ -8188,17 +8831,17 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       closeModal('tournamentModal');enterMode(TournamentMode,{spec,design:dd,team:$('tTeam').value.trim()});
     };
     if($('tMake'))$('tMake').onclick=()=>{
-      const code=makeTournamentCode(+$('tDays').value,$('tChal').value),spec=parseTournamentCode(code);
+      const code=makeTournamentCode(+$('tDays').value,$('tChal').value,$('tO2').value),spec=parseTournamentCode(code);
       $('tMade').textContent=code;
-      const ch=T_CHALLENGES[spec.challenge],evs=ch.events.filter(e=>e[0]<spec.days).map(e=>`${T_EVENT_NAMES[e[1]]} on day ${e[0]+1}`).join(', ')||'no disturbances';
-      $('tInstr').value=`EcoSphere Lab · Class Tournament\nCode: ${code}\n(${ch.name} · ${spec.days} days · ${evs})\n\n1. Open EcoSphere Lab 3.31. Everyone must use the same version of the file.\n2. Click 🎮 Modes, then Play under Class Tournament.\n3. Type the code above and your team name.\n4. Design your tank within the 🪙${T_BUDGET} budget (10 plants max).\n5. Click "Lock in design & run". A gold TOURNAMENT IN PROGRESS bar appears above the tank.\n6. Watch it run (or press ⏩ Finish now). When it ends, click Copy code and send your result code to me.`;
+      const ch=T_CHALLENGES[spec.challenge],evs=ch.hidden?'4 surprise challenges':challengeEvents(spec).map(e=>`${T_EVENT_NAMES[e[1]]} on day ${e[0]+1}`).join(', ')||'no disturbances';
+      $('tInstr').value=`EcoSphere Lab · Class Tournament\nCode: ${code}\n(${ch.name} · ${spec.days} days · ${evs} · oxygen: ${O2_NAMES[spec.o2]})\n\n1. Open EcoSphere Lab 3.33. Everyone must use the same version of the file.\n2. Click 🎮 Modes, then Play under Class Tournament.\n3. Type the code above and your team name.\n4. Design your tank within the 🪙${T_BUDGET} budget (10 plants max).\n5. Click "Lock in design & run". A gold TOURNAMENT IN PROGRESS bar appears above the tank.\n6. Watch it run (or press ⏩ Finish now). When it ends, click Copy code and send your result code to me.`;
       $('tInstr').style.display='block';$('tCopyInstr').style.display='inline-block';
     };
     if($('tCopyInstr'))$('tCopyInstr').onclick=()=>{const t=$('tInstr');t.select();(navigator.clipboard?.writeText(t.value)||Promise.reject()).then(()=>setPresetMessage('Student instructions copied. Paste them into your class page or chat.'),()=>{try{document.execCommand('copy');setPresetMessage('Student instructions copied.');}catch(err){}});};
     const board=[];
     function drawBoard(){
       board.sort((a,b)=>b.score-a.score);
-      $('tBoard').innerHTML=board.length?`<table class="budget-table"><thead><tr><th>#</th><th>Team</th><th>Code</th><th>Design (D/Sn/Sc/F · plants · rocks · light)</th><th>Score</th><th>Check</th></tr></thead><tbody>${board.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(r.team)}</td><td>${r.spec.code}</td><td>${r.design.daphnia}/${r.design.snail}/${r.design.scud}/${r.design.fish} · ${r.design.ribbon+r.design.stem+r.design.grass} · ${r.design.rock} · ${r.design.light}%</td><td><b>${r.score}</b></td><td>${r.verified==null?'—':r.verified===true?'✓ verified':r.verified==='busy'?'running…':`✗ re-run gives ${r.verified}`}</td></tr>`).join('')}</tbody></table>`:'';
+      $('tBoard').innerHTML=board.length?`<table class="budget-table"><thead><tr><th>#</th><th>Team</th><th>Code</th><th>Design (D/Sn/Sc/F · plants · rocks · algae · light)</th><th>Score</th><th>Check</th></tr></thead><tbody>${board.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(r.team)}</td><td>${r.spec.code}</td><td>${r.design.daphnia}/${r.design.snail}/${r.design.scud}/${r.design.fish} · ${r.design.ribbon+r.design.stem+r.design.grass} · ${r.design.rock} · ${r.design.algae||0} · ${r.design.light}%</td><td><b>${r.score}</b></td><td>${r.verified==null?'—':r.verified===true?'✓ verified':r.verified==='busy'?'running…':`✗ re-run gives ${r.verified}`}</td></tr>`).join('')}</tbody></table>`:'';
     }
     if($('tRank'))$('tRank').onclick=()=>{
       board.length=0;const bad=[];
@@ -8402,7 +9045,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     if(m==='tournamentTeacher'){openTournament('teacher');return;}
     enterMode(MODE_DEFS[m]);
   }));
-  for(const id of ['modesModal','modeResultModal','tournamentModal']){
+  for(const id of ['modesModal','modeResultModal','tournamentModal','fileModal']){
     $(id).addEventListener('click',e=>{if(e.target.id===id||e.target.closest('[data-close-modal]'))closeModal(id);});
   }
 

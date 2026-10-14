@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <title>EcoSphere Lab 3.33 — Nitrogen &amp; Decomposition</title>
+  <title>EcoSphere Lab 3.33.1 — Nitrogen &amp; Decomposition</title>
   <style>
 :root{
   --bg:#07111f;--panel:#0f1b2c;--panel2:#132238;--line:#26364d;--text:#e6eef8;--muted:#90a2b8;
@@ -239,6 +239,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
 
 
+
+/* 3.33.1 steady activity strip: a fixed height so the tank never resizes
+   as messages change. Long text is cut with … (hover to read it all). */
+#activityStrip.activity-strip{flex-wrap:nowrap;height:52px;min-height:52px}
+#activityStrip .activity-strip-info{flex:1 1 0;min-width:0}
+#activityStrip .activity-strip-main{flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+#activityStrip #activityStripMetrics{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#activityStrip #activityStripFish{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#activityStrip .tank-controls{flex:0 0 auto;flex-wrap:nowrap}
+#activityStrip .sky-badge{font-variant-numeric:tabular-nums}
+#activityStrip #skyBadgeClock{display:inline-block;min-width:7.3em}
+#activityStrip #skyBadgeLight{display:inline-block;min-width:4.4em}
+#activityStrip #lensBtn{min-width:6.6em}
+@media (max-width:1440px){#activityStrip .activity-strip-title{display:none}}
+@media (max-width:1100px){#activityStrip.activity-strip{flex-wrap:wrap;height:auto;min-height:0}#activityStrip .activity-strip-info{flex:1 1 100%;height:32px}#activityStrip .tank-controls{flex-wrap:wrap}}
+.app.focus-tank #activityStrip.activity-strip{height:auto;min-height:0}
 /* 3.33 chemistry (transformations) panel */
 #chemPanel{position:fixed;right:14px;top:96px;width:min(470px,94vw);max-height:calc(100vh - 110px);overflow:auto;z-index:70;background:#0b1828;border:1px solid #3b5878;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.55);padding:10px 12px;display:none}
 #chemPanel.open{display:block}
@@ -699,7 +715,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.33</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h1>EcoSphere Lab 3.33.1</h1><span class="badge">freshwater ecosystem lab</span><span id="levelBadge" class="badge level-badge">IB SL</span></div>
       <p>Build, disturb, probe, compare trials, and explain a spatial freshwater mesocosm.</p>
     </div>
     <div class="controls primary-controls">
@@ -5527,7 +5543,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const sm = E.summaries(state);
     const compCount=E.chemistryCompartments(state).count;
     $('activityStripMetrics').textContent =
-      `O₂ ${sm.o2.toFixed(2)} ${trendArrow('o2')} · Fish ${sm.fish} · Carcasses ${sm.carcasses}${compCount>1?` · Water compartments ${compCount}`:''}`;
+      `O₂ ${sm.o2.toFixed(2)} ${trendArrow('o2')} · Fish ${sm.fish} · Carcasses ${sm.carcasses}${compCount>1?` · Water compartments ${compCount}`:''}`;$('activityStripMetrics').title=$('activityStripMetrics').textContent;
 
     const fishModes = {};
     state.animals.filter(a => a.kind === 'fish').forEach(a => {
@@ -5542,7 +5558,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
     const modeText = Object.entries(fishModes)
       .map(([k,v]) => `${v} ${k}`)
       .join(' · ') || 'no fish';
-    $('activityStripFish').textContent = `Fish: ${modeText}`;
+    $('activityStripFish').textContent = `Fish: ${modeText}`;$('activityStripFish').title=$('activityStripFish').textContent;
 
     const ev = state.events[0];
     if (!ev) {
@@ -5551,7 +5567,7 @@ body.in-mode #balanceBtn,body.in-mode #missionSelect{visibility:hidden}
       const color = actionColor(ev.severity);
       $('activityStripEvent').innerHTML =
         `<span class="event-dot" style="background:${color}"></span>` +
-        `<span class="event-time">${formatTime(ev.time)}</span>${ev.text}`;
+        `<span class="event-time">${formatTime(ev.time)}</span>${ev.text}`;$('activityStripEvent').title=$('activityStripEvent').textContent;
     }
   }
 

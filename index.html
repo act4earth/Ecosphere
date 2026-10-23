@@ -109,6 +109,8 @@ tbody th{font-weight:700;white-space:nowrap}
 .quizview{min-height:100%;display:flex;flex-direction:column}
 .qwrap{max-width:900px;width:100%;margin:0 auto;padding:18px 16px 48px;display:grid;gap:14px;box-sizing:border-box}
 .qtabs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qtabs .seg button{padding:7px 11px}
+@media (max-width:640px){.qtabs .seg{margin-left:0!important}}
 .qtab{font:700 14.5px var(--body);border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:10px;padding:8px 13px;cursor:pointer}
 .qtab[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .qmeta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--muted);font-size:14px}
@@ -262,12 +264,13 @@ tbody th{font-weight:700;white-space:nowrap}
 
   <section class="quizcard" aria-labelledby="tyH">
     <h2 id="tyH">Test yourself</h2>
-    <p>Practice questions matched to <b id="tyLevel">your level</b>. Multiple-choice questions are marked straight away with an explanation; written questions use IB command terms with a mark scheme you can check yourself against.</p>
+    <p>Practice questions matched to <b id="tyLevel">your level</b>. Choose photosynthesis, respiration or both combined. Multiple-choice questions are marked straight away with an explanation; graph and data questions test reading and analysing experimental results; written questions use IB command terms with a mark scheme to check yourself against.</p>
     <div class="qbtns">
-      <button class="qbtn p" data-quiz="p">Photosynthesis quiz</button>
-      <button class="qbtn r" data-quiz="r">Respiration quiz</button>
-      <button class="qbtn b" data-quiz="all">Mixed quiz (both)</button>
-      <button class="qbtn" data-quiz="wr">Written questions</button>
+      <button class="qbtn p" data-quiz="p" data-mode="mc">Photosynthesis quiz</button>
+      <button class="qbtn r" data-quiz="r" data-mode="mc">Respiration quiz</button>
+      <button class="qbtn b" data-quiz="all" data-mode="mc">Combined quiz</button>
+      <button class="qbtn" data-quiz="all" data-mode="data">📈 Graph &amp; data questions</button>
+      <button class="qbtn" data-quiz="all" data-mode="wr">✍ Written questions</button>
     </div>
     <div class="best" id="bestLine"></div>
   </section>
@@ -303,7 +306,8 @@ tbody th{font-weight:700;white-space:nowrap}
   </div>
   <main class="qwrap">
     <div class="qtabs" role="tablist">
-      <button class="qtab" role="tab" data-qt="p">Photosynthesis</button><button class="qtab" role="tab" data-qt="r">Respiration</button><button class="qtab" role="tab" data-qt="all">Mixed</button><button class="qtab" role="tab" data-qt="wr">Written questions</button>
+      <button class="qtab" role="tab" data-qt="p">Photosynthesis</button><button class="qtab" role="tab" data-qt="r">Respiration</button><button class="qtab" role="tab" data-qt="all">Combined</button>
+      <div class="seg" id="qModeSeg" role="group" aria-label="Question type" style="margin-left:auto"><button type="button" data-qm="mc">Multiple choice</button><button type="button" data-qm="data">📈 Graphs &amp; data</button><button type="button" data-qm="wr">✍ Written</button></div>
     </div>
     <div class="qmeta"><span id="qLvName"></span><label id="qInclWrap"><input type="checkbox" id="qIncl" checked> include SL questions</label><label>Questions <select id="qLen"><option value="10">10</option><option value="20">20</option><option value="all">all</option></select></label><input class="namein" id="qName" placeholder="Your name (for saving)" aria-label="Your name"></div>
     <section id="qMcq" aria-live="polite"></section>
@@ -503,29 +507,123 @@ const WR=[
 {lv:'hl',t:'b',marks:3,q:'Compare chemiosmosis in chloroplasts and mitochondria.',ms:['Both use an electron transport chain to pump H⁺ across a membrane and ATP synthase to make ATP.','Chloroplasts: H⁺ pumped into the thylakoid space; mitochondria: into the intermembrane space.','Chloroplasts: energy comes from light-excited electrons; mitochondria: from electrons from NADH/FADH₂ (oxidation of food).','Final electron acceptor: NADP⁺ in chloroplasts; oxygen in mitochondria.']}
 ];
 
+/* ---------- data-based questions (graphs and diagrams) ---------- */
+// chart({x:[min,max,step,label], y:[min,max,step,label], series:[{pts|fn,color,dash,label,lx,ly,markers}], bars:[{x,y,color,label}], vl:[{x,label}], notes:[{x,y,t}]})
+function chart(o){
+  const W=o.w||460,H=o.h||250,L=56,R=o.r||18,T=16,B=44,[x0,x1,xs,xl]=o.x,[y0,y1,ys,yl]=o.y;
+  const sx=v=>L+(v-x0)/(x1-x0)*(W-L-R),sy=v=>H-B-(v-y0)/(y1-y0)*(H-B-T),f=v=>String(+v.toFixed(3));
+  let s='';
+  for(let v=y0;v<=y1+1e-9;v+=ys)s+=`<line x1="${L}" y1="${sy(v).toFixed(1)}" x2="${W-R}" y2="${sy(v).toFixed(1)}" style="stroke:var(--line)"/><text x="${L-6}" y="${(sy(v)+3.5).toFixed(1)}" font-size="10.5" text-anchor="end" fill="currentColor">${f(v)}</text>`;
+  if(o.cats)o.cats.forEach(([v,t])=>{s+=`<text x="${sx(v).toFixed(1)}" y="${H-B+15}" font-size="10.5" text-anchor="middle" fill="currentColor">${t}</text>`;});
+  else for(let v=x0;v<=x1+1e-9;v+=xs)s+=`<line x1="${sx(v).toFixed(1)}" y1="${H-B}" x2="${sx(v).toFixed(1)}" y2="${H-B+4}" stroke="currentColor"/><text x="${sx(v).toFixed(1)}" y="${H-B+15}" font-size="10.5" text-anchor="middle" fill="currentColor">${f(v)}</text>`;
+  s+=`<line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="currentColor"/><line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="currentColor"/>`;
+  for(const b of o.bars||[]){const bw=(o.bw||.6)*(sx(x0+xs)-sx(x0));s+=`<rect x="${(sx(b.x)-bw/2).toFixed(1)}" y="${sy(b.y).toFixed(1)}" width="${bw.toFixed(1)}" height="${(sy(y0)-sy(b.y)).toFixed(1)}" style="fill:${b.color||'#3d7ff0'}" opacity=".85"/>`;if(b.label!=null)s+=`<text x="${sx(b.x).toFixed(1)}" y="${(sy(b.y)-4).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="currentColor">${b.label}</text>`;}
+  for(const v of o.vl||[]){s+=`<line x1="${sx(v.x).toFixed(1)}" y1="${T}" x2="${sx(v.x).toFixed(1)}" y2="${H-B}" stroke="currentColor" stroke-dasharray="4 4" opacity=".7"/><text x="${(sx(v.x)+4).toFixed(1)}" y="${T+10}" font-size="10.5" fill="currentColor">${v.label}</text>`;}
+  for(const se of o.series||[]){let pts=se.pts;if(se.fn){pts=[];for(let i=0;i<=80;i++){const x=se.from??x0,xe=se.to??x1,v=x+(xe-x)*i/80;pts.push([v,se.fn(v)]);}}
+    s+=`<path d="M${pts.map(([x,y])=>sx(x).toFixed(1)+' '+sy(Math.max(y0,Math.min(y1,y))).toFixed(1)).join(' L')}" fill="none" style="stroke:${se.color}" stroke-width="2.4"${se.dash?' stroke-dasharray="6 4"':''}/>`;
+    if(se.markers)for(const [x,y] of pts)s+=`<circle cx="${sx(x).toFixed(1)}" cy="${sy(y).toFixed(1)}" r="3.4" style="fill:${se.color}"/>`;
+    if(se.label){const [lx,ly]=se.lx!=null?[se.lx,se.ly]:pts[pts.length-1];s+=`<text x="${(sx(lx)+(se.lx!=null?0:4)).toFixed(1)}" y="${(sy(ly)-6).toFixed(1)}" font-size="11" font-weight="700" text-anchor="${se.lx!=null?'middle':'end'}" style="fill:${se.color}">${se.label}</text>`;}}
+  for(const n of o.notes||[])s+=`<text x="${sx(n.x).toFixed(1)}" y="${sy(n.y).toFixed(1)}" font-size="11" font-weight="700" text-anchor="${n.a||'middle'}" fill="currentColor">${n.t}</text>`;
+  s+=`<text x="${(L+W-R)/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="currentColor">${xl}</text><text x="14" y="${(T+H-B)/2}" font-size="11" text-anchor="middle" fill="currentColor" transform="rotate(-90 14 ${(T+H-B)/2})">${yl}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;margin:10px 0;max-width:100%;height:auto;color:var(--fg)" role="img" aria-label="${(o.alt||'graph').replace(/"/g,'')}">${s}</svg>`;
+}
+const C1='#2f8f5b',C2='#d0702a',C3='#3d7ff0',C4='#b0408a';
+const sat=(m,k)=>x=>m*(1-Math.exp(-x/k));
+const bell=(pk,mu,sd)=>x=>pk*Math.exp(-(((x-mu)/sd)**2)/2);
+
+/* chromatogram drawing */
+function chromatogram(){
+  const sp=[[8.6,'#e6a019','carotene'],[5.4,'#d8c21a',''],[4.0,'#2f8f5b',''],[2.2,'#8fb43a','']],X=150,y=d=>250-d*24;
+  let s=`<rect x="${X-40}" y="10" width="80" height="250" rx="3" style="fill:var(--panel);stroke:var(--line)"/><line x1="${X-40}" y1="${y(0)}" x2="${X+40}" y2="${y(0)}" stroke="currentColor" stroke-dasharray="3 3"/><line x1="${X-40}" y1="${y(9)}" x2="${X+40}" y2="${y(9)}" style="stroke:${C3}" stroke-width="2"/>`;
+  sp.forEach(([d,c],i)=>{s+=`<ellipse cx="${X}" cy="${y(d)}" rx="22" ry="6" style="fill:${c}" opacity=".85"/><text x="${X+50}" y="${y(d)+4}" font-size="11" fill="currentColor">spot ${'ABCD'[i]}: ${d.toFixed(1)} cm</text>`;});
+  s+=`<text x="${X-50}" y="${y(0)+4}" font-size="11" text-anchor="end" fill="currentColor">origin</text><text x="${X-50}" y="${y(9)+4}" font-size="11" text-anchor="end" fill="currentColor">solvent front: 9.0 cm</text>`;
+  return `<svg viewBox="-30 0 360 270" width="360" style="display:block;margin:10px 0;max-width:100%;height:auto;color:var(--fg)" role="img" aria-label="Chromatogram with four spots">${s}</svg>`;
+}
+
+/* ===== Integrated Science: data ===== */
+const G_LIGHT_CO2=chart({alt:'Rate of photosynthesis against light intensity at two CO2 concentrations',x:[0,10,2,'Light intensity (arbitrary units)'],y:[0,40,10,'Bubbles of O₂ per minute'],series:[{fn:sat(35,3.85),color:C1,label:'B: 0.10% CO₂',lx:8.2,ly:33.5},{fn:sat(20,2.2),color:C2,dash:1,label:'A: 0.04% CO₂',lx:8.2,ly:21}]});
+const G_TEMP=chart({alt:'Rate of photosynthesis against temperature',x:[0,50,10,'Temperature (°C)'],y:[0,30,10,'Rate of photosynthesis (arbitrary units)'],series:[{pts:[[0,2],[5,4],[10,8],[15,13],[20,18.5],[25,23.5],[30,27],[35,25],[40,15],[45,5],[50,1]],color:C1,markers:1}]});
+const G_RESPIRO=chart({alt:'Distance moved by coloured liquid in a respirometer over time',x:[0,10,2,'Time (minutes)'],y:[0,30,5,'Distance moved by liquid (mm)'],series:[{pts:[[0,0],[2,5],[4,10],[6,15],[8,20],[10,25]],color:C1,markers:1,label:'germinating seeds',lx:7,ly:22.5},{pts:[[0,0],[2,0],[4,0.5],[6,0.5],[8,0.5],[10,0.5]],color:C2,markers:1,dash:1,label:'boiled seeds',lx:7.5,ly:3}]});
+const G_YEAST=chart({alt:'Volume of CO2 produced by yeast at different temperatures',x:[0,70,10,'Temperature (°C)'],y:[0,35,5,'CO₂ produced in 30 min (cm³)'],cats:[[10,'10'],[20,'20'],[30,'30'],[40,'40'],[50,'50'],[60,'60']],bars:[{x:10,y:2,label:'2'},{x:20,y:8,label:'8'},{x:30,y:18,label:'18'},{x:40,y:30,label:'30'},{x:50,y:12,label:'12'},{x:60,y:1,label:'1'}].map(b=>({...b,color:C2}))});
+const G_LACTATE=chart({alt:'Blood lactate before, during and after a sprint',x:[0,40,5,'Time (minutes)'],y:[0,12,2,'Blood lactate (mmol dm⁻³)'],vl:[{x:5,label:''},{x:7,label:''}],notes:[{x:6,y:11.4,t:'sprint'}],series:[{pts:[[0,1],[5,1],[6,5],[7,9],[8,10.5],[10,10],[15,8],[20,6],[25,4.4],[30,3.2],[35,2.3],[40,1.7]],color:C4,markers:0}]});
+const G_GREEN=chart({alt:'CO2 concentration in a sealed greenhouse over 24 hours',x:[0,24,4,'Time of day (hours)'],y:[300,500,50,'CO₂ concentration (ppm)'],series:[{pts:[[0,420],[2,445],[4,462],[6,470],[8,440],[10,395],[12,360],[14,340],[16,332],[18,335],[20,365],[22,395],[24,420]],color:C3,markers:1}],notes:[{x:3,y:315,t:'dark'},{x:12,y:315,t:'light'},{x:21,y:315,t:'dark'}]});
+QZ.push(
+{lv:'g9',t:'p',d:1,q:'The graph shows the rate of photosynthesis of pondweed at two carbon dioxide concentrations.'+G_LIGHT_CO2+'At a light intensity of 1 unit, both curves give almost the same rate. What is limiting the rate at this point?',opts:['Light intensity','Carbon dioxide concentration','Temperature','The number of chloroplasts'],a:0,why:'At low light, adding more CO₂ (curve B) makes almost no difference, but increasing light raises the rate on both curves. So light is the limiting factor here.'},
+{lv:'g9',t:'p',d:1,q:'Look at the same graph.'+G_LIGHT_CO2+'At a light intensity of 8 units, why is the rate on curve B higher than on curve A?',opts:['Curve A is limited by carbon dioxide; raising CO₂ to 0.10% allows a higher rate','Curve B had more light','Curve A is limited by light','Curve B was at a lower temperature'],a:0,why:'Both curves have the same light at 8 units and both have levelled off. The only difference is CO₂, so on curve A, CO₂ is the limiting factor.'},
+{lv:'g9',t:'p',d:1,q:'The graph shows how temperature affects the rate of photosynthesis.'+G_TEMP+'Which statement is supported by the data?',opts:['The optimum is about 30 °C; above it the rate falls because enzymes such as RuBisCO denature','The rate keeps increasing as temperature rises','The optimum is about 45 °C','Temperature has no effect below 30 °C'],a:0,why:'The highest rate is at about 30 °C. Above that the rate drops quickly as enzymes of the Calvin cycle lose their shape.'},
+{lv:'g9',t:'r',d:1,fixed:true,q:'A respirometer was used to measure respiration of germinating seeds. Potassium hydroxide absorbed the CO₂ they released.'+G_RESPIRO+'What is the rate of movement of the liquid for the germinating seeds?',opts:['0.4 mm per minute','2.5 mm per minute','10 mm per minute','25 mm per minute'],a:1,why:'The liquid moved 25 mm in 10 minutes: 25 ÷ 10 = 2.5 mm per minute. (25 mm is the total distance, not the rate.)'},
+{lv:'g9',t:'r',d:1,q:'In the same experiment, why were boiled seeds used?'+G_RESPIRO,opts:['As a control: dead seeds do not respire, showing that the movement is caused by respiration of living seeds','To provide extra oxygen','To absorb carbon dioxide','To make the experiment faster'],a:0,why:'Boiling kills the seeds. Almost no movement with dead seeds shows that the movement with germinating seeds is caused by their respiration, not by temperature or pressure changes.'},
+{lv:'g9',t:'r',d:1,q:'Yeast was mixed with sugar solution at different temperatures and the CO₂ produced in 30 minutes was measured.'+G_YEAST+'Which conclusion is best supported?',opts:['Yeast respires fastest at about 40 °C; at 60 °C its enzymes are denatured','Yeast respires faster the hotter it gets','Yeast does not respire below 30 °C','The yeast produced oxygen, not carbon dioxide'],a:0,why:'CO₂ production rises to a peak at 40 °C, then falls sharply. At 60 °C, enzymes have been denatured, so almost no CO₂ is made. A little CO₂ is made even at 10 °C.'},
+{lv:'g9',t:'r',d:1,q:'The graph shows the concentration of lactate in an athlete\'s blood before, during and after a 2-minute sprint.'+G_LACTATE+'Why does lactate keep rising for about a minute after the sprint and then fall only slowly?',opts:['Lactate made by anaerobic respiration in the muscles takes time to reach the blood, and oxygen is needed afterwards to break it down','The athlete starts respiring anaerobically after the sprint','Lactate is made by the lungs during recovery','Lactate is used up instantly when the sprint ends'],a:0,why:'During the sprint, muscles cannot get enough oxygen and make lactate by anaerobic respiration. It diffuses into the blood, then is gradually removed using oxygen (the "oxygen debt"), so it takes over 30 minutes to return to normal.'},
+{lv:'g9',t:'b',d:1,q:'The CO₂ concentration in a sealed greenhouse was measured over 24 hours.'+G_GREEN+'At about which times was the rate of photosynthesis equal to the rate of respiration?',opts:['About 06:00 and about 16:00–18:00, where the curve stops rising or falling','At 12:00 (midday)','At 00:00 (midnight)','At no time'],a:0,why:'CO₂ falls when photosynthesis is faster than respiration and rises when respiration is faster. At the turning points (the peak around 06:00 and the lowest point around 16:00–18:00) the two rates are equal.'}
+);
+
+/* ===== SL: data ===== */
+const G_SPECTRA=chart({alt:'Absorption spectrum of chlorophyll a and action spectrum of photosynthesis',x:[400,700,50,'Wavelength (nm)'],y:[0,100,25,'% absorption / relative rate'],series:[{fn:x=>Math.min(100,100*(Math.exp(-(((x-430)/16)**2)/2)+.35*Math.exp(-(((x-410)/22)**2)/2)+.82*Math.exp(-(((x-662)/11)**2)/2))/1.2),color:C1,label:'X',lx:418,ly:96},{fn:x=>Math.min(100,14+78*Math.exp(-(((x-440)/38)**2)/2)+70*Math.exp(-(((x-670)/22)**2)/2)+6*Math.exp(-(((x-560)/40)**2)/2)),color:C2,dash:1,label:'Y',lx:505,ly:58}]});
+const G_CO2_T=chart({alt:'Rate of photosynthesis against CO2 concentration at 15 and 25 degrees Celsius',x:[0,0.5,0.1,'CO₂ concentration (%)'],y:[0,25,5,'Rate of photosynthesis (arbitrary units)'],series:[{fn:sat(22,.08),color:C1,label:'25 °C',lx:.44,ly:22.6},{fn:sat(12,.06),color:C3,dash:1,label:'15 °C',lx:.44,ly:12.6}],notes:[{x:.4,y:9.6,t:'P'},{x:.05,y:8.5,t:'Q'}]});
+const G_BARS_T=chart({alt:'Oxygen uptake by germinating seeds at three temperatures',x:[0,40,10,'Temperature (°C)'],y:[0,1,.2,'O₂ uptake (µL g⁻¹ min⁻¹)'],cats:[[10,'10'],[20,'20'],[30,'30']],bars:[{x:10,y:.20,label:'0.20'},{x:20,y:.42,label:'0.42'},{x:30,y:.80,label:'0.80'}].map(b=>({...b,color:C3}))});
+const G_RESPIRO2=chart({alt:'Distance moved by fluid in a respirometer',x:[0,10,2,'Time (minutes)'],y:[0,35,5,'Distance moved (mm)'],series:[{pts:[[0,0],[2,6],[4,12],[6,18],[8,24],[10,30]],color:C1,markers:1}]});
+const G_COMP=chart({alt:'Net CO2 uptake against light intensity',x:[0,10,2,'Light intensity (arbitrary units)'],y:[-4,12,4,'Net CO₂ uptake (arbitrary units)'],series:[{fn:x=>-3+14*(1-Math.exp(-x/3.2)),color:C1}],notes:[{x:9,y:-2.6,t:'uptake < 0 means CO₂ released',a:'end'}]});
+QZ.push(
+{lv:'sl',t:'p',d:1,q:'The graph shows the absorption spectrum of chlorophyll a and the action spectrum of photosynthesis for the same plant.'+G_SPECTRA+'Which statement correctly identifies the curves and explains the difference between 470 and 520 nm?',opts:['X is the absorption spectrum of chlorophyll a; Y is the action spectrum, which stays higher because accessory pigments such as carotenoids absorb these wavelengths','X is the action spectrum; Y is the absorption spectrum of chlorophyll a','Y is higher because green light is used most efficiently','X and Y are both absorption spectra of different pigments'],a:0,why:'The action spectrum (Y) is broader than the absorption spectrum of chlorophyll a (X): carotenoids and chlorophyll b absorb blue-green light and pass the energy on, so some photosynthesis still happens where chlorophyll a absorbs little.'},
+{lv:'sl',t:'p',d:1,q:'The graph shows the rate of photosynthesis at different CO₂ concentrations at two temperatures.'+G_CO2_T+'What is the main limiting factor at point P?',opts:['Temperature','CO₂ concentration','Light intensity is certainly limiting','Nothing is limiting at P'],a:0,why:'At P the 15 °C curve has levelled off, so more CO₂ makes no difference. At the same CO₂ the 25 °C curve is higher, so temperature is limiting at P. (At Q, on the steep part, CO₂ is limiting.)'},
+{lv:'sl',t:'p',d:1,fixed:true,q:'A chromatogram of leaf pigments is shown.'+chromatogram()+'What is the R<sub>f</sub> value of spot C?',opts:['0.22','0.44','2.25','4.0'],a:1,why:'R<sub>f</sub> = distance moved by the spot ÷ distance moved by the solvent = 4.0 ÷ 9.0 = 0.44. Spot C is blue-green, consistent with chlorophyll a.'},
+{lv:'sl',t:'r',d:1,fixed:true,q:'In a respirometer, the fluid moved along a capillary tube of internal radius 0.5 mm, as shown.'+G_RESPIRO2+'What is the rate of oxygen uptake?',opts:['0.79 mm³ min⁻¹','2.36 mm³ min⁻¹','4.71 mm³ min⁻¹','9.42 mm³ min⁻¹'],a:1,why:'Rate of movement = 30 mm ÷ 10 min = 3 mm min⁻¹. Volume = πr² × distance = π × 0.5² × 3 = 2.36 mm³ min⁻¹. Using the diameter instead of the radius gives 9.42.'},
+{lv:'sl',t:'r',d:1,fixed:true,q:'The bar chart shows oxygen uptake by germinating seeds at three temperatures.'+G_BARS_T+'What is the percentage increase in oxygen uptake from 20 °C to 30 °C?',opts:['38%','48%','90%','190%'],a:2,why:'Percentage increase = (0.80 − 0.42) ÷ 0.42 × 100 = 90%. Dividing by 0.80 instead gives 48%.'},
+{lv:'sl',t:'b',d:1,fixed:true,q:'The graph shows net CO₂ uptake by a leaf at different light intensities.'+G_COMP+'At which light intensity is the rate of photosynthesis equal to the rate of respiration?',opts:['0 units','about 1 unit','about 6 units','10 units'],a:1,why:'Net uptake is zero (the line crosses the x-axis) at about 1 unit: CO₂ used in photosynthesis equals CO₂ released by respiration. This is the compensation point. At 0 units the leaf only respires.'}
+);
+
+/* ===== HL: data ===== */
+const G_DARK=chart({alt:'Concentrations of two Calvin cycle intermediates after the light is switched off',x:[0,10,2,'Time (minutes)'],y:[0,10,2,'Concentration (arbitrary units)'],vl:[{x:4,label:'light switched off'}],series:[{pts:[[0,4],[4,4],[5,6],[6,7.4],[7,8.2],[8,8.6],[10,8.8]],color:C2,label:'X',lx:9.2,ly:9},{pts:[[0,5],[4,5],[5,3],[6,1.8],[7,1.1],[8,.8],[10,.6]],color:C1,dash:1,label:'Y',lx:9.2,ly:1.2}]});
+const G_LOWCO2=chart({alt:'Concentrations of two Calvin cycle intermediates after CO2 is reduced',x:[0,10,2,'Time (minutes)'],y:[0,10,2,'Concentration (arbitrary units)'],vl:[{x:4,label:'CO₂ reduced to 0.003%'}],series:[{pts:[[0,4],[4,4],[5,3],[6,2.2],[7,1.7],[8,1.5],[10,1.4]],color:C2,label:'GP',lx:9.2,ly:2},{pts:[[0,5],[4,5],[5,6.8],[6,8],[7,8.6],[8,8.8],[10,9]],color:C1,dash:1,label:'RuBP',lx:9.2,ly:9.3}]});
+const G_MITO=chart({alt:'Oxygen concentration in a suspension of isolated mitochondria',x:[0,10,2,'Time (minutes)'],y:[0,250,50,'O₂ concentration (µmol dm⁻³)'],vl:[{x:3,label:'ADP added'},{x:6.5,label:'cyanide added'}],series:[{pts:[[0,240],[3,225],[4,190],[5,155],[6,120],[6.5,103],[7,102],[8,101],[10,100]],color:C3}]});
+const G_JAG=chart({alt:'ATP produced by thylakoids in the dark after a pH shift',x:[0,4,1,'Treatment (in the dark, with ADP and phosphate)'],y:[0,100,20,'ATP produced (arbitrary units)'],cats:[[1,'pH 4 → pH 8'],[2,'pH 8 → pH 8'],[3,'pH 4 → pH 4']],bars:[{x:1,y:90,label:'90'},{x:2,y:3,label:'3'},{x:3,y:4,label:'4'}].map(b=>({...b,color:C1}))});
+const G_YEASTFLASK=chart({alt:'Oxygen, carbon dioxide and ethanol in a sealed flask of yeast',x:[0,180,30,'Time (minutes)'],y:[0,100,20,'Relative concentration'],vl:[{x:60,label:'O₂ used up'}],series:[{pts:[[0,90],[20,62],[40,30],[60,2],[90,0],[180,0]],color:C3,label:'O₂',lx:22,ly:70},{pts:[[0,0],[20,20],[40,40],[60,58],[90,66],[120,74],[150,82],[180,90]],color:C2,label:'CO₂',lx:150,ly:88},{pts:[[0,0],[60,0],[90,12],[120,26],[150,40],[180,54]],color:C4,dash:1,label:'ethanol',lx:150,ly:30}]});
+QZ.push(
+{lv:'hl',t:'p',d:1,q:'Algae were photosynthesising in bright light. The light was switched off at 4 minutes.'+G_DARK+'Which statement identifies X and Y correctly?',opts:['X is glycerate-3-phosphate (GP): it is still made by rubisco but can no longer be reduced without ATP and NADPH. Y is RuBP.','X is RuBP and Y is GP','X is triose phosphate, which is made faster in the dark','X is NADPH, which accumulates in the dark'],a:0,why:'In the dark, ATP and NADPH run out. CO₂ fixation continues for a while, so GP (X) builds up, but RuBP (Y) is no longer regenerated and falls. Calvin used experiments like this to work out the cycle.'},
+{lv:'hl',t:'p',d:1,q:'The CO₂ concentration around photosynthesising algae was suddenly reduced at 4 minutes.'+G_LOWCO2+'Which explanation is correct?',opts:['Less CO₂ is fixed by rubisco, so less RuBP is used and less GP is made, while RuBP is still regenerated from TP','The light-dependent reactions stop, so GP rises','RuBP is converted into GP faster at low CO₂','GP falls because ATP runs out'],a:0,why:'With little CO₂, rubisco fixes less, so RuBP accumulates and GP falls. The light-dependent reactions continue, so the existing GP is still reduced to TP and some TP regenerates RuBP.'},
+{lv:'hl',t:'r',d:1,q:'The oxygen concentration in a suspension of isolated mitochondria (supplied with a substrate) was recorded.'+G_MITO+'Why does oxygen uptake stop after cyanide is added?',opts:['Cyanide blocks the last protein of the electron transport chain, so electrons cannot be passed to oxygen','Cyanide destroys the substrate in the Krebs cycle','Cyanide removes ADP','Cyanide uses up all the oxygen'],a:0,why:'Cyanide inhibits cytochrome c oxidase, the complex that passes electrons to oxygen. The chain stops, no O₂ is reduced to water, H⁺ pumping stops and ATP synthesis ceases.'},
+{lv:'hl',t:'r',d:1,q:'In the same experiment, why does adding ADP increase the rate of oxygen uptake?'+G_MITO,opts:['ATP synthase can now use ADP, so H⁺ flows back into the matrix; the gradient falls, letting the electron transport chain pump faster','ADP is an electron donor for the chain','ADP reacts directly with oxygen','ADP increases the amount of substrate'],a:0,why:'Without ADP, H⁺ cannot flow through ATP synthase, the gradient stays steep and the chain slows. With ADP, chemiosmosis runs, the gradient is used, and electron transport (and O₂ use) speeds up. Respiration is coupled to ATP demand.'},
+{lv:'hl',t:'p',d:1,q:'Isolated thylakoids were soaked in acid at one pH, then transferred to a buffer at another pH, in the dark, with ADP and phosphate.'+G_JAG+'What does this experiment show?',opts:['A H⁺ gradient across the thylakoid membrane alone can drive ATP synthesis, supporting chemiosmosis','Light is needed directly by ATP synthase','Low pH destroys ATP synthase','ATP is made by photolysis of water'],a:0,why:'Only thylakoids with an acidic inside (pH 4) and an alkaline outside (pH 8) made ATP, with no light. H⁺ flowing out through ATP synthase down the gradient is enough, as Mitchell\'s chemiosmotic theory predicts (Jagendorf, 1966).'},
+{lv:'hl',t:'r',d:1,q:'Yeast was kept in a sealed flask with glucose.'+G_YEASTFLASK+'Why is ethanol produced only after about 60 minutes?',opts:['Once O₂ is used up, NADH cannot be oxidised by the electron transport chain, so pyruvate is converted to ethanol to regenerate NAD⁺ for glycolysis','Ethanol is made from carbon dioxide','Yeast only produces ethanol when glucose runs out','Oxygen is converted into ethanol'],a:0,why:'With oxygen, NADH is reoxidised by the electron transport chain. Without it, yeast regenerates NAD⁺ by converting pyruvate to ethanol and CO₂, which is why CO₂ keeps rising, more slowly, after 60 minutes.'}
+);
+
+/* ===== extra written questions (more respiration, some data-based) ===== */
+WR.push(
+{lv:'g9',t:'r',marks:3,q:'Describe what happens in glycolysis.',ms:['Takes place in the cytoplasm and does not need oxygen.','Glucose (6 carbons) is split into two pyruvate (3 carbons each).','2 ATP are used at the start and 4 are made: a net gain of 2 ATP.','2 NADH are made (NAD⁺ picks up hydrogen/electrons).']},
+{lv:'g9',t:'r',marks:4,q:'Explain how the electron transport chain and ATP synthase make ATP in the mitochondrion.',ms:['NADH and FADH₂ drop off high-energy electrons at the chain on the inner membrane (cristae).','As electrons pass along the proteins, their energy pumps H⁺ into the intermembrane space.','H⁺ builds up and flows back into the matrix only through ATP synthase.','The flow spins ATP synthase, which joins ADP and phosphate to make ATP.','Oxygen accepts the electrons at the end, forming water.']},
+{lv:'g9',t:'r',marks:3,q:'Use the respirometer results to explain why the liquid moved with germinating seeds but not with boiled seeds.'+G_RESPIRO,ms:['Germinating seeds respire, taking in oxygen.','The CO₂ they release is absorbed by potassium hydroxide, so the volume of gas falls and the liquid moves (25 mm in 10 min = 2.5 mm min⁻¹).','Boiled seeds are dead and do not respire, so the liquid hardly moves; they act as a control.']},
+{lv:'sl',t:'r',marks:3,q:'Using the bar chart, describe and explain the effect of temperature on the rate of respiration of germinating seeds.'+G_BARS_T,ms:['Rate (O₂ uptake) increases as temperature increases from 10 to 30 °C.','Quoted data, e.g. 0.20 → 0.80 µL g⁻¹ min⁻¹, about four times faster (or 90% increase from 20 to 30 °C).','Respiration is a series of enzyme-controlled reactions; higher temperature gives more kinetic energy and more frequent enzyme–substrate collisions.','Above an optimum the rate would fall as enzymes denature (not shown in this range).']},
+{lv:'sl',t:'r',marks:2,q:'Explain why lipids release more energy per gram than carbohydrates when used in cell respiration.',ms:['Lipids contain less oxygen and more hydrogen relative to carbon (more C–H bonds).','So more oxidation can take place / more reduced NAD (NADH) is produced per gram, giving more ATP.','About 37 kJ g⁻¹ for lipids compared with about 17 kJ g⁻¹ for carbohydrates.']},
+{lv:'sl',t:'p',marks:3,q:'Using the graph, identify the limiting factor at points P and Q and explain your answers.'+G_CO2_T,ms:['Q: CO₂ concentration is limiting.','Because at Q the rate rises steeply as CO₂ increases.','P: temperature is limiting.','Because at P more CO₂ gives no increase, but the 25 °C curve is higher at the same CO₂.']},
+{lv:'hl',t:'r',marks:5,q:'Describe the link reaction and the Krebs cycle.',ms:['Both take place in the mitochondrial matrix.','Link reaction: pyruvate is decarboxylated (CO₂ removed) and oxidised (NAD⁺ → NADH).','The acetyl group combines with coenzyme A to form acetyl CoA.','Krebs cycle: the acetyl group (2C) combines with a 4C compound to form a 6C compound (citrate).','Decarboxylation twice per turn releases 2 CO₂.','Oxidation reduces 3 NAD⁺ and 1 FAD per turn; 1 ATP made by substrate-level phosphorylation; 4C compound regenerated.']},
+{lv:'hl',t:'r',marks:3,q:'Use the graph to explain the effect of cyanide on ATP production in mitochondria.'+G_MITO,ms:['Oxygen uptake stops after cyanide is added (stays at about 100 µmol dm⁻³).','Cyanide inhibits the final complex (cytochrome c oxidase), so electrons cannot be passed to oxygen.','Electron transport and H⁺ pumping stop, so no proton gradient is maintained and ATP synthase stops making ATP.','NADH is not reoxidised, so the Krebs cycle and link reaction also stop.']},
+{lv:'hl',t:'r',marks:3,q:'Explain why the Krebs cycle stops in the absence of oxygen, even though oxygen is not used in the cycle itself.',ms:['Oxygen is the final electron acceptor of the electron transport chain.','Without it, NADH and FADH₂ cannot be reoxidised.','The Krebs cycle needs NAD⁺ and FAD as hydrogen acceptors, so it stops when they run out.']}
+);
+
 const LVNAME={g9:'Integrated Science (Grade 9)',sl:'IB Biology SL',hl:'IB Biology HL'};
-const TNAME={p:'Photosynthesis',r:'Cellular respiration',all:'Mixed: photosynthesis and respiration',wr:'Written questions'};
-let qTopic='p',Q=null;
+const TNAME={p:'Photosynthesis',r:'Cellular respiration',all:'Combined: photosynthesis and respiration'};const MNAME={mc:'Multiple choice',data:'Graph and data questions',wr:'Written questions'};
+let qTopic='p',qMode='mc',Q=null;
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const levelsFor=()=>lvl==='hl'?($('qIncl').checked?['hl','sl']:['hl']):[lvl];
 const topicOk=(q,t)=>t==='all'?true:q.t===t;
-function bestKey(t){return 'quizBest-'+lvl+'-'+t;}
-function showBest(){const parts=['p','r','all'].map(t=>{const b=store.get(bestKey(t));return b?`${TNAME[t].split(':')[0]}: best ${b}`:null;}).filter(Boolean);
+function bestKey(t,m){return 'quizBest-'+lvl+'-'+t+(m&&m!=='mc'?'-'+m:'');}
+function showBest(){const parts=[['p','mc'],['r','mc'],['all','mc'],['p','data'],['r','data'],['all','data']].map(([t,m])=>{const b=store.get(bestKey(t,m));return b?`${TNAME[t].split(':')[0]}${m==='data'?' (graphs)':''}: best ${b}`:null;}).filter(Boolean);
   $('bestLine').textContent=parts.length?`Your best scores at this level (saved in this browser): ${parts.join(' · ')}`:'';$('tyLevel').textContent=LVNAME[lvl];}
 function newSet(){
-  const lv=levelsFor();let pool=QZ.filter(q=>lv.includes(q.lv)&&topicOk(q,qTopic));
+  const lv=levelsFor();let pool=QZ.filter(q=>lv.includes(q.lv)&&topicOk(q,qTopic)&&(qMode!=='data'||q.d));
   const n=$('qLen').value==='all'?pool.length:Math.min(+$('qLen').value,pool.length);
   // HL with SL included: keep about two thirds HL questions
   if(lvl==='hl'&&lv.length>1&&n<pool.length){const h=shuffle(pool.filter(q=>q.lv==='hl')),s2=shuffle(pool.filter(q=>q.lv==='sl'));const nh=Math.min(h.length,Math.round(n*.65));pool=shuffle(h.slice(0,nh).concat(s2.slice(0,n-nh)));}
   else pool=shuffle(pool.slice()).slice(0,n);
-  Q={topic:qTopic,set:pool.map(q=>{const idx=q.opts.map((_,i)=>i);if(!q.fixed)shuffle(idx);return {q,order:idx,pick:null};}),i:0,done:false};
+  Q={topic:qTopic,mode:qMode,set:pool.map(q=>{const idx=q.opts.map((_,i)=>i);if(!q.fixed)shuffle(idx);return {q,order:idx,pick:null};}),i:0,done:false};
   renderQ();
 }
 function renderQ(){
   const box=$('qMcq');box.textContent='';if(!Q||!Q.set.length){box.innerHTML='<div class="qcard"><p>No questions for this choice yet.</p></div>';return;}
   if(Q.done)return renderEnd();
   const it=Q.set[Q.i],q=it.q,card=document.createElement('div');card.className='qcard';
-  const lvTag=q.lv==='g9'?'Grade 9':q.lv.toUpperCase();
+  const lvTag=(q.lv==='g9'?'Grade 9':q.lv.toUpperCase())+'</span>'+(q.d?' <span class="qtag">📈 Data':'');
   card.innerHTML=`<div class="qhead"><span class="qno">Question ${Q.i+1} of ${Q.set.length}</span><span><span class="qtag ${q.t==='b'?'':q.t}">${q.t==='p'?'Photosynthesis':q.t==='r'?'Respiration':'Both'}</span> <span class="qtag">${lvTag}</span></span></div>
     <div class="qprog"><i style="width:${Q.i/Q.set.length*100}%"></i></div><p class="qstem">${q.q}</p><div class="qopts"></div><div class="qfb"></div><div class="qfoot"></div>`;
   const opts=card.querySelector('.qopts');
@@ -541,11 +639,11 @@ function reveal(card,it){const q=it.q,btns=card.querySelectorAll('.qopt');
   nx.onclick=()=>{if(Q.i<Q.set.length-1)Q.i++;else Q.done=true;renderQ();window.scrollTo({top:0,behavior:'smooth'});};f.append(nx);
   const sc=document.createElement('span');sc.className='qno';sc.textContent=`Score so far: ${Q.set.filter(x=>x.pick===x.q.a).length} / ${Q.set.filter(x=>x.pick!=null).length}`;f.append(sc);nx.focus();}
 function renderEnd(){
-  const n=Q.set.length,ok=Q.set.filter(x=>x.pick===x.q.a).length,pct=Math.round(ok/n*100),key=bestKey(qTopic),prev=store.get(key);
+  const n=Q.set.length,ok=Q.set.filter(x=>x.pick===x.q.a).length,pct=Math.round(ok/n*100),key=bestKey(Q.topic,Q.mode),prev=store.get(key);
   const prevPct=prev?parseInt(prev.split('(')[1]):-1;if(pct>prevPct)store.set(key,`${ok}/${n} (${pct}%)`);
   const box=$('qMcq'),card=document.createElement('div');card.className='qcard';
   const msg=pct>=85?'Excellent — you know this well.':pct>=65?'Good work. Review the ones you missed below.':pct>=40?'Getting there. Re-watch the animations for the topics below, then try a new set.':'Worth another look: open the animations and Label Labs, then try again.';
-  card.innerHTML=`<div class="qno">${TNAME[qTopic]} · ${LVNAME[lvl]}</div><div class="qscore">${ok} / ${n} <span style="font-size:20px;color:var(--muted)">(${pct}%)</span></div><p style="margin:0">${msg}</p><div class="qfoot"></div><div class="qreview"></div>`;
+  card.innerHTML=`<div class="qno">${TNAME[Q.topic]} · ${MNAME[Q.mode]} · ${LVNAME[lvl]}</div><div class="qscore">${ok} / ${n} <span style="font-size:20px;color:var(--muted)">(${pct}%)</span></div><p style="margin:0">${msg}</p><div class="qfoot"></div><div class="qreview"></div>`;
   const f=card.querySelector('.qfoot');
   const again=document.createElement('button');again.className='btn';again.textContent='New set of questions';again.onclick=newSet;f.append(again);
   const sv=document.createElement('button');sv.className='btn';sv.textContent='⬇ Save my results (.txt)';sv.onclick=saveTxt;f.append(sv);
@@ -555,8 +653,8 @@ function renderEnd(){
   box.textContent='';box.append(card);showBest();
 }
 function renderWr(){
-  const lv=levelsFor(),list=WR.filter(w=>lv.includes(w.lv)&&(qTopic==='wr'||topicOk(w,qTopic)));const box=$('qWr');box.textContent='';
-  const intro=document.createElement('div');intro.className='qcard';intro.innerHTML=`<p style="margin:0">Write your answer, then open the mark scheme and tick each point your answer includes (award [1] per point, up to the marks shown). ${LVNAME[lvl]}${lvl==='hl'&&$('qIncl').checked?' — includes SL questions':''}.</p><div class="qfoot"><button class="btn" id="wrSave">⬇ Save my answers (.txt)</button></div>`;box.append(intro);
+  const lv=levelsFor(),list=WR.filter(w=>lv.includes(w.lv)&&topicOk(w,qTopic));list.sort((x,y)=>('prb'.indexOf(x.t)-'prb'.indexOf(y.t))||(['g9','sl','hl'].indexOf(x.lv)-['g9','sl','hl'].indexOf(y.lv)));const box=$('qWr');box.textContent='';
+  const intro=document.createElement('div');intro.className='qcard';intro.innerHTML=`<p style="margin:0">Write your answer, then open the mark scheme and tick each point your answer includes (award [1] per point, up to the marks shown). ${TNAME[qTopic]} · ${LVNAME[lvl]}${lvl==='hl'&&$('qIncl').checked?' — includes SL questions':''}.</p><div class="qfoot"><button class="btn" id="wrSave">⬇ Save my answers (.txt)</button></div>`;box.append(intro);
   list.forEach((w,i)=>{const c=document.createElement('div');c.className='qcard wr';c.dataset.wi=WR.indexOf(w);
     c.innerHTML=`<div class="qhead"><span class="qno">Question ${i+1}</span><span><span class="qtag ${w.t==='b'?'':w.t}">${w.t==='p'?'Photosynthesis':w.t==='r'?'Respiration':'Both'}</span> <span class="qtag">${w.lv==='g9'?'Grade 9':w.lv.toUpperCase()}</span></span></div>
       <p class="qstem"><span class="marks">[${w.marks}]</span>${w.q}</p><textarea aria-label="Your answer to question ${i+1}">${w._ans||''}</textarea>
@@ -572,9 +670,9 @@ function renderWr(){
 function saveTxt(){
   const name=$('qName').value.trim()||'(no name)',strip=h=>{const d=document.createElement('div');d.innerHTML=h;return d.textContent;};
   const out=['Energy in Cells — Test yourself',`Name: ${name}`,`Level: ${LVNAME[lvl]}`,`Saved: ${new Date().toLocaleString()}`,''];
-  if(Q&&Q.set.some(x=>x.pick!=null)){out.push(`MULTIPLE CHOICE — ${TNAME[Q.topic]}`);Q.set.forEach((x,i)=>{const L=k=>'ABCD'[x.order.indexOf(k)];out.push(`${i+1}. ${strip(x.q.q)}`,`   Your answer: ${x.pick==null?'(none)':L(x.pick)+'. '+strip(x.q.opts[x.pick])}${x.pick==null?'':x.pick===x.q.a?'  ✓':`  ✗ (correct: ${L(x.q.a)}. ${strip(x.q.opts[x.q.a])})`}`);});
+  if(Q&&Q.set.some(x=>x.pick!=null)){out.push(`${MNAME[Q.mode].toUpperCase()} — ${TNAME[Q.topic]}`);Q.set.forEach((x,i)=>{const L=k=>'ABCD'[x.order.indexOf(k)];out.push(`${i+1}. ${strip(x.q.q)}`,`   Your answer: ${x.pick==null?'(none)':L(x.pick)+'. '+strip(x.q.opts[x.pick])}${x.pick==null?'':x.pick===x.q.a?'  ✓':`  ✗ (correct: ${L(x.q.a)}. ${strip(x.q.opts[x.q.a])})`}`);});
     out.push(`Score: ${Q.set.filter(x=>x.pick===x.q.a).length} / ${Q.set.length}`,'');}
-  const ws=WR.filter(w=>(w._ans||'').trim());if(ws.length){out.push('WRITTEN QUESTIONS');ws.forEach((w,i)=>{out.push(`${i+1}. ${strip(w.q)} [${w.marks}]`,`   ${w._ans.trim()}`);if(w._tick)out.push(`   Self-marked: ${Math.min(w.marks,w._tick.filter(Boolean).length)} / ${w.marks}`);out.push('');});}
+  const ws=WR.filter(w=>(w._ans||'').trim());if(ws.length){out.push('WRITTEN QUESTIONS');ws.sort((a,b)=>'prb'.indexOf(a.t)-'prb'.indexOf(b.t));ws.forEach((w,i)=>{out.push(`${i+1}. ${strip(w.q)} [${w.marks}]`,`   ${w._ans.trim()}`);if(w._tick)out.push(`   Self-marked: ${Math.min(w.marks,w._tick.filter(Boolean).length)} / ${w.marks}`);out.push('');});}
   deliverFile(`energy_in_cells_${lvl}_${name.replace(/[^\w-]+/g,'_')}.txt`,out.join('\n'));
 }
 // Published on claude.ai: ask the viewer to save through the downloads capability. Opened as a local file: a normal download.
@@ -586,13 +684,15 @@ async function deliverFile(filename,text){let d=null;
 function alertBox(t){const m=document.createElement('div');m.textContent=t;m.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:10px;z-index:9;font:600 14px var(--body)';document.body.append(m);setTimeout(()=>m.remove(),4000);}
 function syncQuizChrome(){$('qLvSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lv===lvl));$('qLvName').textContent=LVNAME[lvl];$('qInclWrap').hidden=lvl!=='hl';
   document.querySelectorAll('.qtab').forEach(t=>t.setAttribute('aria-selected',t.dataset.qt===qTopic));
-  const wr=qTopic==='wr';$('qMcq').hidden=wr;$('qWr').hidden=!wr;$('qLen').parentElement.hidden=wr;}
-function renderQuiz(t){qTopic=t;$('homeView').hidden=true;$('modView').hidden=true;$('quizView').hidden=false;document.title='Test yourself · Energy in Cells';syncQuizChrome();if(t==='wr')renderWr();else newSet();window.scrollTo(0,0);}
-function openQuiz(t){cur=null;renderQuiz(t);try{history.pushState({quiz:t},'','#quiz-'+t);}catch(e){}}
-document.querySelectorAll('[data-quiz]').forEach(b=>b.onclick=()=>openQuiz(b.dataset.quiz));
+  $('qModeSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.qm===qMode));
+  const wr=qMode==='wr';$('qMcq').hidden=wr;$('qWr').hidden=!wr;$('qLen').parentElement.hidden=wr;}
+function renderQuiz(t,m){qTopic=t;if(m)qMode=m;$('homeView').hidden=true;$('modView').hidden=true;$('quizView').hidden=false;document.title='Test yourself · Energy in Cells';syncQuizChrome();if(qMode==='wr')renderWr();else newSet();window.scrollTo(0,0);}
+function openQuiz(t,m){cur=null;renderQuiz(t,m);try{history.pushState({quiz:t},'','#quiz-'+qTopic+'-'+qMode);}catch(e){}}
+document.querySelectorAll('[data-quiz]').forEach(b=>b.onclick=()=>openQuiz(b.dataset.quiz,b.dataset.mode));
 document.querySelectorAll('.qtab').forEach(t=>t.onclick=()=>openQuiz(t.dataset.qt));
+$('qModeSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>openQuiz(qTopic,b.dataset.qm));
 $('qLvSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{setLevel(b.dataset.lv);renderQuiz(qTopic);});
-$('qIncl').onchange=()=>renderQuiz(qTopic);$('qLen').onchange=()=>{if(qTopic!=='wr')newSet();};
+$('qIncl').onchange=()=>renderQuiz(qTopic);$('qLen').onchange=()=>{if(qMode!=='wr')newSet();};
 $('qHome').onclick=()=>goHome();
 
 /* ---------- module frames ---------- */
@@ -629,7 +729,7 @@ function goHome(){cur=null;renderHome();try{history.pushState({},'','#home');}ca
 $('homeBtn').onclick=goHome;
 $('toolSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(!cur)return;const t=INFO[cur].topic;nav(t+b.dataset.kind,null);});
 $('swapBtn').onclick=()=>{if(!cur)return;const I=INFO[cur];nav((I.topic==='p'?'r':'p')+I.kind,null);};
-function fromHash(){let h='';try{h=location.hash.slice(1);}catch(e){}const m=/^(pa|pl|ra|rl)(?:-(\d+))?$/.exec(h);if(m){cur=m[1];renderMod(m[1],m[2]!=null?+m[2]:null);}else{const q=/^quiz-(p|r|all|wr)$/.exec(h);if(q){cur=null;renderQuiz(q[1]);}else renderHome();}}
+function fromHash(){let h='';try{h=location.hash.slice(1);}catch(e){}const m=/^(pa|pl|ra|rl)(?:-(\d+))?$/.exec(h);if(m){cur=m[1];renderMod(m[1],m[2]!=null?+m[2]:null);}else{const q=/^quiz-(p|r|all)(?:-(mc|data|wr))?$/.exec(h);if(q){cur=null;renderQuiz(q[1],q[2]||'mc');}else renderHome();}}
 window.addEventListener('popstate',fromHash);
 fromHash();
 })();
